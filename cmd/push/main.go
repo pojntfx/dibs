@@ -37,25 +37,25 @@ var (
 )
 
 func main() {
-	err, m := getModuleName(SYNC_MODULE_PUSH_MOD_FILE)
+	err, m := GetModuleName(SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
 		panic(err)
 	}
 
-	r := getNewRedisClient(REDIS_URL)
+	r := GetNewRedisClient(REDIS_URL)
 
 	log.Info("Registering module ...")
-	registerModule(r, REDIS_CHANNEL_PREFIX, m)
+	RegisterModule(r, REDIS_CHANNEL_PREFIX, m)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		unregisterModule(r, REDIS_CHANNEL_PREFIX, m)
+		UnregisterModule(r, REDIS_CHANNEL_PREFIX, m)
 		os.Exit(0)
 	}()
 
-	w := getNewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, PUSH_DIR)
+	w := GetNewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, PUSH_DIR)
 
 	first := make(chan struct{}, 1)
 	first <- struct{}{}
@@ -69,28 +69,28 @@ func main() {
 				commandStart.Process.Kill()
 			}
 
-			setupPushDir(SRC_DIR, PUSH_DIR)
+			SetupPushDir(SRC_DIR, PUSH_DIR)
 
 			log.Info("Building module ...")
-			err := runCommand(r, REDIS_CHANNEL_PREFIX, "module_built", m, COMMAND_BUILD, false)
+			err := RunCommand(r, REDIS_CHANNEL_PREFIX, "module_built", m, COMMAND_BUILD, false)
 			if err != nil {
 				panic(err)
 			}
 
 			log.Info("Testing module ...")
-			err = runCommand(r, REDIS_CHANNEL_PREFIX, "module_tested", m, COMMAND_TEST, false)
+			err = RunCommand(r, REDIS_CHANNEL_PREFIX, "module_tested", m, COMMAND_TEST, false)
 			if err != nil {
 				panic(err)
 			}
 
 			log.Info("Pushing module ...")
-			err = pushModule(r, REDIS_CHANNEL_PREFIX, m, PUSH_DIR, GIT_REMOTE_NAME, GIT_URL, GIT_NAME, GIT_EMAIL)
+			err = PushModule(r, REDIS_CHANNEL_PREFIX, m, PUSH_DIR, GIT_REMOTE_NAME, GIT_URL, GIT_NAME, GIT_EMAIL)
 			if err != nil {
 				panic(err)
 			}
 
 			log.Info("Starting module ...")
-			err = runCommand(r, REDIS_CHANNEL_PREFIX, "module_started", m, COMMAND_START, true)
+			err = RunCommand(r, REDIS_CHANNEL_PREFIX, "module_started", m, COMMAND_START, true)
 			if err != nil {
 				panic(err)
 			}
@@ -98,7 +98,8 @@ func main() {
 	}
 }
 
-func getModuleName(goModFilePath string) (error, string) {
+// GetModuleName returns the module name from `go.mod`
+func GetModuleName(goModFilePath string) (error, string) {
 	f, err := ioutil.ReadFile(goModFilePath)
 	if err != nil {
 		return errors.New("Could not read module file"), ""
@@ -113,28 +114,33 @@ func getModuleName(goModFilePath string) (error, string) {
 	return errors.New("Could find module declaration"), ""
 }
 
-func getNewRedisClient(addr string) *redis.Client {
+// GetNewRedisClient returns a new Redis client
+func GetNewRedisClient(addr string) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr: addr,
 	})
 }
 
-func getNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
+// GetNewFolderWatcher returns a new folder watcher
+func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
 	w := fswatch.NewFolderWatcher(watchGlob, true, func(path string) bool { return strings.Contains(path, pushDir) }, 1)
 	w.Start()
 
 	return w
 }
 
-func registerModule(r *redis.Client, prefix, m string) {
+// RegisterModule registers a module in Redis
+func RegisterModule(r *redis.Client, prefix, m string) {
 	r.Publish(prefix+":"+"module_registered", withTimestamp(m))
 }
 
-func unregisterModule(r *redis.Client, prefix, m string) {
+// UnregisterModule unregisters a module from Redis
+func UnregisterModule(r *redis.Client, prefix, m string) {
 	r.Publish(prefix+":"+"module_unregistered", withTimestamp(m))
 }
 
-func runCommand(r *redis.Client, prefix, suffix, m, command string, start bool) error {
+// RunCommand runs or starts a command creates a corresponding message in Redis
+func RunCommand(r *redis.Client, prefix, suffix, m, command string, start bool) error {
 	c := exec.Command(strings.Split(command, " ")[0], strings.Split(command, " ")[1:]...)
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
@@ -151,14 +157,16 @@ func runCommand(r *redis.Client, prefix, suffix, m, command string, start bool) 
 	return nil
 }
 
-func setupPushDir(srcDir, pushDir string) {
+// SetupPushDir creates a temporary directory to do the git operations in
+func SetupPushDir(srcDir, pushDir string) {
 	if _, err := os.Stat(pushDir); !os.IsNotExist(err) {
 		os.RemoveAll(pushDir)
 	}
 	gorecurcopy.CopyDirectory(srcDir, pushDir)
 }
 
-func pushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitName, gitEmail string) error {
+// PushModule adds all files to a git repo, commits and finally pushes them to a remote
+func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitName, gitEmail string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err
@@ -196,6 +204,7 @@ func pushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitN
 	return nil
 }
 
+// withTimestamp gets a message name with the current timestamp
 func withTimestamp(m string) string {
 	t := time.Now().UnixNano()
 	return m + "@" + strconv.Itoa(int(t))
