@@ -13,19 +13,12 @@ import (
 
 var (
 	REDIS_URL                   = os.Getenv("REDIS_URL")
-	REDIS_CHANNEL               = os.Getenv("REDIS_CHANNEL")
+	REDIS_CHANNEL_PREFIX        = os.Getenv("REDIS_CHANNEL_PREFIX")
 	SYNC_MODULE_PUSH_MOD_FILE   = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
 	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
 )
 
 func main() {
-	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return false }, 1)
-	w.Start()
-
-	r := redis.NewClient(&redis.Options{
-		Addr: REDIS_URL,
-	})
-
 	f, err := ioutil.ReadFile(SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
 		panic(err)
@@ -40,15 +33,25 @@ func main() {
 		}
 	}
 
+	r := redis.NewClient(&redis.Options{
+		Addr: REDIS_URL,
+	})
+	defer r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_unregistered", withTimestamp(m))
+	r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_registered", withTimestamp(m))
+
+	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return false }, 1)
+	w.Start()
+
 	for w.IsRunning() {
 		select {
 		case <-w.ChangeDetails():
-			t := time.Now().UnixNano()
-			e := m + "@" + strconv.Itoa(int(t))
-
-			r.Publish(REDIS_CHANNEL, e)
-
+			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_pushed", withTimestamp(m))
 			fmt.Println(m)
 		}
 	}
+}
+
+func withTimestamp(m string) string {
+	t := time.Now().UnixNano()
+	return m + "@" + strconv.Itoa(int(t))
 }
