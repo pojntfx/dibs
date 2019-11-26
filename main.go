@@ -4,13 +4,18 @@ import (
 	"fmt"
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
+	"io/ioutil"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var (
-	REDIS                       = os.Getenv("REDIS")
+	REDIS_URL                   = os.Getenv("REDIS_URL")
+	REDIS_CHANNEL               = os.Getenv("REDIS_CHANNEL")
+	SYNC_MODULE_PUSH_MOD_FILE   = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
 	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
-	CHANNEL                     = "godibs:pushed_module"
 )
 
 func main() {
@@ -18,14 +23,32 @@ func main() {
 	w.Start()
 
 	r := redis.NewClient(&redis.Options{
-		Addr: REDIS,
+		Addr: REDIS_URL,
 	})
+
+	f, err := ioutil.ReadFile(SYNC_MODULE_PUSH_MOD_FILE)
+	if err != nil {
+		panic(err)
+	}
+
+	var m string
+
+	for _, line := range strings.Split(string(f), "\n") {
+		if strings.Contains(line, "module") {
+			m = strings.Split(line, "module ")[1]
+			break
+		}
+	}
 
 	for w.IsRunning() {
 		select {
 		case <-w.ChangeDetails():
-			r.Publish(CHANNEL, "test message")
-			fmt.Println("Published to channel after file change")
+			t := time.Now().UnixNano()
+			e := m + "@" + strconv.Itoa(int(t))
+
+			r.Publish(REDIS_CHANNEL, e)
+
+			fmt.Println(m)
 		}
 	}
 }
