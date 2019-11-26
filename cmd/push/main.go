@@ -4,15 +4,18 @@ import (
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
 	"github.com/plus3it/gorecurcopy"
+	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
 	gitconf "gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -50,8 +53,17 @@ func main() {
 	r := redis.NewClient(&redis.Options{
 		Addr: REDIS_URL,
 	})
-	defer r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_unregistered", withTimestamp(m))
+	log.Info("Registering module ...")
 	r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_registered", withTimestamp(m))
+
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		log.Info("Unregistering module ...")
+		r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_unregistered", withTimestamp(m))
+		os.Exit(0)
+	}()
 
 	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return strings.Contains(path, PUSH_DIR) }, 1)
 	w.Start()
@@ -75,15 +87,7 @@ func main() {
 
 			gorecurcopy.CopyDirectory(SRC_DIR, PUSH_DIR)
 
-			commandTest := exec.Command(strings.Split(COMMAND_TEST, " ")[0], strings.Split(COMMAND_TEST, " ")[1:]...)
-			commandTest.Stdout = os.Stdout
-			commandTest.Stderr = os.Stderr
-			err = commandTest.Run()
-			if err != nil {
-				panic(err)
-			}
-			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_tested", withTimestamp(m))
-
+			log.Info("Building module ...")
 			commandBuild := exec.Command(strings.Split(COMMAND_BUILD, " ")[0], strings.Split(COMMAND_BUILD, " ")[1:]...)
 			commandBuild.Stdout = os.Stdout
 			commandBuild.Stderr = os.Stderr
@@ -92,6 +96,16 @@ func main() {
 				panic(err)
 			}
 			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_built", withTimestamp(m))
+
+			log.Info("Testing module ...")
+			commandTest := exec.Command(strings.Split(COMMAND_TEST, " ")[0], strings.Split(COMMAND_TEST, " ")[1:]...)
+			commandTest.Stdout = os.Stdout
+			commandTest.Stderr = os.Stderr
+			err = commandTest.Run()
+			if err != nil {
+				panic(err)
+			}
+			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_tested", withTimestamp(m))
 
 			g, err := git.PlainOpen(filepath.Join(PUSH_DIR))
 			if err != nil {
@@ -125,8 +139,10 @@ func main() {
 				panic(err)
 			}
 
+			log.Info("Pushing module ...")
 			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_pushed", withTimestamp(m))
 
+			log.Info("Starting module ...")
 			commandStart = exec.Command(strings.Split(COMMAND_START, " ")[0], strings.Split(COMMAND_START, " ")[1:]...)
 			commandStart.Stdout = os.Stdout
 			commandStart.Stderr = os.Stderr
