@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
 	"github.com/plus3it/gorecurcopy"
@@ -30,6 +29,7 @@ var (
 	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
 	COMMAND_BUILD               = os.Getenv("COMMAND_BUILD")
 	COMMAND_TEST                = os.Getenv("COMMAND_TEST")
+	COMMAND_START               = os.Getenv("COMMAND_START")
 )
 
 func main() {
@@ -56,9 +56,19 @@ func main() {
 	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return strings.Contains(path, PUSH_DIR) }, 1)
 	w.Start()
 
+	first := make(chan struct{}, 1)
+	first <- struct{}{}
+
+	var commandStart *exec.Cmd
+
 	for w.IsRunning() {
 		select {
+		case <-first:
 		case <-w.ChangeDetails():
+			if commandStart != nil {
+				commandStart.Process.Kill()
+			}
+
 			if _, err := os.Stat(PUSH_DIR); !os.IsNotExist(err) {
 				os.RemoveAll(PUSH_DIR)
 			}
@@ -117,7 +127,14 @@ func main() {
 
 			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_pushed", withTimestamp(m))
 
-			fmt.Println(m)
+			commandStart = exec.Command(strings.Split(COMMAND_START, " ")[0], strings.Split(COMMAND_START, " ")[1:]...)
+			commandStart.Stdout = os.Stdout
+			commandStart.Stderr = os.Stderr
+			err = commandStart.Start()
+			if err != nil {
+				panic(err)
+			}
+			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_started", withTimestamp(m))
 		}
 	}
 }
