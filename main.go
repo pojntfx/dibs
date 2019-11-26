@@ -7,6 +7,7 @@ import (
 	"github.com/plus3it/gorecurcopy"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,8 @@ var (
 	PUSH_DIR                    = os.Getenv("PUSH_DIR")
 	SYNC_MODULE_PUSH_MOD_FILE   = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
 	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
+	COMMAND_BUILD               = os.Getenv("COMMAND_BUILD")
+	COMMAND_TEST                = os.Getenv("COMMAND_TEST")
 )
 
 func main() {
@@ -59,6 +62,22 @@ func main() {
 			}
 
 			gorecurcopy.CopyDirectory(SRC_DIR, PUSH_DIR)
+
+			commandBuild := exec.Command(strings.Split(COMMAND_BUILD, " ")[0], strings.Split(COMMAND_BUILD, " ")[1:]...)
+			commandBuild.Stdout = os.Stdout
+			commandBuild.Stderr = os.Stderr
+			err = commandBuild.Run()
+			if err != nil {
+				panic(err)
+			}
+
+			commandTest := exec.Command(strings.Split(COMMAND_TEST, " ")[0], strings.Split(COMMAND_TEST, " ")[1:]...)
+			commandTest.Stdout = os.Stdout
+			commandTest.Stderr = os.Stderr
+			err = commandTest.Run()
+			if err != nil {
+				panic(err)
+			}
 
 			os.Chdir(PUSH_DIR)
 
