@@ -119,7 +119,7 @@ func main() {
 
 			err = g.Push(&git.PushOptions{
 				RemoteName: GIT_REMOTE_NAME,
-				RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/branch"},
+				RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/master"},
 			})
 			if err != nil {
 				panic(err)
