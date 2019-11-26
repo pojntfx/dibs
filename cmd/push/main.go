@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
 	"github.com/plus3it/gorecurcopy"
@@ -36,41 +37,28 @@ var (
 )
 
 func main() {
-	f, err := ioutil.ReadFile(SYNC_MODULE_PUSH_MOD_FILE)
+	err, m := getModuleName(SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
 		panic(err)
 	}
 
-	var m string
+	r := getNewRedisClient(REDIS_URL)
 
-	for _, line := range strings.Split(string(f), "\n") {
-		if strings.Contains(line, "module") {
-			m = strings.Split(line, "module ")[1]
-			break
-		}
-	}
-
-	r := redis.NewClient(&redis.Options{
-		Addr: REDIS_URL,
-	})
 	log.Info("Registering module ...")
-	r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_registered", withTimestamp(m))
+	registerModule(r, REDIS_CHANNEL_PREFIX, m)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Info("Unregistering module ...")
-		r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_unregistered", withTimestamp(m))
+		unregisterModule(r, REDIS_CHANNEL_PREFIX, m)
 		os.Exit(0)
 	}()
 
-	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return strings.Contains(path, PUSH_DIR) }, 1)
-	w.Start()
+	w := getNewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, PUSH_DIR)
 
 	first := make(chan struct{}, 1)
 	first <- struct{}{}
-
 	var commandStart *exec.Cmd
 
 	for w.IsRunning() {
@@ -81,78 +69,131 @@ func main() {
 				commandStart.Process.Kill()
 			}
 
-			if _, err := os.Stat(PUSH_DIR); !os.IsNotExist(err) {
-				os.RemoveAll(PUSH_DIR)
-			}
-
-			gorecurcopy.CopyDirectory(SRC_DIR, PUSH_DIR)
+			setupPushDir(SRC_DIR, PUSH_DIR)
 
 			log.Info("Building module ...")
-			commandBuild := exec.Command(strings.Split(COMMAND_BUILD, " ")[0], strings.Split(COMMAND_BUILD, " ")[1:]...)
-			commandBuild.Stdout = os.Stdout
-			commandBuild.Stderr = os.Stderr
-			err = commandBuild.Run()
+			err := runCommand(r, REDIS_CHANNEL_PREFIX, "module_built", m, COMMAND_BUILD, false)
 			if err != nil {
 				panic(err)
 			}
-			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_built", withTimestamp(m))
 
 			log.Info("Testing module ...")
-			commandTest := exec.Command(strings.Split(COMMAND_TEST, " ")[0], strings.Split(COMMAND_TEST, " ")[1:]...)
-			commandTest.Stdout = os.Stdout
-			commandTest.Stderr = os.Stderr
-			err = commandTest.Run()
-			if err != nil {
-				panic(err)
-			}
-			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_tested", withTimestamp(m))
-
-			g, err := git.PlainOpen(filepath.Join(PUSH_DIR))
-			if err != nil {
-				panic(err)
-			}
-
-			g.CreateRemote(&gitconf.RemoteConfig{
-				Name: GIT_REMOTE_NAME,
-				URLs: []string{GIT_URL},
-			})
-
-			wt, err := g.Worktree()
-			if err != nil {
-				panic(err)
-			}
-			wt.Add(".")
-
-			wt.Commit(withTimestamp("module_synced"), &git.CommitOptions{
-				Author: &object.Signature{
-					Name:  GIT_NAME,
-					Email: GIT_EMAIL,
-					When:  time.Now(),
-				},
-			})
-
-			err = g.Push(&git.PushOptions{
-				RemoteName: GIT_REMOTE_NAME,
-				RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/master"},
-			})
+			err = runCommand(r, REDIS_CHANNEL_PREFIX, "module_tested", m, COMMAND_TEST, false)
 			if err != nil {
 				panic(err)
 			}
 
 			log.Info("Pushing module ...")
-			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_pushed", withTimestamp(m))
-
-			log.Info("Starting module ...")
-			commandStart = exec.Command(strings.Split(COMMAND_START, " ")[0], strings.Split(COMMAND_START, " ")[1:]...)
-			commandStart.Stdout = os.Stdout
-			commandStart.Stderr = os.Stderr
-			err = commandStart.Start()
+			err = pushModule(r, REDIS_CHANNEL_PREFIX, m, PUSH_DIR, GIT_REMOTE_NAME, GIT_URL, GIT_NAME, GIT_EMAIL)
 			if err != nil {
 				panic(err)
 			}
-			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_started", withTimestamp(m))
+
+			log.Info("Starting module ...")
+			err = runCommand(r, REDIS_CHANNEL_PREFIX, "module_started", m, COMMAND_START, true)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
+}
+
+func getModuleName(goModFilePath string) (error, string) {
+	f, err := ioutil.ReadFile(goModFilePath)
+	if err != nil {
+		return errors.New("Could not read module file"), ""
+	}
+
+	for _, line := range strings.Split(string(f), "\n") {
+		if strings.Contains(line, "module") {
+			return nil, strings.Split(line, "module ")[1]
+		}
+	}
+
+	return errors.New("Could find module declaration"), ""
+}
+
+func getNewRedisClient(addr string) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr: addr,
+	})
+}
+
+func getNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
+	w := fswatch.NewFolderWatcher(watchGlob, true, func(path string) bool { return strings.Contains(path, pushDir) }, 1)
+	w.Start()
+
+	return w
+}
+
+func registerModule(r *redis.Client, prefix, m string) {
+	r.Publish(prefix+":"+"module_registered", withTimestamp(m))
+}
+
+func unregisterModule(r *redis.Client, prefix, m string) {
+	r.Publish(prefix+":"+"module_unregistered", withTimestamp(m))
+}
+
+func runCommand(r *redis.Client, prefix, suffix, m, command string, start bool) error {
+	c := exec.Command(strings.Split(command, " ")[0], strings.Split(command, " ")[1:]...)
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	var err error
+	if start {
+		err = c.Start()
+	} else {
+		err = c.Run()
+	}
+	if err != nil {
+		return err
+	}
+	r.Publish(prefix+":"+suffix, withTimestamp(m))
+	return nil
+}
+
+func setupPushDir(srcDir, pushDir string) {
+	if _, err := os.Stat(pushDir); !os.IsNotExist(err) {
+		os.RemoveAll(pushDir)
+	}
+	gorecurcopy.CopyDirectory(srcDir, pushDir)
+}
+
+func pushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitName, gitEmail string) error {
+	g, err := git.PlainOpen(filepath.Join(pushDir))
+	if err != nil {
+		return err
+	}
+
+	g.CreateRemote(&gitconf.RemoteConfig{
+		Name: gitRemoteName,
+		URLs: []string{gitUrl},
+	})
+
+	wt, err := g.Worktree()
+	if err != nil {
+		return err
+	}
+	wt.Add(".")
+
+	wt.Commit(withTimestamp("module_synced"), &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  gitName,
+			Email: gitEmail,
+			When:  time.Now(),
+		},
+	})
+
+	err = g.Push(&git.PushOptions{
+		RemoteName: gitRemoteName,
+		RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/master"},
+	})
+	if err != nil {
+		return err
+	}
+
+	r.Publish(prefix+":"+"module_pushed", withTimestamp(m))
+
+	return nil
 }
 
 func withTimestamp(m string) string {
