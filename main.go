@@ -4,6 +4,7 @@ import (
 	"fmt"
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
+	"github.com/plus3it/gorecurcopy"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -14,6 +15,9 @@ import (
 var (
 	REDIS_URL                   = os.Getenv("REDIS_URL")
 	REDIS_CHANNEL_PREFIX        = os.Getenv("REDIS_CHANNEL_PREFIX")
+	GIT_URL                     = os.Getenv("GIT_URL")
+	SRC_DIR                     = os.Getenv("SRC_DIR")
+	PUSH_DIR                    = os.Getenv("PUSH_DIR")
 	SYNC_MODULE_PUSH_MOD_FILE   = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
 	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
 )
@@ -39,14 +43,30 @@ func main() {
 	defer r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_unregistered", withTimestamp(m))
 	r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_registered", withTimestamp(m))
 
-	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return false }, 1)
+	w := fswatch.NewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, true, func(path string) bool { return strings.Contains(path, PUSH_DIR) }, 1)
 	w.Start()
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
 
 	for w.IsRunning() {
 		select {
 		case <-w.ChangeDetails():
-			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_pushed", withTimestamp(m))
+			if _, err := os.Stat(PUSH_DIR); !os.IsNotExist(err) {
+				os.RemoveAll(PUSH_DIR)
+			}
+
+			gorecurcopy.CopyDirectory(SRC_DIR, PUSH_DIR)
+
+			os.Chdir(PUSH_DIR)
+
+			r.Publish(REDIS_CHANNEL_PREFIX+":"+"module_built", withTimestamp(m))
+
 			fmt.Println(m)
+
+			os.Chdir(pwd)
 		}
 	}
 }
