@@ -8,4 +8,5 @@ require (
 	github.com/otiai10/copy v1.0.2
 	github.com/plus3it/gorecurcopy v0.0.1
 	github.com/uudashr/go-module v0.0.0-20180827225833-c0ca9c3a4966
+	gopkg.in/src-d/go-git.v4 v4.13.1
 )
