@@ -5,6 +5,7 @@ import (
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
 	"github.com/plus3it/gorecurcopy"
+	"github.com/pojntfx/godibs/src/lib/common"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
 	gitconf "gopkg.in/src-d/go-git.v4/config"
@@ -42,7 +43,7 @@ func main() {
 		panic(err)
 	}
 
-	r := GetNewRedisClient(REDIS_URL)
+	r := common.GetNewRedisClient(REDIS_URL)
 
 	log.Info("Registering module ...")
 	RegisterModule(r, REDIS_CHANNEL_PREFIX, m)
@@ -72,13 +73,13 @@ func main() {
 			SetupPushDir(SRC_DIR, PUSH_DIR)
 
 			log.Info("Building module ...")
-			err := RunCommand(r, REDIS_CHANNEL_PREFIX, "module_built", m, COMMAND_BUILD, false)
+			err := RunCommand(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_BUILT, m, COMMAND_BUILD, false)
 			if err != nil {
 				panic(err)
 			}
 
 			log.Info("Testing module ...")
-			err = RunCommand(r, REDIS_CHANNEL_PREFIX, "module_tested", m, COMMAND_TEST, false)
+			err = RunCommand(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_TESTED, m, COMMAND_TEST, false)
 			if err != nil {
 				panic(err)
 			}
@@ -90,7 +91,7 @@ func main() {
 			}
 
 			log.Info("Starting module ...")
-			err = RunCommand(r, REDIS_CHANNEL_PREFIX, "module_started", m, COMMAND_START, true)
+			err = RunCommand(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_STARTED, m, COMMAND_START, true)
 			if err != nil {
 				panic(err)
 			}
@@ -114,13 +115,6 @@ func GetModuleName(goModFilePath string) (error, string) {
 	return errors.New("Could find module declaration"), ""
 }
 
-// GetNewRedisClient returns a new Redis client
-func GetNewRedisClient(addr string) *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr: addr,
-	})
-}
-
 // GetNewFolderWatcher returns a new folder watcher
 func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
 	w := fswatch.NewFolderWatcher(watchGlob, true, func(path string) bool { return strings.Contains(path, pushDir) }, 1)
@@ -131,12 +125,12 @@ func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
 
 // RegisterModule registers a module in Redis
 func RegisterModule(r *redis.Client, prefix, m string) {
-	r.Publish(prefix+":"+"module_registered", withTimestamp(m))
+	r.Publish(prefix+":"+common.REDIS_CHANNEL_MODULE_REGISTERED, withTimestamp(m))
 }
 
 // UnregisterModule unregisters a module from Redis
 func UnregisterModule(r *redis.Client, prefix, m string) {
-	r.Publish(prefix+":"+"module_unregistered", withTimestamp(m))
+	r.Publish(prefix+":"+common.REDIS_CHANNEL_MODULE_UNREGISTERED, withTimestamp(m))
 }
 
 // RunCommand runs or starts a command creates a corresponding message in Redis
@@ -183,7 +177,7 @@ func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitN
 	}
 	wt.Add(".")
 
-	wt.Commit(withTimestamp("module_synced"), &git.CommitOptions{
+	wt.Commit(withTimestamp(common.GIT_COMMIT_MESSAGE), &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  gitName,
 			Email: gitEmail,
@@ -199,7 +193,7 @@ func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitN
 		return err
 	}
 
-	r.Publish(prefix+":"+"module_pushed", withTimestamp(m))
+	r.Publish(prefix+":"+common.REDIS_CHANNEL_MODULE_PUSHED, withTimestamp(m))
 
 	return nil
 }
