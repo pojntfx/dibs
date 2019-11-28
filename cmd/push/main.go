@@ -52,6 +52,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
+		log.Info("Unregistering module ...")
 		UnregisterModule(r, REDIS_CHANNEL_PREFIX, m)
 		os.Exit(0)
 	}()
