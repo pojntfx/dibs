@@ -22,56 +22,85 @@ var (
 func main() {
 	r := common.GetNewRedisClient(REDIS_URL)
 
-	StartDirectoryCreationWorker(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR)
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR, false)
+	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_UNREGISTERED, GIT_DIR, true)
+
+	wg.Wait()
 }
 
-func ParseModuleFromMessage(m string) (name, timestamp string) {
+// parseModuleFromMessage gets the module name and event timestamp from a message
+func parseModuleFromMessage(m string) (name, timestamp string) {
 	res := strings.Split(m, "@")
 	return res[0], res[1]
 }
 
-func GetPathForModule(baseDir, m string) string {
+// getPathForModule builds the path for a module
+func getPathForModule(baseDir, m string) string {
 	return filepath.Join(append([]string{baseDir, "repositories"}, strings.Split(m, "/")...)...)
 }
 
-func StartDirectoryCreationWorker(r *redis.Client, prefix, channel, baseDir string) error {
+// getChannel gets a new Go channel for a redis prefix and channel
+func getChannel(r *redis.Client, prefix, channel string) (error, <-chan *redis.Message, *redis.PubSub) {
 	p := r.Subscribe(prefix + ":" + channel)
-	defer p.Close()
 
 	_, err := p.Receive()
+	if err != nil {
+		return err, nil, p
+	}
+
+	return nil, p.Channel(), p
+}
+
+// StartDirectoryManagementWorker starts a new directory management worker
+func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix, channel, baseDir string, deleteOnly bool) error {
+	err, c, p := getChannel(r, prefix, channel)
+	defer p.Close()
 	if err != nil {
 		return err
 	}
 
-	c := p.Channel()
+	if deleteOnly {
+		log.Info("Starting directory deletion worker ...")
+	} else {
+		log.Info("Starting directory update worker ...")
+	}
 
-	var wg sync.WaitGroup
+	for m := range c {
+		var innerWg sync.WaitGroup
 
-	log.Info("Starting directory creation worker ...")
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		for m := range c {
-			n, t := ParseModuleFromMessage(m.Payload)
-			log.Info("Creating directory", rz.String("moduleName", n), rz.String("modulePushedTimestamp", t))
+		go func(wg *sync.WaitGroup, m *redis.Message) {
+			wg.Add(1)
 
-			path := GetPathForModule(baseDir, n)
+			n, t := parseModuleFromMessage(m.Payload)
+			if deleteOnly {
+				log.Info("Deleting directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
+			} else {
+				log.Info("Updating directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
+			}
+
+			path := getPathForModule(baseDir, n)
 
 			err = os.RemoveAll(path)
 			if err != nil {
 				panic(err)
 			}
 
-			err = os.MkdirAll(path, 0777)
-			if err != nil {
-				panic(err)
+			if !deleteOnly {
+				err = os.MkdirAll(path, 0777)
+				if err != nil {
+					panic(err)
+				}
 			}
 
-		}
+			defer wg.Done()
+		}(&innerWg, m)
+	}
 
-		wg.Done()
-	}(&wg)
-
-	wg.Wait()
+	defer wg.Done()
 
 	return nil
 }
