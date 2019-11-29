@@ -24,7 +24,7 @@ import (
 var (
 	REDIS_URL                   = os.Getenv("REDIS_URL")
 	REDIS_CHANNEL_PREFIX        = os.Getenv("REDIS_CHANNEL_PREFIX")
-	GIT_URL                     = os.Getenv("GIT_URL")
+	GIT_BASE_URL                = os.Getenv("GIT_BASE_URL")
 	GIT_REMOTE_NAME             = os.Getenv("GIT_REMOTE_NAME")
 	GIT_NAME                    = os.Getenv("GIT_NAME")
 	GIT_EMAIL                   = os.Getenv("GIT_EMAIL")
@@ -86,7 +86,8 @@ func main() {
 			}
 
 			log.Info("Pushing module ...")
-			err = PushModule(r, REDIS_CHANNEL_PREFIX, m, PUSH_DIR, GIT_REMOTE_NAME, GIT_URL, GIT_NAME, GIT_EMAIL)
+			pushURL := GetGitURL(GIT_BASE_URL, m)
+			err = PushModule(r, REDIS_CHANNEL_PREFIX, m, PUSH_DIR, GIT_REMOTE_NAME, pushURL, GIT_NAME, GIT_EMAIL)
 			if err != nil {
 				panic(err)
 			}
@@ -98,6 +99,10 @@ func main() {
 			}
 		}
 	}
+}
+
+func GetGitURL(baseURL, m string) string {
+	return baseURL + "/" + m
 }
 
 // GetModuleName returns the module name from `go.mod`
@@ -161,7 +166,7 @@ func SetupPushDir(srcDir, pushDir string) {
 }
 
 // PushModule adds all files to a git repo, commits and finally pushes them to a remote
-func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitName, gitEmail string) error {
+func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, pushURL, gitName, gitEmail string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err
@@ -169,7 +174,7 @@ func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, gitUrl, gitN
 
 	g.CreateRemote(&gitconf.RemoteConfig{
 		Name: gitRemoteName,
-		URLs: []string{gitUrl},
+		URLs: []string{pushURL},
 	})
 
 	wt, err := g.Worktree()

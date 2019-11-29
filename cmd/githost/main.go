@@ -5,6 +5,7 @@ import (
 	"github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
+	git "gopkg.in/src-d/go-git.v4"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,10 +73,10 @@ func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix,
 	for m := range c {
 		var innerWg sync.WaitGroup
 
-		go func(wg *sync.WaitGroup, m *redis.Message) {
+		go func(wg *sync.WaitGroup, msg *redis.Message) {
 			wg.Add(1)
 
-			n, t := parseModuleFromMessage(m.Payload)
+			n, t := parseModuleFromMessage(msg.Payload)
 			if deleteOnly {
 				log.Info("Deleting directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
 			} else {
@@ -91,6 +92,11 @@ func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix,
 
 			if !deleteOnly {
 				err = os.MkdirAll(path, 0777)
+				if err != nil {
+					panic(err)
+				}
+
+				_, err := git.PlainInit(path, false)
 				if err != nil {
 					panic(err)
 				}
