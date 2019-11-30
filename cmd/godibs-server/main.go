@@ -1,16 +1,12 @@
 package main
 
 import (
-	redis "github.com/go-redis/redis/v7"
 	"github.com/pojntfx/godibs/pkg/config"
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
-	git "gopkg.in/src-d/go-git.v4"
-	"os"
 	"strconv"
-	"sync"
 )
 
 func main() {
@@ -82,59 +78,4 @@ func main() {
 			}
 		}
 	}
-}
-
-// StartDirectoryManagementWorker starts a new directory management worker
-func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix, channel, baseDir string, deleteOnly bool) error {
-	err, c, p := utils.GetRedisChannel(r, prefix, channel)
-	defer p.Close()
-	if err != nil {
-		return err
-	}
-
-	if deleteOnly {
-		log.Info("Starting directory deletion worker ...")
-	} else {
-		log.Info("Starting directory update worker ...")
-	}
-
-	for m := range c {
-		var innerWg sync.WaitGroup
-
-		go func(wg *sync.WaitGroup, msg *redis.Message) {
-			wg.Add(1)
-
-			n, t := utils.ParseModuleFromMessage(msg.Payload)
-			if deleteOnly {
-				log.Info("Deleting directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
-			} else {
-				log.Info("Updating directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
-			}
-
-			path := utils.GetPathForModule(baseDir, n)
-
-			if !deleteOnly {
-				err = os.RemoveAll(path)
-				if err != nil {
-					panic(err)
-				}
-
-				err = os.MkdirAll(path, 0777)
-				if err != nil {
-					panic(err)
-				}
-
-				_, err := git.PlainInit(path, false)
-				if err != nil {
-					panic(err)
-				}
-			}
-
-			defer wg.Done()
-		}(&innerWg, m)
-	}
-
-	defer wg.Done()
-
-	return nil
 }

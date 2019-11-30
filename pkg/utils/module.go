@@ -7,8 +7,8 @@ import (
 
 // ParseModuleFromMessage gets the module name and event timestamp from a message
 func ParseModuleFromMessage(m string) (name, timestamp string) {
-	res := strings.Split(m, "@")
-	return res[0], res[1]
+	moduleParts := strings.Split(m, "@")
+	return moduleParts[0], moduleParts[1]
 }
 
 // GetPathForModule builds the path for a module

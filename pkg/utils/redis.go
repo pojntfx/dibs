@@ -13,12 +13,12 @@ func NewRedisClient(addr string) *redis.Client {
 
 // GetRedisChannel gets a new Go channel for a redis prefix and channel
 func GetRedisChannel(r *redis.Client, prefix, channel string) (error, <-chan *redis.Message, *redis.PubSub) {
-	p := r.Subscribe(prefix + ":" + channel)
+	pubSub := r.Subscribe(prefix + ":" + channel)
 
-	if _, err := p.Receive(); err != nil {
+	if _, err := pubSub.Receive(); err != nil {
 
-		return err, nil, p
+		return err, nil, pubSub
 	}
 
-	return nil, p.Channel(), p
+	return nil, pubSub.Channel(), pubSub
 }
