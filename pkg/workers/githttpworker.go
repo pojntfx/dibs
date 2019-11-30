@@ -2,12 +2,9 @@ package workers
 
 import (
 	"github.com/gorilla/mux"
-	rz "gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"gopkg.in/mysticmode/gitviahttp.v1"
 	"net/http"
 	"strconv"
-	"sync"
 )
 
 // GitHTTPWorker serves Git repos via HTTP
@@ -17,22 +14,42 @@ type GitHTTPWorker struct {
 	Port           int    // Port on which the HTTP server should listen
 }
 
+// GitHTTPWorkerEvent enables status messages
+type GitHTTPWorkerEvent struct {
+	Code    int    // Status code of the event
+	Message string // Message of the event
+}
+
 // Start starts a GitHTTPWorker
-func (config *GitHTTPWorker) Start(wg *sync.WaitGroup) {
-	log.Info("Starting Git HTTP worker ...", rz.String("ReposDir", config.ReposDir), rz.String("HTTPPathPrefix", config.HTTPPathPrefix), rz.Int("Port", config.Port))
+func (worker *GitHTTPWorker) Start(errors chan error, events chan GitHTTPWorkerEvent) {
+	events <- GitHTTPWorkerEvent{
+		Code:    0,
+		Message: "Started",
+	}
 
 	r := mux.NewRouter()
 
-	r.PathPrefix(config.HTTPPathPrefix).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gitviahttp.Context(w, r, config.ReposDir)
+	r.PathPrefix(worker.HTTPPathPrefix).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		events <- GitHTTPWorkerEvent{
+			Code:    1,
+			Message: r.Method + " request to " + r.URL.Path + " received",
+		}
+
+		gitviahttp.Context(w, r, worker.ReposDir)
 	}).Methods("GET", "POST")
 
 	s := &http.Server{
 		Handler: r,
-		Addr:    "127.0.0.1:" + strconv.Itoa(config.Port),
+		Addr:    "127.0.0.1:" + strconv.Itoa(worker.Port),
 	}
 
-	s.ListenAndServe()
+	if err := s.ListenAndServe(); err != nil {
+		errors <- err
+		return
+	}
 
-	wg.Done()
+	events <- GitHTTPWorkerEvent{
+		Code:    2,
+		Message: "Server stopped",
+	}
 }
