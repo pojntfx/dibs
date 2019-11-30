@@ -3,6 +3,7 @@ package main
 import (
 	redis "github.com/go-redis/redis/v7"
 	"github.com/gorilla/mux"
+	"github.com/pojntfx/godibs/pkg/workers"
 	"github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
@@ -35,11 +36,17 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	wg.Add(4)
+	gitHTTPWorker := &workers.GitHTTPWorker{
+		ReposDir:       GIT_DIR,
+		HTTPPathPrefix: GIT_HTTP_PATH,
+		Port:           int(p),
+	}
 
+	wg.Add(3)
+
+	go gitHTTPWorker.Start(&wg)
 	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR, false)
 	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_UNREGISTERED, GIT_DIR, true)
-	go StartHTTPWorker(&wg, GIT_DIR, int(p), GIT_HTTP_PATH)
 
 	wg.Wait()
 }
