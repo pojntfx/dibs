@@ -4,8 +4,9 @@ import (
 	"errors"
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
-	"github.com/plus3it/gorecurcopy"
+	"github.com/otiai10/copy"
 	"github.com/pojntfx/godibs/src/lib/common"
+	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
 	gitconf "gopkg.in/src-d/go-git.v4/config"
@@ -61,39 +62,18 @@ func main() {
 
 	first := make(chan struct{}, 1)
 	first <- struct{}{}
-	var commandStart *exec.Cmd
+	var commandStartState *exec.Cmd
+
+	err = RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_BUILT, common.REDIS_CHANNEL_MODULE_TESTED, common.REDIS_CHANNEL_MODULE_PUSHED, common.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
+	if err != nil {
+		panic(err)
+	}
 
 	for w.IsRunning() {
 		select {
 		case <-first:
 		case <-w.ChangeDetails():
-			if commandStart != nil {
-				commandStart.Process.Kill()
-			}
-
-			SetupPushDir(SRC_DIR, PUSH_DIR)
-
-			log.Info("Building module ...")
-			err := RunCommand(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_BUILT, m, COMMAND_BUILD, false)
-			if err != nil {
-				panic(err)
-			}
-
-			log.Info("Testing module ...")
-			err = RunCommand(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_TESTED, m, COMMAND_TEST, false)
-			if err != nil {
-				panic(err)
-			}
-
-			log.Info("Pushing module ...")
-			pushURL := GetGitURL(GIT_BASE_URL, m)
-			err = PushModule(r, REDIS_CHANNEL_PREFIX, m, PUSH_DIR, GIT_REMOTE_NAME, pushURL, GIT_NAME, GIT_EMAIL)
-			if err != nil {
-				panic(err)
-			}
-
-			log.Info("Starting module ...")
-			err = RunCommand(r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_STARTED, m, COMMAND_START, true)
+			err := RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_BUILT, common.REDIS_CHANNEL_MODULE_TESTED, common.REDIS_CHANNEL_MODULE_PUSHED, common.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
 			if err != nil {
 				panic(err)
 			}
@@ -101,6 +81,48 @@ func main() {
 	}
 }
 
+// RunPipeline runs the entire pipeline
+func RunPipeline(r *redis.Client, m string, commandStartState *exec.Cmd, channelPrefix, moduleBuildSuffix, moduleTestedSuffix, modulePushedSuffix, moduleStartedSuffix, commandBuild, commandTest, commandStart, gitBaseUrl, gitRemoteName, gitName, gitEmail, srcDir, pushDir string) error {
+	log.Info("Stopping module ...")
+	if commandStartState != nil {
+		commandStartState.Process.Kill()
+	}
+
+	log.Info("Copying module ...")
+	err := SetupPushDir(srcDir, pushDir)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Building module ...")
+	err = RunCommand(r, channelPrefix, moduleTestedSuffix, m, commandBuild, false)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Testing module ...")
+	err = RunCommand(r, channelPrefix, moduleTestedSuffix, m, commandTest, false)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Pushing module ...")
+	pushURL := GetGitURL(gitBaseUrl, m)
+	err = PushModule(r, channelPrefix, modulePushedSuffix, m, pushDir, gitRemoteName, pushURL, gitName, gitEmail)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Starting module ...")
+	err = RunCommand(r, channelPrefix, moduleStartedSuffix, m, commandStart, true)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetGitURL returns the URL of a git repo
 func GetGitURL(baseURL, m string) string {
 	return baseURL + "/" + m
 }
@@ -158,38 +180,61 @@ func RunCommand(r *redis.Client, prefix, suffix, m, command string, start bool) 
 }
 
 // SetupPushDir creates a temporary directory to do the git operations in
-func SetupPushDir(srcDir, pushDir string) {
-	if _, err := os.Stat(pushDir); !os.IsNotExist(err) {
-		os.RemoveAll(pushDir)
+func SetupPushDir(srcDir, pushDir string) error {
+	err := os.RemoveAll(pushDir)
+	if err != nil {
+		return err
 	}
-	gorecurcopy.CopyDirectory(srcDir, pushDir)
+
+	err = os.MkdirAll(pushDir, 0777)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Copying internal", rz.String("src", srcDir), rz.String("dist", pushDir))
+	err = copy.Copy(srcDir, pushDir)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // PushModule adds all files to a git repo, commits and finally pushes them to a remote
-func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, pushURL, gitName, gitEmail string) error {
+func PushModule(r *redis.Client, prefix, suffix, m, pushDir, gitRemoteName, pushURL, gitName, gitEmail string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err
 	}
 
-	g.CreateRemote(&gitconf.RemoteConfig{
+	_, err = g.CreateRemote(&gitconf.RemoteConfig{
 		Name: gitRemoteName,
 		URLs: []string{pushURL},
 	})
+	if err != nil {
+		return err
+	}
 
 	wt, err := g.Worktree()
 	if err != nil {
 		return err
 	}
-	wt.Add(".")
 
-	wt.Commit(withTimestamp(common.GIT_COMMIT_MESSAGE), &git.CommitOptions{
+	_, err = wt.Add(".")
+	if err != nil {
+		return err
+	}
+
+	_, err = wt.Commit(withTimestamp(common.GIT_COMMIT_MESSAGE), &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  gitName,
 			Email: gitEmail,
 			When:  time.Now(),
 		},
 	})
+	if err != nil {
+		return err
+	}
 
 	err = g.Push(&git.PushOptions{
 		RemoteName: gitRemoteName,
@@ -199,7 +244,7 @@ func PushModule(r *redis.Client, prefix, m, pushDir, gitRemoteName, pushURL, git
 		return err
 	}
 
-	r.Publish(prefix+":"+common.REDIS_CHANNEL_MODULE_PUSHED, withTimestamp(m))
+	r.Publish(prefix+":"+suffix, withTimestamp(m))
 
 	return nil
 }
