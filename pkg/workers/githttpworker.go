@@ -2,6 +2,7 @@ package workers
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/pojntfx/godibs/pkg/utils"
 	"gopkg.in/mysticmode/gitviahttp.v1"
 	"net/http"
 	"strconv"
@@ -14,15 +15,9 @@ type GitHTTPWorker struct {
 	Port           int    // Port on which the HTTP server should listen
 }
 
-// GitHTTPWorkerEvent enables status messages
-type GitHTTPWorkerEvent struct {
-	Code    int    // Status code of the event
-	Message string // Message of the event
-}
-
 // Start starts a GitHTTPWorker
-func (worker *GitHTTPWorker) Start(errors chan error, events chan GitHTTPWorkerEvent) {
-	events <- GitHTTPWorkerEvent{
+func (worker *GitHTTPWorker) Start(errors chan error, events chan utils.Event) {
+	events <- utils.Event{
 		Code:    0,
 		Message: "Started",
 	}
@@ -30,7 +25,7 @@ func (worker *GitHTTPWorker) Start(errors chan error, events chan GitHTTPWorkerE
 	r := mux.NewRouter()
 
 	r.PathPrefix(worker.HTTPPathPrefix).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		events <- GitHTTPWorkerEvent{
+		events <- utils.Event{
 			Code:    1,
 			Message: r.Method + " request to " + r.URL.Path + " received",
 		}
@@ -48,7 +43,7 @@ func (worker *GitHTTPWorker) Start(errors chan error, events chan GitHTTPWorkerE
 		return
 	}
 
-	events <- GitHTTPWorkerEvent{
+	events <- utils.Event{
 		Code:    2,
 		Message: "Server stopped",
 	}

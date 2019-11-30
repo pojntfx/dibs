@@ -2,6 +2,7 @@ package main
 
 import (
 	redis "github.com/go-redis/redis/v7"
+	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
 	// "github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
@@ -40,7 +41,7 @@ func main() {
 	}
 
 	httpWorkerErrors := make(chan error, 0)
-	httpWorkerEvents := make(chan workers.GitHTTPWorkerEvent, 0)
+	httpWorkerEvents := make(chan utils.Event, 0)
 	go gitHTTPWorker.Start(httpWorkerErrors, httpWorkerEvents)
 
 	for {
