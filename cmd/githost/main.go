@@ -4,7 +4,7 @@ import (
 	redis "github.com/go-redis/redis/v7"
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
-	// "github.com/pojntfx/godibs/src/lib/common"
+	"github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
@@ -26,32 +26,59 @@ var (
 )
 
 func main() {
-	// r := common.GetNewRedisClient(REDIS_URL)
-	p, err := strconv.ParseInt(GIT_HTTP_PORT, 0, 64)
+	redisClient := common.GetNewRedisClient(REDIS_URL)
+
+	httpPort, err := strconv.ParseInt(GIT_HTTP_PORT, 0, 64)
 	if err != nil {
 		panic(err)
 	}
 
-	// var wg sync.WaitGroup
-
-	gitHTTPWorker := &workers.GitHTTPWorker{
+	httpWorker := &workers.GitHTTPWorker{
 		ReposDir:       GIT_DIR,
 		HTTPPathPrefix: GIT_HTTP_PATH,
-		Port:           int(p),
+		Port:           int(httpPort),
+	}
+
+	repoWorkerUpdate := &workers.GitRepoWorker{
+		ReposDir:    GIT_DIR,
+		DeleteOnly:  false,
+		RedisClient: redisClient,
+		RedisPrefix: REDIS_CHANNEL_PREFIX,
+		RedisSuffix: common.REDIS_CHANNEL_MODULE_REGISTERED,
+	}
+
+	repoWorkerDeleteOnly := &workers.GitRepoWorker{
+		ReposDir:    GIT_DIR,
+		DeleteOnly:  true,
+		RedisClient: redisClient,
+		RedisPrefix: REDIS_CHANNEL_PREFIX,
+		RedisSuffix: common.REDIS_CHANNEL_MODULE_UNREGISTERED,
 	}
 
 	httpWorkerErrors := make(chan error, 0)
 	httpWorkerEvents := make(chan utils.Event, 0)
-	go gitHTTPWorker.Start(httpWorkerErrors, httpWorkerEvents)
+	repoWorkerUpdateErrors := make(chan error, 0)
+	repoWorkerUpdateEvents := make(chan utils.Event, 0)
+	repoWorkerDeleteOnlyErrors := make(chan error, 0)
+	repoWorkerDeleteOnlyEvents := make(chan utils.Event, 0)
+
+	go httpWorker.Start(httpWorkerErrors, httpWorkerEvents)
+	go repoWorkerUpdate.Start(repoWorkerUpdateErrors, repoWorkerUpdateEvents)
+	go repoWorkerDeleteOnly.Start(repoWorkerDeleteOnlyErrors, repoWorkerDeleteOnlyEvents)
 
 	for {
 		select {
 		case err := <-httpWorkerErrors:
 			panic(err)
+		case err := <-repoWorkerUpdateErrors:
+			panic(err)
+		case err := <-repoWorkerDeleteOnlyErrors:
+			panic(err)
+
 		case event := <-httpWorkerEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "GitHTTPWorker"), rz.String("ReposDir", gitHTTPWorker.ReposDir), rz.String("HTTPPathPrefix", gitHTTPWorker.HTTPPathPrefix), rz.Int("Port", gitHTTPWorker.Port), rz.String("EventMessage", event.Message))
+				log.Info("Started", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", httpWorker.ReposDir), rz.String("HTTPPathPrefix", httpWorker.HTTPPathPrefix), rz.Int("Port", httpWorker.Port))
 			case 1:
 				log.Info("Request", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message))
 			case 2:
@@ -60,15 +87,18 @@ func main() {
 			default:
 				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
+		case event := <-repoWorkerUpdateEvents:
+			switch event.Code {
+			case 0:
+				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerUpdate.ReposDir), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("RedisPrefix", repoWorkerUpdate.RedisPrefix), rz.String("RedisSuffix", repoWorkerUpdate.RedisSuffix))
+			}
+		case event := <-repoWorkerDeleteOnlyEvents:
+			switch event.Code {
+			case 0:
+				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerDeleteOnly.ReposDir), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("RedisPrefix", repoWorkerDeleteOnly.RedisPrefix), rz.String("RedisSuffix", repoWorkerDeleteOnly.RedisSuffix))
+			}
 		}
 	}
-
-	//	wg.Add(2)
-	//
-	//	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR, false)
-	//	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_UNREGISTERED, GIT_DIR, true)
-	//
-	//	wg.Wait()
 }
 
 // parseModuleFromMessage gets the module name and event timestamp from a message
