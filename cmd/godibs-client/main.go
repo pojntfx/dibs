@@ -45,7 +45,7 @@ func main() {
 		panic(err)
 	}
 
-	r := utils.GetNewRedisClient(REDIS_URL)
+	r := utils.NewRedisClient(REDIS_URL)
 
 	log.Info("Registering module ...")
 	RegisterModule(r, REDIS_CHANNEL_PREFIX, m)
