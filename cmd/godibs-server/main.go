@@ -6,6 +6,7 @@ import (
 	"github.com/pojntfx/godibs/pkg/workers"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
+	"path/filepath"
 	"strconv"
 )
 
@@ -16,6 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
 	}
+	reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_DIR, config.GIT_HTTP_PATH)
 
 	httpWorker := &workers.GitHTTPWorker{
 		ReposDir:       config.GIT_DIR,
@@ -24,13 +26,13 @@ func main() {
 	}
 
 	repoWorkerUpdate, repoWorkerDeleteOnly := &workers.GitRepoWorker{
-		ReposDir:    config.GIT_DIR,
+		ReposDir:    reposDirWithHTTPPathPrefix,
 		DeleteOnly:  false,
 		RedisClient: redisClient,
 		RedisPrefix: config.REDIS_CHANNEL_PREFIX,
 		RedisSuffix: config.REDIS_CHANNEL_MODULE_REGISTERED,
 	}, &workers.GitRepoWorker{
-		ReposDir:    config.GIT_DIR,
+		ReposDir:    reposDirWithHTTPPathPrefix,
 		DeleteOnly:  true,
 		RedisClient: redisClient,
 		RedisPrefix: config.REDIS_CHANNEL_PREFIX,
