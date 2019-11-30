@@ -14,7 +14,7 @@ func main() {
 
 	httpPort, err := strconv.ParseInt(config.GIT_HTTP_PORT, 0, 64)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
 	}
 
 	httpWorker := &workers.GitHTTPWorker{
@@ -48,11 +48,11 @@ func main() {
 	for {
 		select {
 		case err := <-httpWorkerErrors:
-			panic(err)
+			log.Fatal("Error", rz.String("System", "GitHTTPWorker"), rz.Err(err))
 		case err := <-repoWorkerUpdateErrors:
-			panic(err)
+			log.Fatal("Error", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Err(err))
 		case err := <-repoWorkerDeleteOnlyErrors:
-			panic(err)
+			log.Fatal("Error", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.Err(err))
 
 		case event := <-httpWorkerEvents:
 			switch event.Code {
