@@ -9,14 +9,12 @@ import (
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
 	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 )
 
 func main() {
-	redisClient := utils.GetNewRedisClient(config.REDIS_URL)
+	redisClient := utils.NewRedisClient(config.REDIS_URL)
 
 	httpPort, err := strconv.ParseInt(config.GIT_HTTP_PORT, 0, 64)
 	if err != nil {
@@ -86,32 +84,9 @@ func main() {
 	}
 }
 
-// parseModuleFromMessage gets the module name and event timestamp from a message
-func parseModuleFromMessage(m string) (name, timestamp string) {
-	res := strings.Split(m, "@")
-	return res[0], res[1]
-}
-
-// getPathForModule builds the path for a module
-func getPathForModule(baseDir, m string) string {
-	return filepath.Join(append([]string{baseDir, "repositories"}, strings.Split(m, "/")...)...)
-}
-
-// getChannel gets a new Go channel for a redis prefix and channel
-func getChannel(r *redis.Client, prefix, channel string) (error, <-chan *redis.Message, *redis.PubSub) {
-	p := r.Subscribe(prefix + ":" + channel)
-
-	_, err := p.Receive()
-	if err != nil {
-		return err, nil, p
-	}
-
-	return nil, p.Channel(), p
-}
-
 // StartDirectoryManagementWorker starts a new directory management worker
 func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix, channel, baseDir string, deleteOnly bool) error {
-	err, c, p := getChannel(r, prefix, channel)
+	err, c, p := utils.GetRedisChannel(r, prefix, channel)
 	defer p.Close()
 	if err != nil {
 		return err
@@ -129,14 +104,14 @@ func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix,
 		go func(wg *sync.WaitGroup, msg *redis.Message) {
 			wg.Add(1)
 
-			n, t := parseModuleFromMessage(msg.Payload)
+			n, t := utils.ParseModuleFromMessage(msg.Payload)
 			if deleteOnly {
 				log.Info("Deleting directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
 			} else {
 				log.Info("Updating directory", rz.String("moduleName", n), rz.String("eventTimestamp", t))
 			}
 
-			path := getPathForModule(baseDir, n)
+			path := utils.GetPathForModule(baseDir, n)
 
 			if !deleteOnly {
 				err = os.RemoveAll(path)
