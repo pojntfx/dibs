@@ -5,7 +5,8 @@ import (
 	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/go-redis/redis/v7"
 	"github.com/otiai10/copy"
-	"github.com/pojntfx/godibs/src/lib/common"
+	"github.com/pojntfx/godibs/pkg/config"
+	"github.com/pojntfx/godibs/pkg/utils"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
@@ -44,7 +45,7 @@ func main() {
 		panic(err)
 	}
 
-	r := common.GetNewRedisClient(REDIS_URL)
+	r := utils.GetNewRedisClient(REDIS_URL)
 
 	log.Info("Registering module ...")
 	RegisterModule(r, REDIS_CHANNEL_PREFIX, m)
@@ -64,7 +65,7 @@ func main() {
 	first <- struct{}{}
 	var commandStartState *exec.Cmd
 
-	err = RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_BUILT, common.REDIS_CHANNEL_MODULE_TESTED, common.REDIS_CHANNEL_MODULE_PUSHED, common.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
+	err = RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_BUILT, config.REDIS_CHANNEL_MODULE_TESTED, config.REDIS_CHANNEL_MODULE_PUSHED, config.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
 	if err != nil {
 		panic(err)
 	}
@@ -73,7 +74,7 @@ func main() {
 		select {
 		case <-first:
 		case <-w.ChangeDetails():
-			err := RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_BUILT, common.REDIS_CHANNEL_MODULE_TESTED, common.REDIS_CHANNEL_MODULE_PUSHED, common.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
+			err := RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_BUILT, config.REDIS_CHANNEL_MODULE_TESTED, config.REDIS_CHANNEL_MODULE_PUSHED, config.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
 			if err != nil {
 				panic(err)
 			}
@@ -153,12 +154,12 @@ func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
 
 // RegisterModule registers a module in Redis
 func RegisterModule(r *redis.Client, prefix, m string) {
-	r.Publish(prefix+":"+common.REDIS_CHANNEL_MODULE_REGISTERED, withTimestamp(m))
+	r.Publish(prefix+":"+config.REDIS_CHANNEL_MODULE_REGISTERED, withTimestamp(m))
 }
 
 // UnregisterModule unregisters a module from Redis
 func UnregisterModule(r *redis.Client, prefix, m string) {
-	r.Publish(prefix+":"+common.REDIS_CHANNEL_MODULE_UNREGISTERED, withTimestamp(m))
+	r.Publish(prefix+":"+config.REDIS_CHANNEL_MODULE_UNREGISTERED, withTimestamp(m))
 }
 
 // RunCommand runs or starts a command creates a corresponding message in Redis
@@ -225,7 +226,7 @@ func PushModule(r *redis.Client, prefix, suffix, m, pushDir, gitRemoteName, push
 		return err
 	}
 
-	_, err = wt.Commit(withTimestamp(common.GIT_COMMIT_MESSAGE), &git.CommitOptions{
+	_, err = wt.Commit(withTimestamp(config.GIT_COMMIT_MESSAGE), &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  gitName,
 			Email: gitEmail,
