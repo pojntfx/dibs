@@ -2,14 +2,11 @@ package main
 
 import (
 	redis "github.com/go-redis/redis/v7"
-	"github.com/gorilla/mux"
 	"github.com/pojntfx/godibs/pkg/workers"
-	"github.com/pojntfx/godibs/src/lib/common"
+	// "github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
-	"gopkg.in/mysticmode/gitviahttp.v1"
 	git "gopkg.in/src-d/go-git.v4"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -28,13 +25,13 @@ var (
 )
 
 func main() {
-	r := common.GetNewRedisClient(REDIS_URL)
+	// r := common.GetNewRedisClient(REDIS_URL)
 	p, err := strconv.ParseInt(GIT_HTTP_PORT, 0, 64)
 	if err != nil {
 		panic(err)
 	}
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	gitHTTPWorker := &workers.GitHTTPWorker{
 		ReposDir:       GIT_DIR,
@@ -42,33 +39,35 @@ func main() {
 		Port:           int(p),
 	}
 
-	wg.Add(3)
+	httpWorkerErrors := make(chan error, 0)
+	httpWorkerEvents := make(chan workers.GitHTTPWorkerEvent, 0)
+	go gitHTTPWorker.Start(httpWorkerErrors, httpWorkerEvents)
 
-	go gitHTTPWorker.Start(&wg)
-	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR, false)
-	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_UNREGISTERED, GIT_DIR, true)
-
-	wg.Wait()
-}
-
-// StartHTTPWorker starts a new HTTP server to serve the git repos from
-func StartHTTPWorker(wg *sync.WaitGroup, baseDir string, port int, path string) {
-	log.Info("Starting HTTP worker ...")
-
-	r := mux.NewRouter()
-
-	r.PathPrefix(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gitviahttp.Context(w, r, filepath.Join(baseDir, "repositories"))
-	}).Methods("GET", "POST")
-
-	s := &http.Server{
-		Handler: r,
-		Addr:    "127.0.0.1:" + strconv.Itoa(port),
+	for {
+		select {
+		case err := <-httpWorkerErrors:
+			panic(err)
+		case event := <-httpWorkerEvents:
+			switch event.Code {
+			case 0:
+				log.Info("Started", rz.String("System", "GitHTTPWorker"), rz.String("ReposDir", gitHTTPWorker.ReposDir), rz.String("HTTPPathPrefix", gitHTTPWorker.HTTPPathPrefix), rz.Int("Port", gitHTTPWorker.Port), rz.String("EventMessage", event.Message))
+			case 1:
+				log.Info("Request", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message))
+			case 2:
+				log.Info("Stopped", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message))
+				return
+			default:
+				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+			}
+		}
 	}
 
-	s.ListenAndServe()
-
-	wg.Done()
+	//	wg.Add(2)
+	//
+	//	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR, false)
+	//	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_UNREGISTERED, GIT_DIR, true)
+	//
+	//	wg.Wait()
 }
 
 // parseModuleFromMessage gets the module name and event timestamp from a message
