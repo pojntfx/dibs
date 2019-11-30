@@ -2,12 +2,16 @@ package main
 
 import (
 	redis "github.com/go-redis/redis/v7"
+	"github.com/gorilla/mux"
 	"github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
+	"gopkg.in/mysticmode/gitviahttp.v1"
 	git "gopkg.in/src-d/go-git.v4"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -18,19 +22,46 @@ var (
 	GIT_DIR              = os.Getenv("GIT_DIR")
 	GIT_NAME             = os.Getenv("GIT_NAME")
 	GIT_EMAIL            = os.Getenv("GIT_EMAIL")
+	GIT_HTTP_PORT        = os.Getenv("GIT_HTTP_PORT")
+	GIT_HTTP_PATH        = os.Getenv("GIT_HTTP_PATH")
 )
 
 func main() {
 	r := common.GetNewRedisClient(REDIS_URL)
+	p, err := strconv.ParseInt(GIT_HTTP_PORT, 0, 64)
+	if err != nil {
+		panic(err)
+	}
 
 	var wg sync.WaitGroup
 
-	wg.Add(2)
+	wg.Add(4)
 
 	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_REGISTERED, GIT_DIR, false)
 	go StartDirectoryManagementWorker(&wg, r, REDIS_CHANNEL_PREFIX, common.REDIS_CHANNEL_MODULE_UNREGISTERED, GIT_DIR, true)
+	go StartHTTPWorker(&wg, GIT_DIR, int(p), GIT_HTTP_PATH)
 
 	wg.Wait()
+}
+
+// StartHTTPWorker starts a new HTTP server to serve the git repos from
+func StartHTTPWorker(wg *sync.WaitGroup, baseDir string, port int, path string) {
+	log.Info("Starting HTTP worker ...")
+
+	r := mux.NewRouter()
+
+	r.PathPrefix(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gitviahttp.Context(w, r, filepath.Join(baseDir, "repositories"))
+	}).Methods("GET", "POST")
+
+	s := &http.Server{
+		Handler: r,
+		Addr:    "127.0.0.1:" + strconv.Itoa(port),
+	}
+
+	s.ListenAndServe()
+
+	wg.Done()
 }
 
 // parseModuleFromMessage gets the module name and event timestamp from a message
@@ -85,12 +116,12 @@ func StartDirectoryManagementWorker(wg *sync.WaitGroup, r *redis.Client, prefix,
 
 			path := getPathForModule(baseDir, n)
 
-			err = os.RemoveAll(path)
-			if err != nil {
-				panic(err)
-			}
-
 			if !deleteOnly {
+				err = os.RemoveAll(path)
+				if err != nil {
+					panic(err)
+				}
+
 				err = os.MkdirAll(path, 0777)
 				if err != nil {
 					panic(err)
