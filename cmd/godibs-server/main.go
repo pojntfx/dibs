@@ -72,11 +72,26 @@ func main() {
 			switch event.Code {
 			case 0:
 				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerUpdate.ReposDir), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("RedisPrefix", repoWorkerUpdate.RedisPrefix), rz.String("RedisSuffix", repoWorkerUpdate.RedisSuffix))
+			case 1:
+				log.Info("Update", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("EventMessage", event.Message))
+			case 2:
+				log.Info("Stopped", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("EventMessage", event.Message))
+				return
+			default:
+				log.Fatal("Unknown event code", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
 		case event := <-repoWorkerDeleteOnlyEvents:
 			switch event.Code {
 			case 0:
 				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerDeleteOnly.ReposDir), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("RedisPrefix", repoWorkerDeleteOnly.RedisPrefix), rz.String("RedisSuffix", repoWorkerDeleteOnly.RedisSuffix))
+			case 1:
+				log.Info("Deletion", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("EventMessage", event.Message))
+			case 2:
+				log.Info("Stopped", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("EventMessage", event.Message))
+				return
+			default:
+				log.Fatal("Unknown event code", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+
 			}
 		}
 	}
