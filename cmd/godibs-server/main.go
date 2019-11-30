@@ -2,9 +2,9 @@ package main
 
 import (
 	redis "github.com/go-redis/redis/v7"
+	"github.com/pojntfx/godibs/pkg/config"
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
-	"github.com/pojntfx/godibs/src/lib/common"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	git "gopkg.in/src-d/go-git.v4"
@@ -15,52 +15,37 @@ import (
 	"sync"
 )
 
-var (
-	REDIS_URL            = os.Getenv("REDIS_URL")
-	REDIS_CHANNEL_PREFIX = os.Getenv("REDIS_CHANNEL_PREFIX")
-	GIT_DIR              = os.Getenv("GIT_DIR")
-	GIT_NAME             = os.Getenv("GIT_NAME")
-	GIT_EMAIL            = os.Getenv("GIT_EMAIL")
-	GIT_HTTP_PORT        = os.Getenv("GIT_HTTP_PORT")
-	GIT_HTTP_PATH        = os.Getenv("GIT_HTTP_PATH")
-)
-
 func main() {
-	redisClient := common.GetNewRedisClient(REDIS_URL)
+	redisClient := utils.GetNewRedisClient(config.REDIS_URL)
 
-	httpPort, err := strconv.ParseInt(GIT_HTTP_PORT, 0, 64)
+	httpPort, err := strconv.ParseInt(config.GIT_HTTP_PORT, 0, 64)
 	if err != nil {
 		panic(err)
 	}
 
 	httpWorker := &workers.GitHTTPWorker{
-		ReposDir:       GIT_DIR,
-		HTTPPathPrefix: GIT_HTTP_PATH,
+		ReposDir:       config.GIT_DIR,
+		HTTPPathPrefix: config.GIT_HTTP_PATH,
 		Port:           int(httpPort),
 	}
 
-	repoWorkerUpdate := &workers.GitRepoWorker{
-		ReposDir:    GIT_DIR,
+	repoWorkerUpdate, repoWorkerDeleteOnly := &workers.GitRepoWorker{
+		ReposDir:    config.GIT_DIR,
 		DeleteOnly:  false,
 		RedisClient: redisClient,
-		RedisPrefix: REDIS_CHANNEL_PREFIX,
-		RedisSuffix: common.REDIS_CHANNEL_MODULE_REGISTERED,
-	}
-
-	repoWorkerDeleteOnly := &workers.GitRepoWorker{
-		ReposDir:    GIT_DIR,
+		RedisPrefix: config.REDIS_CHANNEL_PREFIX,
+		RedisSuffix: config.REDIS_CHANNEL_MODULE_REGISTERED,
+	}, &workers.GitRepoWorker{
+		ReposDir:    config.GIT_DIR,
 		DeleteOnly:  true,
 		RedisClient: redisClient,
-		RedisPrefix: REDIS_CHANNEL_PREFIX,
-		RedisSuffix: common.REDIS_CHANNEL_MODULE_UNREGISTERED,
+		RedisPrefix: config.REDIS_CHANNEL_PREFIX,
+		RedisSuffix: config.REDIS_CHANNEL_MODULE_UNREGISTERED,
 	}
 
-	httpWorkerErrors := make(chan error, 0)
-	httpWorkerEvents := make(chan utils.Event, 0)
-	repoWorkerUpdateErrors := make(chan error, 0)
-	repoWorkerUpdateEvents := make(chan utils.Event, 0)
-	repoWorkerDeleteOnlyErrors := make(chan error, 0)
-	repoWorkerDeleteOnlyEvents := make(chan utils.Event, 0)
+	httpWorkerErrors, repoWorkerUpdateErrors, repoWorkerDeleteOnlyErrors := make(chan error, 0), make(chan error, 0), make(chan error, 0)
+
+	httpWorkerEvents, repoWorkerUpdateEvents, repoWorkerDeleteOnlyEvents := make(chan utils.Event, 0), make(chan utils.Event, 0), make(chan utils.Event, 0)
 
 	go httpWorker.Start(httpWorkerErrors, httpWorkerEvents)
 	go repoWorkerUpdate.Start(repoWorkerUpdateErrors, repoWorkerUpdateEvents)
