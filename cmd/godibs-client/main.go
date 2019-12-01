@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/pojntfx/godibs/pkg/config"
 	"github.com/pojntfx/godibs/pkg/utils"
+	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"os/exec"
@@ -10,13 +11,10 @@ import (
 	"syscall"
 )
 
-// TODO:
-// - Use struct for pipeline and the pipeline only (only define it once, then use the `.Run()` function twice)
-
 func main() {
 	err, m := utils.GetModuleName(config.SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 	}
 
 	redis := utils.Redis{
@@ -83,14 +81,14 @@ func main() {
 	}
 
 	if err := pipeline.RunAll(); err != nil {
-		panic(err) // TODO: Log fatal instead of panic
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 	}
 
 	for w.IsRunning() {
 		select {
 		case <-w.ChangeDetails():
 			if err := pipeline.RunAll(); err != nil {
-				panic(err) // TODO: Log fatal instead of panic
+				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 			}
 		}
 	}

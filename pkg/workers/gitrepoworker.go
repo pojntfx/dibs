@@ -53,17 +53,17 @@ func (worker *GitRepoWorker) Start(errors chan error, events chan utils.Event) {
 			if !worker.DeleteOnly {
 				err = os.RemoveAll(path)
 				if err != nil {
-					panic(err)
+					errors <- err
 				}
 
 				err = os.MkdirAll(path, 0777)
 				if err != nil {
-					panic(err)
+					errors <- err
 				}
 
 				_, err := git.PlainInit(path, false)
 				if err != nil {
-					panic(err)
+					errors <- err
 				}
 			}
 
