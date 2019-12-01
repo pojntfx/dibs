@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	err, m := utils.GetModuleName(config.SYNC_MODULE_PUSH_MOD_FILE)
+	err, moduleName := utils.GetModuleName(config.SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", moduleName))
 	}
 
 	redis := utils.Redis{
@@ -23,15 +23,15 @@ func main() {
 	}
 	redis.Connect()
 
-	log.Info("Registering module ...")
-	redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_REGISTERED, m)
+	log.Info("Registering module ...", rz.String("Module", moduleName))
+	redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_REGISTERED, moduleName)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Info("Unregistering module ...")
-		redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_UNREGISTERED, m)
+		log.Info("Unregistering module ...", rz.String("Module", moduleName))
+		redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_UNREGISTERED, moduleName)
 		os.Exit(0)
 	}()
 
@@ -41,35 +41,35 @@ func main() {
 
 	git := utils.Git{
 		RemoteName:    config.GIT_REMOTE_NAME,
-		RemoteURL:     utils.GetGitURL(config.GIT_BASE_URL, m),
+		RemoteURL:     utils.GetGitURL(config.GIT_BASE_URL, moduleName),
 		UserName:      config.GIT_NAME,
 		UserEmail:     config.GIT_EMAIL,
 		CommitMessage: config.GIT_COMMIT_MESSAGE,
 	}
 
 	testCommand := utils.EventedCommand{
-		LogMessage:   "Running test command",
+		LogMessage:   "Running test command ...",
 		ExecLine:     config.COMMAND_TEST,
 		RedisSuffix:  config.REDIS_CHANNEL_MODULE_TESTED,
-		RedisMessage: m,
+		RedisMessage: moduleName,
 	}
 
 	buildCommand := utils.EventedCommand{
-		LogMessage:   "Running build command",
+		LogMessage:   "Running build command ...",
 		ExecLine:     config.COMMAND_BUILD,
 		RedisSuffix:  config.REDIS_CHANNEL_MODULE_BUILT,
-		RedisMessage: m,
+		RedisMessage: moduleName,
 	}
 
 	startCommand := utils.EventedCommand{
-		LogMessage:   "Starting start command",
+		LogMessage:   "Starting start command ...",
 		ExecLine:     config.COMMAND_START,
 		RedisSuffix:  config.REDIS_CHANNEL_MODULE_STARTED,
-		RedisMessage: m,
+		RedisMessage: moduleName,
 	}
 
 	pipeline := utils.Pipeline{
-		Module:                  m,
+		Module:                  moduleName,
 		ModulePushedRedisSuffix: config.REDIS_CHANNEL_MODULE_PUSHED,
 		SrcDir:                  config.SRC_DIR,
 		PushDir:                 config.PUSH_DIR,
@@ -81,14 +81,14 @@ func main() {
 	}
 
 	if err := pipeline.RunAll(); err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+		log.Fatal("Error", rz.String("System", "Client"), rz.String("Module", moduleName), rz.Err(err))
 	}
 
 	for w.IsRunning() {
 		select {
 		case <-w.ChangeDetails():
 			if err := pipeline.RunAll(); err != nil {
-				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+				log.Fatal("Error", rz.String("System", "Client"), rz.String("Module", moduleName), rz.Err(err))
 			}
 		}
 	}
