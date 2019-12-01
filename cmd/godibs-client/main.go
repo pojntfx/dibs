@@ -23,49 +23,37 @@ import (
 	"time"
 )
 
-var (
-	REDIS_URL                   = os.Getenv("REDIS_URL")
-	REDIS_CHANNEL_PREFIX        = os.Getenv("REDIS_CHANNEL_PREFIX")
-	GIT_BASE_URL                = os.Getenv("GIT_BASE_URL")
-	GIT_REMOTE_NAME             = os.Getenv("GIT_REMOTE_NAME")
-	GIT_NAME                    = os.Getenv("GIT_NAME")
-	GIT_EMAIL                   = os.Getenv("GIT_EMAIL")
-	SRC_DIR                     = os.Getenv("SRC_DIR")
-	PUSH_DIR                    = os.Getenv("PUSH_DIR")
-	SYNC_MODULE_PUSH_MOD_FILE   = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
-	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
-	COMMAND_BUILD               = os.Getenv("COMMAND_BUILD")
-	COMMAND_TEST                = os.Getenv("COMMAND_TEST")
-	COMMAND_START               = os.Getenv("COMMAND_START")
-)
+// TODO:
+// - Decompose all functions
+// - Use struct for pipeline and the pipeline only (only define it once, then use the `.Run()` function twice)
 
 func main() {
-	err, m := GetModuleName(SYNC_MODULE_PUSH_MOD_FILE)
+	err, m := GetModuleName(config.SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
 		panic(err)
 	}
 
-	r := utils.NewRedisClient(REDIS_URL)
+	r := utils.NewRedisClient(config.REDIS_URL)
 
 	log.Info("Registering module ...")
-	RegisterModule(r, REDIS_CHANNEL_PREFIX, m)
+	RegisterModule(r, config.REDIS_CHANNEL_PREFIX, m)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		log.Info("Unregistering module ...")
-		UnregisterModule(r, REDIS_CHANNEL_PREFIX, m)
+		UnregisterModule(r, config.REDIS_CHANNEL_PREFIX, m)
 		os.Exit(0)
 	}()
 
-	w := GetNewFolderWatcher(SYNC_MODULE_PUSH_WATCH_GLOB, PUSH_DIR)
+	w := GetNewFolderWatcher(config.SYNC_MODULE_PUSH_WATCH_GLOB, config.PUSH_DIR)
 
 	first := make(chan struct{}, 1)
 	first <- struct{}{}
 	var commandStartState *exec.Cmd
 
-	err = RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_BUILT, config.REDIS_CHANNEL_MODULE_TESTED, config.REDIS_CHANNEL_MODULE_PUSHED, config.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
+	err = RunPipeline(r, m, commandStartState, config.REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_BUILT, config.REDIS_CHANNEL_MODULE_TESTED, config.REDIS_CHANNEL_MODULE_PUSHED, config.REDIS_CHANNEL_MODULE_STARTED, config.COMMAND_BUILD, config.COMMAND_TEST, config.COMMAND_START, config.GIT_BASE_URL, config.GIT_REMOTE_NAME, config.GIT_NAME, config.GIT_EMAIL, config.SRC_DIR, config.PUSH_DIR)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +62,8 @@ func main() {
 		select {
 		case <-first:
 		case <-w.ChangeDetails():
-			err := RunPipeline(r, m, commandStartState, REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_BUILT, config.REDIS_CHANNEL_MODULE_TESTED, config.REDIS_CHANNEL_MODULE_PUSHED, config.REDIS_CHANNEL_MODULE_STARTED, COMMAND_BUILD, COMMAND_TEST, COMMAND_START, GIT_BASE_URL, GIT_REMOTE_NAME, GIT_NAME, GIT_EMAIL, SRC_DIR, PUSH_DIR)
+			err := RunPipeline(r, m, commandStartState, config.REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_BUILT, config.REDIS_CHANNEL_MODULE_TESTED, config.REDIS_CHANNEL_MODULE_PUSHED, config.REDIS_CHANNEL_MODULE_STARTED, config.COMMAND_BUILD, config.COMMAND_TEST, config.COMMAND_START, config.GIT_BASE_URL, config.GIT_REMOTE_NAME, config.GIT_NAME, config.GIT_EMAIL, config.SRC_DIR, config.PUSH_DIR)
+
 			if err != nil {
 				panic(err)
 			}
