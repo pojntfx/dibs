@@ -19,17 +19,21 @@ func main() {
 		panic(err)
 	}
 
-	r := utils.NewRedisClient(config.REDIS_URL)
+	redis := utils.Redis{
+		Addr:   config.REDIS_URL,
+		Prefix: config.REDIS_CHANNEL_PREFIX,
+	}
+	redis.Connect()
 
 	log.Info("Registering module ...")
-	utils.RegisterModule(r, config.REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_REGISTERED, m)
+	redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_REGISTERED, m)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		log.Info("Unregistering module ...")
-		utils.UnregisterModule(r, config.REDIS_CHANNEL_PREFIX, config.REDIS_CHANNEL_MODULE_UNREGISTERED, m)
+		redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_UNREGISTERED, m)
 		os.Exit(0)
 	}()
 
