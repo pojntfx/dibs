@@ -33,7 +33,7 @@ type Pipeline struct {
 
 func (pipeline *Pipeline) RunAll() error {
 	if pipeline.StartCommandState != nil {
-		log.Info("Stopping module ...")
+		log.Info("Stopping module ...", rz.String("Module", pipeline.Module))
 		pipeline.StartCommandState.Process.Kill()
 	}
 
@@ -47,14 +47,14 @@ func (pipeline *Pipeline) RunAll() error {
 	pipeline.Redis.PublishWithTimestamp(pipeline.ModulePushedRedisSuffix, pipeline.Module)
 
 	for _, runCommand := range pipeline.RunCommands {
-		log.Info(runCommand.LogMessage)
+		log.Info(runCommand.LogMessage, rz.String("Module", pipeline.Module))
 		if err := RunCommand(runCommand.ExecLine, false); err != nil {
 			return err
 		}
 		pipeline.Redis.PublishWithTimestamp(runCommand.RedisSuffix, runCommand.RedisMessage)
 	}
 
-	log.Info(pipeline.StartCommand.LogMessage)
+	log.Info(pipeline.StartCommand.LogMessage, rz.String("Module", pipeline.Module))
 	if err := RunCommand(pipeline.StartCommand.ExecLine, true); err != nil {
 		return exec.ErrNotFound
 	}
@@ -74,35 +74,34 @@ func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
 // RunCommand runs or starts a command creates a corresponding message in Redis
 func RunCommand(command string, start bool) error {
 	c := exec.Command(strings.Split(command, " ")[0], strings.Split(command, " ")[1:]...)
+
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
-	var err error
+
 	if start {
-		err = c.Start()
+		if err := c.Start(); err != nil {
+			return err
+		}
 	} else {
-		err = c.Run()
+		if err := c.Run(); err != nil {
+			return err
+		}
 	}
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
 // SetupPushDir creates a temporary directory to do the git operations in
 func SetupPushDir(srcDir, pushDir string) error {
-	err := os.RemoveAll(pushDir)
-	if err != nil {
+	if err := os.RemoveAll(pushDir); err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(pushDir, 0777)
-	if err != nil {
+	if err := os.MkdirAll(pushDir, 0777); err != nil {
 		return err
 	}
 
-	log.Info("Copying internal", rz.String("src", srcDir), rz.String("dist", pushDir))
-	err = copy.Copy(srcDir, pushDir)
-	if err != nil {
+	if err := copy.Copy(srcDir, pushDir); err != nil {
 		return err
 	}
 
@@ -110,7 +109,8 @@ func SetupPushDir(srcDir, pushDir string) error {
 }
 
 // WithTimestamp gets a message name with the current timestamp
-func WithTimestamp(m string) string {
-	t := time.Now().UnixNano()
-	return m + "@" + strconv.Itoa(int(t))
+func WithTimestamp(message string) string {
+	currentTime := time.Now().UnixNano()
+
+	return message + "@" + strconv.Itoa(int(currentTime))
 }
