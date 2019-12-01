@@ -14,21 +14,21 @@ func main() {
 	// Connect to Redis
 	redis := utils.Redis{
 		Addr:   config.REDIS_URL,
-		Prefix: config.REDIS_CHANNEL_PREFIX,
+		Prefix: config.REDIS_PREFIX,
 	}
 	redis.Connect()
 
 	// Build the configuration
-	httpPort, err := strconv.ParseInt(config.GIT_HTTP_PORT, 0, 64)
+	httpPort, err := strconv.ParseInt(config.GIT_SERVER_HTTP_PORT, 0, 64)
 	if err != nil {
 		log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
 	}
-	reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_DIR, config.GIT_HTTP_PATH)
+	reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_SERVER_REPO_DIR, config.GIT_SERVER_HTTP_PATH)
 
 	// Setup workers
 	httpWorker := &workers.GitHTTPWorker{
-		ReposDir:       config.GIT_DIR,
-		HTTPPathPrefix: config.GIT_HTTP_PATH,
+		ReposDir:       config.GIT_SERVER_REPO_DIR,
+		HTTPPathPrefix: config.GIT_SERVER_HTTP_PATH,
 		Port:           int(httpPort),
 	}
 
@@ -36,12 +36,12 @@ func main() {
 		ReposDir:    reposDirWithHTTPPathPrefix,
 		DeleteOnly:  false,
 		Redis:       redis,
-		RedisSuffix: config.REDIS_CHANNEL_MODULE_REGISTERED,
+		RedisSuffix: config.REDIS_SUFFIX_UP_REGISTERED,
 	}, &workers.GitRepoWorker{
 		ReposDir:    reposDirWithHTTPPathPrefix,
 		DeleteOnly:  true,
 		Redis:       redis,
-		RedisSuffix: config.REDIS_CHANNEL_MODULE_UNREGISTERED,
+		RedisSuffix: config.REDIS_SUFFIX_UP_UNREGISTERED,
 	}
 
 	// Create error channels

@@ -3,11 +3,11 @@ package config
 import "os"
 
 var (
-	SRC_DIR                     = os.Getenv("SRC_DIR")
-	PUSH_DIR                    = os.Getenv("PUSH_DIR")
-	SYNC_MODULE_PUSH_MOD_FILE   = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
-	SYNC_MODULE_PUSH_WATCH_GLOB = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
-	COMMAND_BUILD               = os.Getenv("COMMAND_BUILD")
-	COMMAND_TEST                = os.Getenv("COMMAND_TEST")
-	COMMAND_START               = os.Getenv("COMMAND_START")
+	PIPELINE_UP_SRC_DIR       = os.Getenv("SRC_DIR")
+	PIPELINE_UP_PUSH_DIR      = os.Getenv("PUSH_DIR")
+	PIPELINE_UP_WATCH_DIR     = os.Getenv("SYNC_MODULE_PUSH_WATCH_GLOB")
+	PIPELINE_UP_MOD_FILE      = os.Getenv("SYNC_MODULE_PUSH_MOD_FILE")
+	PIPELINE_UP_BUILD_COMMAND = os.Getenv("COMMAND_BUILD")
+	PIPELINE_UP_TEST_COMMAND  = os.Getenv("COMMAND_TEST")
+	PIPELINE_UP_START_COMMAND = os.Getenv("COMMAND_START")
 )
