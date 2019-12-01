@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Get the name of the module that is to be pushed
-	err, module := utils.GetModuleName(config.PIPELINE_UP_MOD_FILE)
+	err, module := utils.GetModuleName(config.PIPELINE_UP_FILE_MOD)
 	if err != nil {
 		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
 	}
@@ -72,8 +72,8 @@ func main() {
 	pipeline := utils.Pipeline{
 		Module:                  module,
 		ModulePushedRedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
-		SrcDir:                  config.PIPELINE_UP_SRC_DIR,
-		PushDir:                 config.PIPELINE_UP_PUSH_DIR,
+		SrcDir:                  config.PIPELINE_UP_DIR_SRC,
+		PushDir:                 config.PIPELINE_UP_DIR_PUSH,
 		RunCommands:             []utils.EventedCommand{testCommand, buildCommand},
 		StartCommand:            startCommand,
 		StartCommandState:       commandStartState,
@@ -88,8 +88,8 @@ func main() {
 
 	// Create a new folder watcher
 	folderWatcher := utils.FolderWatcher{
-		WatchDir:  config.PIPELINE_UP_WATCH_DIR,
-		IgnoreDir: config.PIPELINE_UP_PUSH_DIR,
+		WatchDir:  config.PIPELINE_UP_DIR_WATCH,
+		IgnoreDir: config.PIPELINE_UP_DIR_PUSH,
 	}
 	folderWatcher.Start()
 
