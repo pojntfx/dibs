@@ -2,7 +2,6 @@ package utils
 
 import (
 	fswatch "github.com/andreaskoch/go-fswatch"
-	redis "github.com/go-redis/redis/v7"
 	"github.com/otiai10/copy"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
@@ -13,50 +12,53 @@ import (
 	"time"
 )
 
-// RunPipeline runs the entire pipeline
-func RunPipeline(r *redis.Client, m string, commandStartState *exec.Cmd, channelPrefix, moduleBuildSuffix, moduleTestedSuffix, modulePushedSuffix, moduleStartedSuffix, commandBuild, commandTest, commandStart, gitBaseUrl, gitRemoteName, gitName, gitEmail, gitCommitMessage, srcDir, pushDir string) error {
-	log.Info("Stopping module ...")
-	if commandStartState != nil {
-		commandStartState.Process.Kill()
+type EventedCommand struct {
+	LogMessage   string
+	ExecLine     string
+	RedisSuffix  string
+	RedisMessage string
+}
+
+type Pipeline struct {
+	Module                  string
+	ModulePushedRedisSuffix string
+	SrcDir                  string
+	PushDir                 string
+	RunCommands             []EventedCommand
+	StartCommand            EventedCommand
+	StartCommandState       *exec.Cmd
+	Git                     Git
+	Redis                   Redis
+}
+
+func (pipeline *Pipeline) RunAll() error {
+	if pipeline.StartCommandState != nil {
+		log.Info("Stopping module ...")
+		pipeline.StartCommandState.Process.Kill()
 	}
 
-	log.Info("Copying module ...")
-	err := SetupPushDir(srcDir, pushDir)
-	if err != nil {
+	if err := SetupPushDir(pipeline.SrcDir, pipeline.PushDir); err != nil {
 		return err
 	}
 
-	log.Info("Building module ...")
-	err = RunCommand(r, channelPrefix, moduleTestedSuffix, m, commandBuild, false)
-	if err != nil {
+	if err := pipeline.Git.PushModule(pipeline.Module, pipeline.PushDir); err != nil {
 		return err
+	}
+	pipeline.Redis.PublishWithTimestamp(pipeline.ModulePushedRedisSuffix, pipeline.Module)
+
+	for _, runCommand := range pipeline.RunCommands {
+		log.Info(runCommand.LogMessage)
+		if err := RunCommand(runCommand.ExecLine, false); err != nil {
+			return err
+		}
+		pipeline.Redis.PublishWithTimestamp(runCommand.RedisSuffix, runCommand.RedisMessage)
 	}
 
-	log.Info("Testing module ...")
-	err = RunCommand(r, channelPrefix, moduleTestedSuffix, m, commandTest, false)
-	if err != nil {
-		return err
+	log.Info(pipeline.StartCommand.LogMessage)
+	if err := RunCommand(pipeline.StartCommand.ExecLine, true); err != nil {
+		return exec.ErrNotFound
 	}
-
-	log.Info("Pushing module ...")
-	pushURL := GetGitURL(gitBaseUrl, m)
-	git := Git{
-		RemoteName:    gitRemoteName,
-		RemoteURL:     pushURL,
-		UserName:      gitName,
-		UserEmail:     gitEmail,
-		CommitMessage: gitCommitMessage,
-	}
-	err = git.PushModule(r, channelPrefix, modulePushedSuffix, m, pushDir)
-	if err != nil {
-		return err
-	}
-
-	log.Info("Starting module ...")
-	err = RunCommand(r, channelPrefix, moduleStartedSuffix, m, commandStart, true)
-	if err != nil {
-		return err
-	}
+	pipeline.Redis.PublishWithTimestamp(pipeline.StartCommand.RedisSuffix, pipeline.StartCommand.RedisMessage)
 
 	return nil
 }
@@ -70,7 +72,7 @@ func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
 }
 
 // RunCommand runs or starts a command creates a corresponding message in Redis
-func RunCommand(r *redis.Client, prefix, suffix, m, command string, start bool) error {
+func RunCommand(command string, start bool) error {
 	c := exec.Command(strings.Split(command, " ")[0], strings.Split(command, " ")[1:]...)
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
@@ -83,7 +85,6 @@ func RunCommand(r *redis.Client, prefix, suffix, m, command string, start bool) 
 	if err != nil {
 		return err
 	}
-	r.Publish(prefix+":"+suffix, WithTimestamp(m))
 	return nil
 }
 

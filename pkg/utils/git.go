@@ -1,7 +1,6 @@
 package utils
 
 import (
-	redis "github.com/go-redis/redis/v7"
 	git "gopkg.in/src-d/go-git.v4"
 	gitconf "gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
@@ -23,7 +22,7 @@ func GetGitURL(baseURL, m string) string {
 }
 
 // PushModule adds all files to a git repo, commits and finally pushes them to a remote
-func (metadata *Git) PushModule(r *redis.Client, prefix, suffix, m, pushDir string) error {
+func (metadata *Git) PushModule(module, pushDir string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err
@@ -65,8 +64,6 @@ func (metadata *Git) PushModule(r *redis.Client, prefix, suffix, m, pushDir stri
 	if err != nil {
 		return err
 	}
-
-	r.Publish(prefix+":"+suffix, WithTimestamp(m))
 
 	return nil
 }
