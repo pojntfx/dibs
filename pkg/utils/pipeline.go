@@ -40,7 +40,14 @@ func RunPipeline(r *redis.Client, m string, commandStartState *exec.Cmd, channel
 
 	log.Info("Pushing module ...")
 	pushURL := GetGitURL(gitBaseUrl, m)
-	err = PushModule(r, channelPrefix, modulePushedSuffix, m, pushDir, gitRemoteName, pushURL, gitName, gitEmail, gitCommitMessage)
+	git := Git{
+		RemoteName:    gitRemoteName,
+		RemoteURL:     pushURL,
+		UserName:      gitName,
+		UserEmail:     gitEmail,
+		CommitMessage: gitCommitMessage,
+	}
+	err = git.PushModule(r, channelPrefix, modulePushedSuffix, m, pushDir)
 	if err != nil {
 		return err
 	}

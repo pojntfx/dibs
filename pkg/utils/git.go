@@ -9,21 +9,29 @@ import (
 	"time"
 )
 
+type Git struct {
+	RemoteName    string
+	RemoteURL     string
+	UserName      string
+	UserEmail     string
+	CommitMessage string
+}
+
 // GetGitURL returns the URL of a git repo
 func GetGitURL(baseURL, m string) string {
 	return baseURL + "/" + m
 }
 
 // PushModule adds all files to a git repo, commits and finally pushes them to a remote
-func PushModule(r *redis.Client, prefix, suffix, m, pushDir, gitRemoteName, pushURL, gitName, gitEmail, gitCommitMessage string) error {
+func (metadata *Git) PushModule(r *redis.Client, prefix, suffix, m, pushDir string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err
 	}
 
 	_, err = g.CreateRemote(&gitconf.RemoteConfig{
-		Name: gitRemoteName,
-		URLs: []string{pushURL},
+		Name: metadata.RemoteName,
+		URLs: []string{metadata.RemoteURL},
 	})
 	if err != nil {
 		return err
@@ -39,10 +47,10 @@ func PushModule(r *redis.Client, prefix, suffix, m, pushDir, gitRemoteName, push
 		return err
 	}
 
-	_, err = wt.Commit(WithTimestamp(gitCommitMessage), &git.CommitOptions{
+	_, err = wt.Commit(WithTimestamp(metadata.CommitMessage), &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  gitName,
-			Email: gitEmail,
+			Name:  metadata.UserName,
+			Email: metadata.UserEmail,
 			When:  time.Now(),
 		},
 	})
@@ -51,7 +59,7 @@ func PushModule(r *redis.Client, prefix, suffix, m, pushDir, gitRemoteName, push
 	}
 
 	err = g.Push(&git.PushOptions{
-		RemoteName: gitRemoteName,
+		RemoteName: metadata.RemoteName,
 		RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/master"},
 	})
 	if err != nil {

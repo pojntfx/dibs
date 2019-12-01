@@ -11,7 +11,11 @@ import (
 )
 
 func main() {
-	redisClient := utils.NewRedisClient(config.REDIS_URL)
+	redis := utils.Redis{
+		Addr:   config.REDIS_URL,
+		Prefix: config.REDIS_CHANNEL_PREFIX,
+	}
+	redis.Connect()
 
 	httpPort, err := strconv.ParseInt(config.GIT_HTTP_PORT, 0, 64)
 	if err != nil {
@@ -28,14 +32,12 @@ func main() {
 	repoWorkerUpdate, repoWorkerDeleteOnly := &workers.GitRepoWorker{
 		ReposDir:    reposDirWithHTTPPathPrefix,
 		DeleteOnly:  false,
-		RedisClient: redisClient,
-		RedisPrefix: config.REDIS_CHANNEL_PREFIX,
+		Redis:       redis,
 		RedisSuffix: config.REDIS_CHANNEL_MODULE_REGISTERED,
 	}, &workers.GitRepoWorker{
 		ReposDir:    reposDirWithHTTPPathPrefix,
 		DeleteOnly:  true,
-		RedisClient: redisClient,
-		RedisPrefix: config.REDIS_CHANNEL_PREFIX,
+		Redis:       redis,
 		RedisSuffix: config.REDIS_CHANNEL_MODULE_UNREGISTERED,
 	}
 
@@ -71,7 +73,7 @@ func main() {
 		case event := <-repoWorkerUpdateEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerUpdate.ReposDir), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("RedisPrefix", repoWorkerUpdate.RedisPrefix), rz.String("RedisSuffix", repoWorkerUpdate.RedisSuffix))
+				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerUpdate.ReposDir), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("RedisSuffix", repoWorkerUpdate.RedisSuffix))
 			case 1:
 				log.Info("Update", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("EventMessage", event.Message))
 			case 2:
@@ -83,7 +85,7 @@ func main() {
 		case event := <-repoWorkerDeleteOnlyEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerDeleteOnly.ReposDir), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("RedisPrefix", repoWorkerDeleteOnly.RedisPrefix), rz.String("RedisSuffix", repoWorkerDeleteOnly.RedisSuffix))
+				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerDeleteOnly.ReposDir), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("RedisSuffix", repoWorkerDeleteOnly.RedisSuffix))
 			case 1:
 				log.Info("Deletion", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("EventMessage", event.Message))
 			case 2:
