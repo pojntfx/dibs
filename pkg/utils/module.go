@@ -2,21 +2,21 @@ package utils
 
 import (
 	"errors"
-	"github.com/go-redis/redis/v7"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 )
 
 // ParseModuleFromMessage gets the module name and event timestamp from a message
-func ParseModuleFromMessage(m string) (name, timestamp string) {
-	moduleParts := strings.Split(m, "@")
+func ParseModuleFromMessage(message string) (name, timestamp string) {
+	moduleParts := strings.Split(message, "@")
+
 	return moduleParts[0], moduleParts[1]
 }
 
 // GetPathForModule builds the path for a module
-func GetPathForModule(baseDir, m string) string {
-	pathParts := append([]string{baseDir}, strings.Split(m, "/")...)
+func GetPathForModule(baseDir, module string) string {
+	pathParts := append([]string{baseDir}, strings.Split(module, "/")...)
 
 	fullModulePath := filepath.Join(pathParts...)
 
@@ -37,14 +37,4 @@ func GetModuleName(goModFilePath string) (error, string) {
 	}
 
 	return errors.New("Could find module declaration"), ""
-}
-
-// RegisterModule registers a module in Redis
-func RegisterModule(r *redis.Client, prefix, suffix, m string) {
-	r.Publish(prefix+":"+suffix, WithTimestamp(m))
-}
-
-// UnregisterModule unregisters a module from Redis
-func UnregisterModule(r *redis.Client, prefix, suffix, m string) {
-	r.Publish(prefix+":"+suffix, WithTimestamp(m))
 }

@@ -1,6 +1,10 @@
 package utils
 
-import redis "github.com/go-redis/redis/v7"
+import (
+	redis "github.com/go-redis/redis/v7"
+	"strconv"
+	"time"
+)
 
 type Redis struct {
 	client *redis.Client
@@ -25,6 +29,13 @@ func (r *Redis) GetRedisChannel(channel string) (error, <-chan *redis.Message, *
 	}
 
 	return nil, pubSub.Channel(), pubSub
+}
+
+// WithTimestamp gets a message name with the current timestamp
+func WithTimestamp(message string) string {
+	currentTime := time.Now().UnixNano()
+
+	return message + "@" + strconv.Itoa(int(currentTime))
 }
 
 // getChannelWithPrefix returns a channel suffix with the prefix

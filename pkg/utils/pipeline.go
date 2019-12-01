@@ -1,43 +1,43 @@
 package utils
 
 import (
-	fswatch "github.com/andreaskoch/go-fswatch"
 	"github.com/otiai10/copy"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
-	"time"
 )
 
+// EventedCommand is a command that also publishes an event
 type EventedCommand struct {
-	LogMessage   string
-	ExecLine     string
-	RedisSuffix  string
-	RedisMessage string
+	LogMessage   string // The message to log to stdout
+	ExecLine     string // The command to run/start
+	RedisSuffix  string // The Redis channel suffix to use for the event
+	RedisMessage string // The Redis message to send
 }
 
+// Pipeline is a development configuration
 type Pipeline struct {
-	Module                  string
-	ModulePushedRedisSuffix string
-	SrcDir                  string
-	PushDir                 string
-	RunCommands             []EventedCommand
-	StartCommand            EventedCommand
-	StartCommandState       *exec.Cmd
-	Git                     Git
-	Redis                   Redis
+	Module                  string           // The module that is being pushed
+	ModulePushedRedisSuffix string           // The Redis suffix channel suffix to use for the pushed event
+	SrcDir                  string           // The directory of the module's source
+	PushDir                 string           // The temporary directory to use for the modification of the Git repo
+	RunCommands             []EventedCommand // The commands to run
+	StartCommand            EventedCommand   // The command to start (will keep running, but can be killed)
+	StartCommandState       *exec.Cmd        // Stores the state of the start command (to make it possible to kill it)
+	Git                     Git              // Git instance to use to modify the Git repo in PushDir
+	Redis                   Redis            // Redis instance to use to publish the events
 }
 
+// RunAll runs the entire pipeline
 func (pipeline *Pipeline) RunAll() error {
 	if pipeline.StartCommandState != nil {
 		log.Info("Stopping module ...", rz.String("Module", pipeline.Module))
 		pipeline.StartCommandState.Process.Kill()
 	}
 
-	if err := SetupPushDir(pipeline.SrcDir, pipeline.PushDir); err != nil {
+	if err := setupPushDir(pipeline.SrcDir, pipeline.PushDir); err != nil {
 		return err
 	}
 
@@ -63,18 +63,11 @@ func (pipeline *Pipeline) RunAll() error {
 	return nil
 }
 
-// GetNewFolderWatcher returns a new folder watcher
-func GetNewFolderWatcher(watchGlob, pushDir string) *fswatch.FolderWatcher {
-	w := fswatch.NewFolderWatcher(watchGlob, true, func(path string) bool { return strings.Contains(path, pushDir) }, 1)
-	w.Start()
-
-	return w
-}
-
-// RunCommand runs or starts a command creates a corresponding message in Redis
+// RunCommand runs or starts a command
 func RunCommand(command string, start bool) error {
 	c := exec.Command(strings.Split(command, " ")[0], strings.Split(command, " ")[1:]...)
 
+	// Log the output of the command to the console
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 
@@ -91,8 +84,8 @@ func RunCommand(command string, start bool) error {
 	return nil
 }
 
-// SetupPushDir creates a temporary directory to do the git operations in
-func SetupPushDir(srcDir, pushDir string) error {
+// setupPushDir creates a temporary directory to do the Git operations in
+func setupPushDir(srcDir, pushDir string) error {
 	if err := os.RemoveAll(pushDir); err != nil {
 		return err
 	}
@@ -106,11 +99,4 @@ func SetupPushDir(srcDir, pushDir string) error {
 	}
 
 	return nil
-}
-
-// WithTimestamp gets a message name with the current timestamp
-func WithTimestamp(message string) string {
-	currentTime := time.Now().UnixNano()
-
-	return message + "@" + strconv.Itoa(int(currentTime))
 }
