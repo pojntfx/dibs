@@ -23,11 +23,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
 	}
-	reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_SERVER_REPO_DIR, config.GIT_SERVER_HTTP_PATH)
+	reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_SERVER_REPOS_DIR, config.GIT_SERVER_HTTP_PATH)
 
 	// Setup workers
 	httpWorker := &workers.GitHTTPWorker{
-		ReposDir:       config.GIT_SERVER_REPO_DIR,
+		ReposDir:       config.GIT_SERVER_REPOS_DIR,
 		HTTPPathPrefix: config.GIT_SERVER_HTTP_PATH,
 		Port:           int(httpPort),
 	}

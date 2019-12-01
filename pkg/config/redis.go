@@ -4,7 +4,7 @@ import "os"
 
 var (
 	REDIS_URL    = os.Getenv("REDIS_URL")
-	REDIS_PREFIX = os.Getenv("REDIS_CHANNEL_PREFIX")
+	REDIS_PREFIX = os.Getenv("REDIS_PREFIX")
 )
 
 const (
