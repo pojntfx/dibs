@@ -8,31 +8,33 @@ import (
 	"time"
 )
 
+// Git is the configuration for the Git version control system
 type Git struct {
-	RemoteName    string
-	RemoteURL     string
-	UserName      string
-	UserEmail     string
-	CommitMessage string
+	RemoteName    string // Name that the sync remote should use
+	RemoteURL     string // Base URL of the sync remote
+	UserName      string // Name to use for commits
+	UserEmail     string // Email to use for commits
+	CommitMessage string // Message to use for commits
 }
 
 // GetGitURL returns the URL of a git repo
-func GetGitURL(baseURL, m string) string {
-	return baseURL + "/" + m
+func GetGitURL(baseURL, module string) string {
+	completeURL := baseURL + "/" + module
+
+	return completeURL
 }
 
-// PushModule adds all files to a git repo, commits and finally pushes them to a remote
+// PushModule adds all files to a git repo, commits and pushes them to a remote
 func (metadata *Git) PushModule(module, pushDir string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err
 	}
 
-	_, err = g.CreateRemote(&gitconf.RemoteConfig{
+	if _, err = g.CreateRemote(&gitconf.RemoteConfig{
 		Name: metadata.RemoteName,
 		URLs: []string{metadata.RemoteURL},
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -41,27 +43,24 @@ func (metadata *Git) PushModule(module, pushDir string) error {
 		return err
 	}
 
-	_, err = wt.Add(".")
-	if err != nil {
+	if _, err = wt.Add("."); err != nil {
 		return err
 	}
 
-	_, err = wt.Commit(WithTimestamp(metadata.CommitMessage), &git.CommitOptions{
+	if _, err = wt.Commit(WithTimestamp(metadata.CommitMessage), &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  metadata.UserName,
 			Email: metadata.UserEmail,
 			When:  time.Now(),
 		},
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
-	err = g.Push(&git.PushOptions{
+	if err = g.Push(&git.PushOptions{
 		RemoteName: metadata.RemoteName,
 		RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/master"},
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 

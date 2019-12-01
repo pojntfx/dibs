@@ -11,18 +11,21 @@ import (
 )
 
 func main() {
+	// Connect to Redis
 	redis := utils.Redis{
 		Addr:   config.REDIS_URL,
 		Prefix: config.REDIS_CHANNEL_PREFIX,
 	}
 	redis.Connect()
 
+	// Build the configuration
 	httpPort, err := strconv.ParseInt(config.GIT_HTTP_PORT, 0, 64)
 	if err != nil {
 		log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
 	}
 	reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_DIR, config.GIT_HTTP_PATH)
 
+	// Setup workers
 	httpWorker := &workers.GitHTTPWorker{
 		ReposDir:       config.GIT_DIR,
 		HTTPPathPrefix: config.GIT_HTTP_PATH,
@@ -41,16 +44,21 @@ func main() {
 		RedisSuffix: config.REDIS_CHANNEL_MODULE_UNREGISTERED,
 	}
 
+	// Create error channels
 	httpWorkerErrors, repoWorkerUpdateErrors, repoWorkerDeleteOnlyErrors := make(chan error, 0), make(chan error, 0), make(chan error, 0)
 
+	// Create event channels
 	httpWorkerEvents, repoWorkerUpdateEvents, repoWorkerDeleteOnlyEvents := make(chan utils.Event, 0), make(chan utils.Event, 0), make(chan utils.Event, 0)
 
+	// Start the workers
 	go httpWorker.Start(httpWorkerErrors, httpWorkerEvents)
 	go repoWorkerUpdate.Start(repoWorkerUpdateErrors, repoWorkerUpdateEvents)
 	go repoWorkerDeleteOnly.Start(repoWorkerDeleteOnlyErrors, repoWorkerDeleteOnlyEvents)
 
+	// Start the main loop
 	for {
 		select {
+		// If there are errors, log the erros and exit
 		case err := <-httpWorkerErrors:
 			log.Fatal("Error", rz.String("System", "GitHTTPWorker"), rz.Err(err))
 		case err := <-repoWorkerUpdateErrors:
@@ -58,6 +66,7 @@ func main() {
 		case err := <-repoWorkerDeleteOnlyErrors:
 			log.Fatal("Error", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.Err(err))
 
+		// If there are events, log them
 		case event := <-httpWorkerEvents:
 			switch event.Code {
 			case 0:
@@ -93,7 +102,6 @@ func main() {
 				return
 			default:
 				log.Fatal("Unknown event code", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
-
 			}
 		}
 	}

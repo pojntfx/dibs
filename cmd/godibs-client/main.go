@@ -12,64 +12,65 @@ import (
 )
 
 func main() {
-	err, moduleName := utils.GetModuleName(config.SYNC_MODULE_PUSH_MOD_FILE)
+	// Get the name of the module that is to be pushed
+	err, module := utils.GetModuleName(config.SYNC_MODULE_PUSH_MOD_FILE)
 	if err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", moduleName))
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
 	}
 
+	// Connect to Redis
 	redis := utils.Redis{
 		Addr:   config.REDIS_URL,
 		Prefix: config.REDIS_CHANNEL_PREFIX,
 	}
 	redis.Connect()
 
-	log.Info("Registering module ...", rz.String("Module", moduleName))
-	redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_REGISTERED, moduleName)
+	// Register the module
+	log.Info("Registering module ...", rz.String("Module", module))
+	redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_REGISTERED, module)
 
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	// Unregister the module on interrupt signal
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-c
-		log.Info("Unregistering module ...", rz.String("Module", moduleName))
-		redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_UNREGISTERED, moduleName)
+		<-interrupt
+
+		log.Info("Unregistering module ...", rz.String("Module", module))
+		redis.PublishWithTimestamp(config.REDIS_CHANNEL_MODULE_UNREGISTERED, module)
+
 		os.Exit(0)
 	}()
 
-	w := utils.GetNewFolderWatcher(config.SYNC_MODULE_PUSH_WATCH_GLOB, config.PUSH_DIR)
-
+	// Setup the pipeline
 	var commandStartState *exec.Cmd
 
 	git := utils.Git{
 		RemoteName:    config.GIT_REMOTE_NAME,
-		RemoteURL:     utils.GetGitURL(config.GIT_BASE_URL, moduleName),
+		RemoteURL:     utils.GetGitURL(config.GIT_BASE_URL, module),
 		UserName:      config.GIT_NAME,
 		UserEmail:     config.GIT_EMAIL,
 		CommitMessage: config.GIT_COMMIT_MESSAGE,
 	}
 
-	testCommand := utils.EventedCommand{
+	testCommand, buildCommand, startCommand := utils.EventedCommand{
 		LogMessage:   "Running test command ...",
 		ExecLine:     config.COMMAND_TEST,
 		RedisSuffix:  config.REDIS_CHANNEL_MODULE_TESTED,
-		RedisMessage: moduleName,
-	}
-
-	buildCommand := utils.EventedCommand{
+		RedisMessage: module,
+	}, utils.EventedCommand{
 		LogMessage:   "Running build command ...",
 		ExecLine:     config.COMMAND_BUILD,
 		RedisSuffix:  config.REDIS_CHANNEL_MODULE_BUILT,
-		RedisMessage: moduleName,
-	}
-
-	startCommand := utils.EventedCommand{
+		RedisMessage: module,
+	}, utils.EventedCommand{
 		LogMessage:   "Starting start command ...",
 		ExecLine:     config.COMMAND_START,
 		RedisSuffix:  config.REDIS_CHANNEL_MODULE_STARTED,
-		RedisMessage: moduleName,
+		RedisMessage: module,
 	}
 
 	pipeline := utils.Pipeline{
-		Module:                  moduleName,
+		Module:                  module,
 		ModulePushedRedisSuffix: config.REDIS_CHANNEL_MODULE_PUSHED,
 		SrcDir:                  config.SRC_DIR,
 		PushDir:                 config.PUSH_DIR,
@@ -80,15 +81,25 @@ func main() {
 		Redis:                   redis,
 	}
 
+	// Run the pipeline once. If there are errors, don't exit
 	if err := pipeline.RunAll(); err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.String("Module", moduleName), rz.Err(err))
+		log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
 	}
 
-	for w.IsRunning() {
+	// Create a new folder watcher
+	folderWatcher := utils.FolderWatcher{
+		WatchGlob: config.SYNC_MODULE_PUSH_WATCH_GLOB,
+		IgnoreDir: config.PUSH_DIR,
+	}
+	folderWatcher.Start()
+
+	// Start the main loop
+	for folderWatcher.FolderWatcher.IsRunning() {
 		select {
-		case <-w.ChangeDetails():
+		case <-folderWatcher.FolderWatcher.ChangeDetails():
+			// Run the pipeline again on every file change. If there are errors, don't exit
 			if err := pipeline.RunAll(); err != nil {
-				log.Fatal("Error", rz.String("System", "Client"), rz.String("Module", moduleName), rz.Err(err))
+				log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
 			}
 		}
 	}

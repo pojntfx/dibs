@@ -10,10 +10,10 @@ import (
 
 // GitRepoWorker creates, updates and deletes Git repos
 type GitRepoWorker struct {
-	ReposDir    string // Directory in which the managed repos should reside
-	DeleteOnly  bool   // Whether the worker should only perform delete operations
-	Redis       utils.Redis
-	RedisSuffix string // Channel suffix to use to listen to messages
+	ReposDir    string      // Directory in which the managed repos should reside
+	DeleteOnly  bool        // Whether the worker should only perform delete operations
+	Redis       utils.Redis // Redis instance to get the channel from
+	RedisSuffix string      // Redis channel suffix to use to listen to messages
 }
 
 // Start starts a GitRepoWorker
@@ -23,32 +23,32 @@ func (worker *GitRepoWorker) Start(errors chan error, events chan utils.Event) {
 		Message: "Started",
 	}
 
-	err, c, p := worker.Redis.GetRedisChannel(worker.RedisSuffix)
+	err, channel, pubSub := worker.Redis.GetRedisChannel(worker.RedisSuffix)
 	if err != nil {
 		errors <- err
 	}
-	defer p.Close()
+	defer pubSub.Close()
 
-	for m := range c {
+	for message := range channel {
 		var innerWg sync.WaitGroup
 
-		go func(wg *sync.WaitGroup, msg *redis.Message) {
+		go func(wg *sync.WaitGroup, message *redis.Message) {
 			wg.Add(1)
 
-			moduleName, moduleTimestamp := utils.ParseModuleFromMessage(msg.Payload)
+			module, moduleTimestamp := utils.ParseModuleFromMessage(message.Payload)
 			if worker.DeleteOnly {
 				events <- utils.Event{
 					Code:    1,
-					Message: "Deleting directory for module " + moduleName + " (version " + moduleTimestamp + ")",
+					Message: "Deleting directory for module " + module + " (version " + moduleTimestamp + ")",
 				}
 			} else {
 				events <- utils.Event{
 					Code:    1,
-					Message: "Updating directory for module " + moduleName + " (version " + moduleTimestamp + ")",
+					Message: "Updating directory for module " + module + " (version " + moduleTimestamp + ")",
 				}
 			}
 
-			path := utils.GetPathForModule(worker.ReposDir, moduleName)
+			path := utils.GetPathForModule(worker.ReposDir, module)
 
 			if !worker.DeleteOnly {
 				err = os.RemoveAll(path)
@@ -68,7 +68,7 @@ func (worker *GitRepoWorker) Start(errors chan error, events chan utils.Event) {
 			}
 
 			defer wg.Done()
-		}(&innerWg, m)
+		}(&innerWg, message)
 	}
 
 	events <- utils.Event{
