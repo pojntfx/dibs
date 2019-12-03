@@ -5,6 +5,7 @@ import (
 	"github.com/pojntfx/godibs/pkg/utils"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -13,10 +14,19 @@ import (
 
 func main() {
 	// Get the name of the module that is to be pushed
-	err, module := utils.GetModuleName(config.PIPELINE_UP_FILE_MOD)
+	rawGoModContent, err := ioutil.ReadFile(config.PIPELINE_UP_FILE_MOD)
+	if err != nil {
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+	}
+	goModContent := string(rawGoModContent)
+	err, module := utils.GetModuleName(goModContent)
 	if err != nil {
 		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
 	}
+
+	// Replace the modules that are specified
+	// moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, []string{"github.com/andreaskoch/go-fswatch"}, "localhost.localdomain:5000")
+	// ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
 
 	// Connect to Redis
 	redis := utils.Redis{
