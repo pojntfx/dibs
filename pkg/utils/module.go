@@ -70,9 +70,7 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, hostReplac
 		}
 	}
 
-	var replaceBlock string
-
-	replaceBlock = replaceBlock + "\n// GODIBS:TEMPREPLACE:START"
+	replaceBlock := "// GODIBS:TEMPREPLACE:START"
 
 	for index, replace := range replaces {
 		moduleWithReplacePrefix := "replace " + requires[index] + " => " + replace + " master"
@@ -82,7 +80,7 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, hostReplac
 
 	replaceBlock = replaceBlock + "\n// GODIBS:TEMPREPLACE:END"
 
-	return content + "\n" + replaceBlock
+	return content + replaceBlock
 }
 
 // GetModuleWithoutReplaces returns the content without the replaces

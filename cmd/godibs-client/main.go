@@ -25,9 +25,8 @@ func main() {
 	}
 
 	// Replace the modules that are specified
-	// moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, []string{"github.com/andreaskoch/go-fswatch"}, "localhost.localdomain:5000")
-	// moduleWithoutReplaces := utils.GetModuleWithoutReplaces(moduleWithReplaces)
-	// ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
+	moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, []string{"github.com/andreaskoch/go-fswatch"}, "localhost.localdomain:5000")
+	ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
 
 	// Connect to Redis
 	redis := utils.Redis{
@@ -48,6 +47,15 @@ func main() {
 
 		log.Info("Unregistering module ...", rz.String("Module", module))
 		redis.PublishWithTimestamp(config.REDIS_SUFFIX_UP_UNREGISTERED, module)
+
+		log.Info("Cleaning up ...", rz.String("Module", module), rz.String("ModuleFile", config.PIPELINE_UP_FILE_MOD))
+		rawGoModContent, err := ioutil.ReadFile(config.PIPELINE_UP_FILE_MOD)
+		if err != nil {
+			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+		}
+		goModContent := string(rawGoModContent)
+		moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
+		ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithoutReplaces), 0777)
 
 		os.Exit(0)
 	}()
