@@ -26,6 +26,7 @@ func main() {
 
 	// Replace the modules that are specified
 	// moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, []string{"github.com/andreaskoch/go-fswatch"}, "localhost.localdomain:5000")
+	// moduleWithoutReplaces := utils.GetModuleWithoutReplaces(moduleWithReplaces)
 	// ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
 
 	// Connect to Redis
