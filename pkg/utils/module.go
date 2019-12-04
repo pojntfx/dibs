@@ -84,3 +84,27 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, hostReplac
 
 	return content + "\n" + replaceBlock
 }
+
+// GetModuleWithoutReplaces returns the content without the replaces
+func GetModuleWithoutReplaces(content string) string {
+	var contentWithoutReplaces string
+	var isInReplacesBlock bool
+
+	for _, line := range strings.Split(content, "\n") {
+		if strings.Contains(line, "// GODIBS:TEMPREPLACE:START") {
+			isInReplacesBlock = true
+			continue
+		}
+
+		if strings.Contains(line, "// GODIBS:TEMPREPLACE:END") {
+			isInReplacesBlock = false
+			continue
+		}
+
+		if !isInReplacesBlock {
+			contentWithoutReplaces += line + "\n"
+		}
+	}
+
+	return contentWithoutReplaces
+}
