@@ -77,7 +77,12 @@ func main() {
 		CommitMessage: config.GIT_UP_COMMIT_MESSAGE,
 	}
 
-	testCommand, buildCommand, startCommand := utils.EventedCommand{
+	downloadCommand, testCommand, buildCommand, startCommand := utils.EventedCommand{
+		LogMessage:   "Running download command ...",
+		ExecLine:     config.PIPELINE_DOWN_DOWNLOAD_COMMAND,
+		RedisSuffix:  config.REDIS_SUFFIX_DOWN_DOWNLOADED,
+		RedisMessage: module,
+	}, utils.EventedCommand{
 		LogMessage:   "Running test command ...",
 		ExecLine:     config.PIPELINE_UP_TEST_COMMAND,
 		RedisSuffix:  config.REDIS_SUFFIX_UP_TESTED,
@@ -99,6 +104,7 @@ func main() {
 		ModulePushedRedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
 		SrcDir:                  config.PIPELINE_UP_DIR_SRC,
 		PushDir:                 config.PIPELINE_UP_DIR_PUSH,
+		DownloadCommand:         downloadCommand,
 		RunCommands:             []utils.EventedCommand{testCommand, buildCommand},
 		StartCommand:            startCommand,
 		StartCommandState:       commandStartState,

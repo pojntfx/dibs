@@ -13,3 +13,7 @@ var (
 
 	PIPELINE_DOWN_MODULES = os.Getenv("PIPELINE_DOWN_MODULES")
 )
+
+const (
+	PIPELINE_DOWN_DOWNLOAD_COMMAND = "go download -insecure"
+)
