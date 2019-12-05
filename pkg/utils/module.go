@@ -106,3 +106,19 @@ func GetModuleWithoutReplaces(content string) string {
 
 	return contentWithoutReplaces
 }
+
+// GetModulesFromRawInputString returns the modules for a comma-seperated list of modules
+func GetModulesFromRawInputString(rawInput string) []string {
+	modules := strings.Split(rawInput, ",")
+
+	return modules
+}
+
+// GetHostAndPortFromUrl parses the host and port from a URL
+func GetHostAndPortFromUrl(url string) string {
+	urlWithoutProtocol := strings.Split(url, "://")[1]
+
+	urlWithoutPath := strings.Split(urlWithoutProtocol, "/")[0]
+
+	return urlWithoutPath
+}
