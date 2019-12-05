@@ -105,7 +105,7 @@ func main() {
 		SrcDir:                      config.PIPELINE_UP_DIR_SRC,
 		PushDir:                     config.PIPELINE_UP_DIR_PUSH,
 		DownloadCommand:             downloadCommand,
-		DownloadCommandEnvVariables: config.PIPELINE_DOWN_ENV_VARIABLES,
+		DownloadCommandEnvVariables: config.PIPELINE_DOWN_DOWNLOAD_COMMAND_ENV_VARIABLES,
 		RunCommands:                 []utils.EventedCommand{testCommand, buildCommand},
 		StartCommand:                startCommand,
 		StartCommandState:           commandStartState,
