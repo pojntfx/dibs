@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/pojntfx/godibs/pkg/config"
 	"github.com/pojntfx/godibs/pkg/utils"
+	"github.com/pojntfx/godibs/pkg/workers"
 	rz "gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"io/ioutil"
@@ -105,6 +106,20 @@ func main() {
 		log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
 	}
 
+	// Setup worker
+	pipelineUpdateWorker := &workers.PipelineUpdateWorker{
+		Pipeline:    pipeline,
+		Redis:       redis,
+		RedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
+	}
+
+	// Create channels
+	pipelineUpdateWorkerErrors := make(chan error, 0)
+	pipelineUpdateWorkerEvents := make(chan utils.Event, 0)
+
+	// Start worker
+	go pipelineUpdateWorker.Start(pipelineUpdateWorkerErrors, pipelineUpdateWorkerEvents)
+
 	// Create a new folder watcher
 	folderWatcher := utils.FolderWatcher{
 		WatchDir:  config.PIPELINE_UP_DIR_WATCH,
@@ -115,6 +130,21 @@ func main() {
 	// Start the main loop
 	for folderWatcher.FolderWatcher.IsRunning() {
 		select {
+		// If there are errors, log the erros and exit
+		case err := <-pipelineUpdateWorkerErrors:
+			log.Fatal("Error", rz.String("System", "PipelineUpdateWorker"), rz.Err(err))
+		case event := <-pipelineUpdateWorkerEvents:
+			switch event.Code {
+			case 0:
+				log.Info("Started", rz.String("System", "PipelineUpdateWorker"), rz.String("EventMessage", event.Message))
+			case 1:
+				log.Info("Request", rz.String("System", "PipelineUpdateWorker"), rz.String("EventMessage", event.Message))
+			case 2:
+				log.Info("Stopped", rz.String("System", "PipelineUpdateWorker"), rz.String("EventMessage", event.Message))
+				return
+			default:
+				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+			}
 		case <-folderWatcher.FolderWatcher.ChangeDetails():
 			// Run the pipeline again on every file change. If there are errors, don't exit
 			if err := pipeline.RunAll(); err != nil {
