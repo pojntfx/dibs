@@ -50,12 +50,12 @@ func main() {
 	// Create event channels
 	httpWorkerEvents, repoWorkerUpdateEvents, repoWorkerDeleteOnlyEvents := make(chan utils.Event, 0), make(chan utils.Event, 0), make(chan utils.Event, 0)
 
-	// Start the workers
+	// Start workers
 	go httpWorker.Start(httpWorkerErrors, httpWorkerEvents)
 	go repoWorkerUpdate.Start(repoWorkerUpdateErrors, repoWorkerUpdateEvents)
 	go repoWorkerDeleteOnly.Start(repoWorkerDeleteOnlyErrors, repoWorkerDeleteOnlyEvents)
 
-	// Start the main loop
+	// Start main loop
 	for {
 		select {
 		// If there are errors, log the erros and exit
