@@ -14,4 +14,6 @@ const (
 	REDIS_SUFFIX_UP_REGISTERED   = "up_registered"
 	REDIS_SUFFIX_UP_UNREGISTERED = "up_unregistered"
 	REDIS_SUFFIX_UP_PUSHED       = "up_pushed"
+
+	REDIS_SUFFIX_DOWN_DOWNLOADED = "down_downloaded"
 )
