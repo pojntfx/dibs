@@ -19,20 +19,29 @@ type EventedCommand struct {
 
 // Pipeline is a development configuration
 type Pipeline struct {
-	Module                  string           // The module that is being pushed
-	ModulePushedRedisSuffix string           // The Redis suffix channel suffix to use for the pushed event
-	SrcDir                  string           // The directory of the module's source
-	PushDir                 string           // The temporary directory to use for the modification of the Git repo
-	RunCommands             []EventedCommand // The commands to run
-	StartCommand            EventedCommand   // The command to start (will keep running, but can be killed)
-	DownloadCommand         EventedCommand   // The command to use download pushed modules
-	StartCommandState       *exec.Cmd        // Stores the state of the start command (to make it possible to kill it)
-	Git                     Git              // Git instance to use to modify the Git repo in PushDir
-	Redis                   Redis            // Redis instance to use to publish the events
+	Module                      string           // The module that is being pushed
+	ModulePushedRedisSuffix     string           // The Redis suffix channel suffix to use for the pushed event
+	SrcDir                      string           // The directory of the module's source
+	PushDir                     string           // The temporary directory to use for the modification of the Git repo
+	RunCommands                 []EventedCommand // The commands to run
+	StartCommand                EventedCommand   // The command to start (will keep running, but can be killed)
+	DownloadCommand             EventedCommand   // The command to use download pushed modules
+	DownloadCommandEnvVariables string           // Environment variables to set before running the download command
+	StartCommandState           *exec.Cmd        // Stores the state of the start command (to make it possible to kill it)
+	Git                         Git              // Git instance to use to modify the Git repo in PushDir
+	Redis                       Redis            // Redis instance to use to publish the events
 }
 
 // RunDownloadCommand runs the download command
 func (pipeline *Pipeline) RunDownloadCommand() error {
+	for _, envVar := range strings.Split(pipeline.DownloadCommandEnvVariables, ",") {
+		parts := strings.Split(envVar, "=")
+
+		if err := os.Setenv(parts[0], parts[1]); err != nil {
+			return err
+		}
+	}
+
 	log.Info(pipeline.DownloadCommand.LogMessage, rz.String("Module", pipeline.Module))
 	if err := RunCommand(pipeline.DownloadCommand.ExecLine, false); err != nil {
 		return err

@@ -3,6 +3,8 @@ package config
 import "os"
 
 var (
+	PIPELINE_REGEX_IGNORE = os.Getenv("PIPELINE_REGEX_IGNORE")
+
 	PIPELINE_UP_DIR_SRC       = os.Getenv("PIPELINE_UP_DIR_SRC")
 	PIPELINE_UP_DIR_PUSH      = os.Getenv("PIPELINE_UP_DIR_PUSH")
 	PIPELINE_UP_DIR_WATCH     = os.Getenv("PIPELINE_UP_DIR_WATCH")
@@ -15,5 +17,6 @@ var (
 )
 
 const (
-	PIPELINE_DOWN_DOWNLOAD_COMMAND = "go download -insecure"
+	PIPELINE_DOWN_DOWNLOAD_COMMAND = "go mod download"
+	PIPELINE_DOWN_ENV_VARIABLES    = "GOINSECURE=true"
 )
