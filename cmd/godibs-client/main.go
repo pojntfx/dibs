@@ -100,16 +100,17 @@ func main() {
 	}
 
 	pipeline := utils.Pipeline{
-		Module:                  module,
-		ModulePushedRedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
-		SrcDir:                  config.PIPELINE_UP_DIR_SRC,
-		PushDir:                 config.PIPELINE_UP_DIR_PUSH,
-		DownloadCommand:         downloadCommand,
-		RunCommands:             []utils.EventedCommand{testCommand, buildCommand},
-		StartCommand:            startCommand,
-		StartCommandState:       commandStartState,
-		Git:                     git,
-		Redis:                   redis,
+		Module:                      module,
+		ModulePushedRedisSuffix:     config.REDIS_SUFFIX_UP_PUSHED,
+		SrcDir:                      config.PIPELINE_UP_DIR_SRC,
+		PushDir:                     config.PIPELINE_UP_DIR_PUSH,
+		DownloadCommand:             downloadCommand,
+		DownloadCommandEnvVariables: config.PIPELINE_DOWN_ENV_VARIABLES,
+		RunCommands:                 []utils.EventedCommand{testCommand, buildCommand},
+		StartCommand:                startCommand,
+		StartCommandState:           commandStartState,
+		Git:                         git,
+		Redis:                       redis,
 	}
 
 	// Run the pipeline once. If there are errors, don't exit
@@ -122,6 +123,7 @@ func main() {
 		Pipeline:    pipeline,
 		Redis:       redis,
 		RedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
+		Modules:     downModules,
 	}
 
 	// Create channels
@@ -133,8 +135,8 @@ func main() {
 
 	// Create a new folder watcher
 	folderWatcher := utils.FolderWatcher{
-		WatchDir:  config.PIPELINE_UP_DIR_WATCH,
-		IgnoreDir: config.PIPELINE_UP_DIR_PUSH,
+		WatchDir:    config.PIPELINE_UP_DIR_WATCH,
+		IgnoreRegex: config.PIPELINE_REGEX_IGNORE,
 	}
 	folderWatcher.Start()
 
