@@ -30,6 +30,19 @@ type Pipeline struct {
 	Redis                   Redis            // Redis instance to use to publish the events
 }
 
+// RunCommandsOnly only runs the commands
+func (pipeline *Pipeline) RunCommandsOnly() error {
+	for _, runCommand := range pipeline.RunCommands {
+		log.Info(runCommand.LogMessage, rz.String("Module", pipeline.Module))
+		if err := RunCommand(runCommand.ExecLine, false); err != nil {
+			return err
+		}
+		pipeline.Redis.PublishWithTimestamp(runCommand.RedisSuffix, runCommand.RedisMessage)
+	}
+
+	return nil
+}
+
 // RunAll runs the entire pipeline
 func (pipeline *Pipeline) RunAll() error {
 	if pipeline.StartCommandState != nil {
@@ -46,13 +59,7 @@ func (pipeline *Pipeline) RunAll() error {
 	}
 	pipeline.Redis.PublishWithTimestamp(pipeline.ModulePushedRedisSuffix, pipeline.Module)
 
-	for _, runCommand := range pipeline.RunCommands {
-		log.Info(runCommand.LogMessage, rz.String("Module", pipeline.Module))
-		if err := RunCommand(runCommand.ExecLine, false); err != nil {
-			return err
-		}
-		pipeline.Redis.PublishWithTimestamp(runCommand.RedisSuffix, runCommand.RedisMessage)
-	}
+	pipeline.RunCommandsOnly()
 
 	log.Info(pipeline.StartCommand.LogMessage, rz.String("Module", pipeline.Module))
 	if err := RunCommand(pipeline.StartCommand.ExecLine, true); err != nil {
