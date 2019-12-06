@@ -27,11 +27,11 @@ func main() {
 	}
 	// Get the modules that are to be downloaded
 	downModules := utils.GetModulesFromRawInputString(config.PIPELINE_DOWN_MODULES)
-	// Get the host and port of the git host to use
-	downUrl := utils.GetHostAndPortFromUrl(config.GIT_BASE_URL)
+	// Directory to clone the local modules to
+	downModulesDir := config.PIPELINE_DOWN_DIR_MODULES
 
 	// Replace the modules that are specified
-	moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, downModules, downUrl)
+	moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
 	ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
 
 	// Connect to Redis
@@ -77,12 +77,7 @@ func main() {
 		CommitMessage: config.GIT_UP_COMMIT_MESSAGE,
 	}
 
-	downloadCommand, testCommand, buildCommand, startCommand := utils.EventedCommand{
-		LogMessage:   "Running download command ...",
-		ExecLine:     config.PIPELINE_DOWN_DOWNLOAD_COMMAND,
-		RedisSuffix:  config.REDIS_SUFFIX_DOWN_DOWNLOADED,
-		RedisMessage: module,
-	}, utils.EventedCommand{
+	testCommand, buildCommand, startCommand := utils.EventedCommand{
 		LogMessage:   "Running test command ...",
 		ExecLine:     config.PIPELINE_UP_TEST_COMMAND,
 		RedisSuffix:  config.REDIS_SUFFIX_UP_TESTED,
@@ -100,17 +95,15 @@ func main() {
 	}
 
 	pipeline := utils.Pipeline{
-		Module:                      module,
-		ModulePushedRedisSuffix:     config.REDIS_SUFFIX_UP_PUSHED,
-		SrcDir:                      config.PIPELINE_UP_DIR_SRC,
-		PushDir:                     config.PIPELINE_UP_DIR_PUSH,
-		DownloadCommand:             downloadCommand,
-		DownloadCommandEnvVariables: config.PIPELINE_DOWN_DOWNLOAD_COMMAND_ENV_VARIABLES,
-		RunCommands:                 []utils.EventedCommand{testCommand, buildCommand},
-		StartCommand:                startCommand,
-		StartCommandState:           commandStartState,
-		Git:                         git,
-		Redis:                       redis,
+		Module:                  module,
+		ModulePushedRedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
+		SrcDir:                  config.PIPELINE_UP_DIR_SRC,
+		PushDir:                 config.PIPELINE_UP_DIR_PUSH,
+		RunCommands:             []utils.EventedCommand{testCommand, buildCommand},
+		StartCommand:            startCommand,
+		StartCommandState:       commandStartState,
+		Git:                     git,
+		Redis:                   redis,
 	}
 
 	// Run the pipeline once. If there are errors, don't exit
@@ -120,10 +113,12 @@ func main() {
 
 	// Setup worker
 	pipelineUpdateWorker := &workers.PipelineUpdateWorker{
-		Pipeline:    pipeline,
-		Redis:       redis,
-		RedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
-		Modules:     downModules,
+		Modules:       downModules,
+		Pipeline:      pipeline,
+		LocalCloneDir: config.PIPELINE_DOWN_DIR_MODULES,
+		Redis:         redis,
+		RedisSuffix:   config.REDIS_SUFFIX_UP_PUSHED,
+		HTTPBaseURL:   config.GIT_BASE_URL,
 	}
 
 	// Create channels
