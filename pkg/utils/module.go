@@ -34,7 +34,7 @@ func GetModuleName(content string) (error, string) {
 }
 
 // GetModuleWithReplaces returns the module file content with additional replacement declarations
-func GetModuleWithReplaces(content string, modulesToReplace []string, hostReplacement string) string {
+func GetModuleWithReplaces(content string, modulesToReplace []string, dirToReplaceHost string) string {
 	var requires []string
 	var isInRequiresBlock bool
 
@@ -61,8 +61,8 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, hostReplac
 	for _, require := range requires {
 		for _, moduleToReplace := range modulesToReplace {
 			if require == moduleToReplace {
-				moduleSuffixes := strings.Split(require, "/")[1:]
-				modulePartsWithHostReplace := append([]string{hostReplacement}, moduleSuffixes...)
+				moduleSuffixes := strings.Split(require, "/")
+				modulePartsWithHostReplace := append([]string{dirToReplaceHost}, moduleSuffixes...)
 				moduleWithReplacedHost := strings.Join(modulePartsWithHostReplace, "/")
 
 				replaces = append(replaces, moduleWithReplacedHost)
@@ -73,7 +73,7 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, hostReplac
 	replaceBlock := "// GODIBS:TEMPREPLACE:START"
 
 	for index, replace := range replaces {
-		moduleWithReplacePrefix := "replace " + requires[index] + " => " + replace + " master"
+		moduleWithReplacePrefix := "replace " + requires[index] + " => " + replace
 
 		replaceBlock = replaceBlock + "\n" + moduleWithReplacePrefix
 	}
