@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/pojntfx/godibs/pkg/config"
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
 	"github.com/spf13/cobra"
@@ -9,6 +8,12 @@ import (
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"path/filepath"
 	"strconv"
+)
+
+var (
+	GIT_SERVER_REPOS_DIR string
+	GIT_SERVER_HTTP_PORT string
+	GIT_SERVER_HTTP_PATH string
 )
 
 var serverCmd = &cobra.Command{
@@ -23,16 +28,16 @@ var serverCmd = &cobra.Command{
 		redis.Connect()
 
 		// Build the configuration
-		httpPort, err := strconv.ParseInt(config.GIT_SERVER_HTTP_PORT, 0, 64)
+		httpPort, err := strconv.ParseInt(GIT_SERVER_HTTP_PORT, 0, 64)
 		if err != nil {
 			log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
 		}
-		reposDirWithHTTPPathPrefix := filepath.Join(config.GIT_SERVER_REPOS_DIR, config.GIT_SERVER_HTTP_PATH)
+		reposDirWithHTTPPathPrefix := filepath.Join(GIT_SERVER_REPOS_DIR, GIT_SERVER_HTTP_PATH)
 
 		// Setup workers
 		httpWorker := &workers.GitHTTPWorker{
-			ReposDir:       config.GIT_SERVER_REPOS_DIR,
-			HTTPPathPrefix: config.GIT_SERVER_HTTP_PATH,
+			ReposDir:       GIT_SERVER_REPOS_DIR,
+			HTTPPathPrefix: GIT_SERVER_HTTP_PATH,
 			Port:           int(httpPort),
 		}
 
@@ -113,5 +118,9 @@ var serverCmd = &cobra.Command{
 }
 
 func init() {
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "git-server-repos-dir", "/tmp/serverrepos", "Directory in which the Git repos should be stored")
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "git-server-http-port", "25000", "Port on which the Git repos should be served")
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "git-server-http-path", "/repos", "HTTP path on which the Git repos should be served")
+
 	rootCmd.AddCommand(serverCmd)
 }
