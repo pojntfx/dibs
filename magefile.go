@@ -68,9 +68,6 @@ func BinaryIntegrationTests() error {
 	return buildConfiguration.BinaryIntegrationTests()
 }
 
-// TODO:
-// - Add DockerMultiarchSetup to buildConfigCollection
-// - Add push methods
 func DockerMultiarchSetup() error {
 	return buildConfiguration.DockerMultiarchSetup()
 }
@@ -139,6 +136,10 @@ func GetBinaryFromDockerContainerARM() error {
 	return buildConfigARM.GetBinaryFromDockerContainer()
 }
 
+func SetupMultiArch() error {
+	return buildConfigCollection.SetupMultiArch()
+}
+
 func BuildAllDockerImages() error {
 	return buildConfigCollection.BuildAllDockerImages()
 }
@@ -195,6 +196,10 @@ func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
 	}
 
 	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) SetupMultiArch() error {
+	return sh.RunV("docker", "run", "--rm", "--privileged", "multiarch/qemu-user-static", "--reset", "-p", "yes")
 }
 
 func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error {
