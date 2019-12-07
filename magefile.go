@@ -3,9 +3,12 @@
 package main
 
 import (
+	"github.com/google/uuid"
 	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 	"github.com/pojntfx/godibs/pkg/utils"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -27,8 +30,7 @@ var (
 			"arm64",
 		},
 	}
-	PLATFORM     = os.Getenv("PLATFORM")
-	ARCHITECTURE = os.Getenv("ARCHITECTURE")
+	PLATFORM = os.Getenv("PLATFORM")
 )
 
 func Build() error {
@@ -77,4 +79,49 @@ func SkaffoldBuild() error {
 
 func DockerManifestBuild() error {
 	return buildConfiguration.DockerManifestBuild()
+}
+
+var (
+	ARCHITECTURE = os.Getenv("ARCHITECTURE")
+	TAG          = os.Getenv("TAG")
+)
+
+func BuildDocker() error {
+	return buildDocker(ARCHITECTURE, TAG)
+}
+
+func BuildBinary() error {
+	mg.SerialDeps(BuildDocker)
+
+	return buildBinary(TAG, "/usr/local/bin/godibs", filepath.Join(".bin", "godibs-"+ARCHITECTURE))
+}
+
+func buildDocker(architecture, tag string) error {
+	return sh.RunV("docker", "build", "-f", "Dockerfile."+architecture, "-t", tag, ".")
+}
+
+func buildBinary(tag, srcDir, distDir string) error {
+	id := uuid.New().String()
+
+	out, err := exec.Command("docker", "ps", "-aqf", "name="+id).Output()
+	if err != nil {
+		return err
+	}
+	if string(out) != "\n" {
+		if err := sh.RunV("docker", "run", "--name", id, tag, "echo"); err != nil {
+			return err
+		}
+
+		if err := sh.RunV("docker", "cp", id+":"+srcDir, distDir); err != nil {
+			return err
+		}
+
+		if err := sh.RunV("docker", "rm", "-f", id); err != nil {
+			return err
+		}
+	} else {
+		return buildBinary(tag, srcDir, distDir)
+	}
+
+	return nil
 }
