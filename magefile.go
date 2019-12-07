@@ -3,13 +3,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
-	"io"
+	"github.com/pojntfx/godibs/pkg/utils"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -32,138 +28,55 @@ var (
 )
 
 func Build() error {
-	return sh.RunV(COMMAND_GO, "build", "./...")
+	return utils.Build(COMMAND_GO)
 }
 
 func BinaryBuild() error {
 	platform := os.Getenv("PLATFORM")
 	architecture := os.Getenv("ARCHITECTURE")
 
-	_, err := os.Stat(DIR_BIN)
-	if os.IsExist(err) {
-		os.Mkdir(DIR_BIN, 0755)
-	}
-
-	return sh.RunWith(map[string]string{
-		"CGO_ENABLED": "0",
-		"GOOS":        platform,
-		"GOARCH":      architecture,
-	}, COMMAND_GO, "build", "-o", filepath.Join(DIR_BIN, PROJECT_NAME+"-"+platform+"-"+architecture), MAIN_FILE)
+	return utils.BinaryBuild(platform, architecture, DIR_BIN, COMMAND_GO, PROJECT_NAME, MAIN_FILE)
 }
 
 func BinaryInstall() error {
 	platform := os.Getenv("PLATFORM")
 	architecture := os.Getenv("ARCHITECTURE")
 
-	from, _ := os.Open(filepath.Join(DIR_BIN, PROJECT_NAME+"-"+platform+"-"+architecture))
-	defer from.Close()
-
-	to, _ := os.OpenFile(DIR_INSTALL, os.O_RDWR|os.O_CREATE, 755)
-	defer to.Close()
-
-	fmt.Println(filepath.Join(DIR_BIN, PROJECT_NAME+"-"+platform+"-"+architecture))
-	_, err := io.Copy(to, from)
-
-	return err
+	return utils.BinaryInstall(platform, architecture, DIR_BIN, PROJECT_NAME, DIR_INSTALL)
 }
 
 func Clean() error {
-	binariesToRemove, _ := filepath.Glob(filepath.Join(DIR_BIN, PROJECT_NAME+"-*-*"))
-	for _, fileToRemove := range binariesToRemove {
-		if err := os.Remove(fileToRemove); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return utils.Clean(DIR_BIN, PROJECT_NAME)
 }
 
 func Start() error {
-	return sh.RunV(COMMAND_GO, append([]string{"run", MAIN_FILE}, os.Args[2:]...)...)
+	return utils.Start(COMMAND_GO, MAIN_FILE)
 }
 
 func UnitTests() error {
-	err := sh.RunV(COMMAND_GO, "test", "--tags", "unit", "./...")
-	if err != nil {
-		return err
-	}
-	log.Info("Passed")
-	return nil
+	return utils.UnitTests(COMMAND_GO)
 }
 
 func IntegrationTests() error {
-	err := sh.RunV(COMMAND_GO, "install", "./...")
-	if err != nil {
-		return err
-	}
-
-	err = sh.RunV(PROJECT_NAME, "--help")
-	if err != nil {
-		return err
-	}
-
-	installPathNonBinary, err := exec.LookPath(PROJECT_NAME)
-	if err != nil {
-		return err
-	}
-	os.Remove(installPathNonBinary)
-
-	log.Info("Passed")
-	return nil
+	return utils.IntegrationTests(COMMAND_GO, PROJECT_NAME)
 }
 
 func BinaryIntegrationTests() error {
 	mg.SerialDeps(BinaryInstall)
 
-	err := sh.RunV(PROJECT_NAME, "--help")
-	if err != nil {
-		return err
-	}
-
-	os.Remove(DIR_INSTALL)
-
-	log.Info("Passed")
-	return nil
+	return utils.BinaryIntegrationTests(PROJECT_NAME, DIR_INSTALL)
 }
 
 func DockerMultiarchSetup() error {
-	return sh.RunV("docker", "run", "--rm", "--privileged", "multiarch/qemu-user-static", "--reset", "-p", "yes")
+	return utils.DockerMultiarchSetup()
 }
 
 func SkaffoldBuild() error {
 	mg.SerialDeps(DockerMultiarchSetup)
-	var profiles []string
 
-	for _, architecture := range ARCHITECTURES {
-		profiles = append(profiles, PROFILES_BASE[0]+"-"+architecture)
-	}
-
-	sh.RunV("skaffold", "config", "unset", "--global", "default-repo")
-
-	for _, profile := range profiles {
-		sh.RunV("skaffold", "build", "-p", profile)
-	}
-
-	return nil
+	return utils.SkaffoldBuild(ARCHITECTURES, PROFILES_BASE)
 }
 
 func DockerManifestBuild() error {
-	var cmds []string
-
-	manifestName := DOCKER_NAMESPACE + "/" + PROFILES_BASE[0] + ":latest"
-
-	cmds = append(cmds, "manifest", "create", "--amend", manifestName)
-
-	for _, architecture := range ARCHITECTURES {
-		cmds = append(cmds, DOCKER_NAMESPACE+"/"+PROFILES_BASE[0]+":latest-"+architecture)
-	}
-
-	err := sh.RunWith(map[string]string{
-		"DOCKER_CLI_EXPERIMENTAL": "enabled",
-	}, "docker", cmds...)
-	if err != nil {
-		return err
-	}
-
-	return sh.RunV("docker", "manifest", "push", manifestName)
+	return utils.DockerManifestBuild(DOCKER_NAMESPACE, PROFILES_BASE, ARCHITECTURES)
 }
