@@ -11,6 +11,15 @@ var (
 	REDIS_PREFIX string
 )
 
+const (
+	REDIS_SUFFIX_UP_BUILT        = "up_built"
+	REDIS_SUFFIX_UP_TESTED       = "up_tested"
+	REDIS_SUFFIX_UP_STARTED      = "up_started"
+	REDIS_SUFFIX_UP_REGISTERED   = "up_registered"
+	REDIS_SUFFIX_UP_UNREGISTERED = "up_unregistered"
+	REDIS_SUFFIX_UP_PUSHED       = "up_pushed"
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "godibs",
 	Short: "Distributed build system for Go",

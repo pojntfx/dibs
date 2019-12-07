@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/pojntfx/godibs/pkg/config"
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
 	"github.com/spf13/cobra"
@@ -14,12 +13,35 @@ import (
 	"syscall"
 )
 
+var (
+	GIT_UP_BASE_URL string
+
+	PIPELINE_UP_DIR_SRC       string
+	PIPELINE_UP_DIR_PUSH      string
+	PIPELINE_UP_DIR_WATCH     string
+	PIPELINE_UP_FILE_MOD      string
+	PIPELINE_UP_BUILD_COMMAND string
+	PIPELINE_UP_TEST_COMMAND  string
+	PIPELINE_UP_START_COMMAND string
+	PIPELINE_UP_REGEX_IGNORE  string
+
+	PIPELINE_DOWN_MODULES     string
+	PIPELINE_DOWN_DIR_MODULES string
+)
+
+const (
+	GIT_UP_COMMIT_MESSAGE = "up_synced"
+	GIT_UP_REMOTE_NAME    = "godibs-sync"
+	GIT_UP_USER_NAME      = "godibs-syncer"
+	GIT_UP_USER_EMAIL     = "godibs-syncer@pojtinger.space"
+)
+
 var clientCmd = &cobra.Command{
 	Use:   "client",
 	Short: "Start the client",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the name of the module that is to be pushed
-		rawGoModContent, err := ioutil.ReadFile(config.PIPELINE_UP_FILE_MOD)
+		rawGoModContent, err := ioutil.ReadFile(PIPELINE_UP_FILE_MOD)
 		if err != nil {
 			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 		}
@@ -30,13 +52,13 @@ var clientCmd = &cobra.Command{
 			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
 		}
 		// Get the modules that are to be downloaded
-		downModules := utils.GetModulesFromRawInputString(config.PIPELINE_DOWN_MODULES)
+		downModules := utils.GetModulesFromRawInputString(PIPELINE_DOWN_MODULES)
 		// Directory to clone the local modules to
-		downModulesDir := config.PIPELINE_DOWN_DIR_MODULES
+		downModulesDir := PIPELINE_DOWN_DIR_MODULES
 
 		// Replace the modules that are specified
 		moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
-		ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
+		ioutil.WriteFile(PIPELINE_UP_FILE_MOD, []byte(moduleWithReplaces), 0777)
 
 		// Connect to Redis
 		redis := utils.Redis{
@@ -47,7 +69,7 @@ var clientCmd = &cobra.Command{
 
 		// Register the module
 		log.Info("Registering module ...", rz.String("Module", module))
-		redis.PublishWithTimestamp(config.REDIS_SUFFIX_UP_REGISTERED, module)
+		redis.PublishWithTimestamp(REDIS_SUFFIX_UP_REGISTERED, module)
 
 		// Unregister the module on interrupt signal
 		interrupt := make(chan os.Signal, 2)
@@ -56,16 +78,16 @@ var clientCmd = &cobra.Command{
 			<-interrupt
 
 			log.Info("Unregistering module ...", rz.String("Module", module))
-			redis.PublishWithTimestamp(config.REDIS_SUFFIX_UP_UNREGISTERED, module)
+			redis.PublishWithTimestamp(REDIS_SUFFIX_UP_UNREGISTERED, module)
 
-			log.Info("Cleaning up ...", rz.String("Module", module), rz.String("ModuleFile", config.PIPELINE_UP_FILE_MOD))
-			rawGoModContent, err := ioutil.ReadFile(config.PIPELINE_UP_FILE_MOD)
+			log.Info("Cleaning up ...", rz.String("Module", module), rz.String("ModuleFile", PIPELINE_UP_FILE_MOD))
+			rawGoModContent, err := ioutil.ReadFile(PIPELINE_UP_FILE_MOD)
 			if err != nil {
 				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 			}
 			goModContent := string(rawGoModContent)
 			moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
-			ioutil.WriteFile(config.PIPELINE_UP_FILE_MOD, []byte(moduleWithoutReplaces), 0777)
+			ioutil.WriteFile(PIPELINE_UP_FILE_MOD, []byte(moduleWithoutReplaces), 0777)
 
 			os.Exit(0)
 		}()
@@ -74,35 +96,35 @@ var clientCmd = &cobra.Command{
 		var commandStartState *exec.Cmd
 
 		git := utils.Git{
-			RemoteName:    config.GIT_UP_REMOTE_NAME,
-			RemoteURL:     utils.GetGitURL(config.GIT_UP_BASE_URL, module),
-			UserName:      config.GIT_UP_USER_NAME,
-			UserEmail:     config.GIT_UP_USER_EMAIL,
-			CommitMessage: config.GIT_UP_COMMIT_MESSAGE,
+			RemoteName:    GIT_UP_REMOTE_NAME,
+			RemoteURL:     utils.GetGitURL(GIT_UP_BASE_URL, module),
+			UserName:      GIT_UP_USER_NAME,
+			UserEmail:     GIT_UP_USER_EMAIL,
+			CommitMessage: GIT_UP_COMMIT_MESSAGE,
 		}
 
 		testCommand, buildCommand, startCommand := utils.EventedCommand{
 			LogMessage:   "Running test command ...",
-			ExecLine:     config.PIPELINE_UP_TEST_COMMAND,
-			RedisSuffix:  config.REDIS_SUFFIX_UP_TESTED,
+			ExecLine:     PIPELINE_UP_TEST_COMMAND,
+			RedisSuffix:  REDIS_SUFFIX_UP_TESTED,
 			RedisMessage: module,
 		}, utils.EventedCommand{
 			LogMessage:   "Running build command ...",
-			ExecLine:     config.PIPELINE_UP_BUILD_COMMAND,
-			RedisSuffix:  config.REDIS_SUFFIX_UP_BUILT,
+			ExecLine:     PIPELINE_UP_BUILD_COMMAND,
+			RedisSuffix:  REDIS_SUFFIX_UP_BUILT,
 			RedisMessage: module,
 		}, utils.EventedCommand{
 			LogMessage:   "Starting start command ...",
-			ExecLine:     config.PIPELINE_UP_START_COMMAND,
-			RedisSuffix:  config.REDIS_SUFFIX_UP_STARTED,
+			ExecLine:     PIPELINE_UP_START_COMMAND,
+			RedisSuffix:  REDIS_SUFFIX_UP_STARTED,
 			RedisMessage: module,
 		}
 
 		pipeline := utils.Pipeline{
 			Module:                  module,
-			ModulePushedRedisSuffix: config.REDIS_SUFFIX_UP_PUSHED,
-			SrcDir:                  config.PIPELINE_UP_DIR_SRC,
-			PushDir:                 config.PIPELINE_UP_DIR_PUSH,
+			ModulePushedRedisSuffix: REDIS_SUFFIX_UP_PUSHED,
+			SrcDir:                  PIPELINE_UP_DIR_SRC,
+			PushDir:                 PIPELINE_UP_DIR_PUSH,
 			RunCommands:             []utils.EventedCommand{testCommand, buildCommand},
 			StartCommand:            startCommand,
 			StartCommandState:       commandStartState,
@@ -119,10 +141,10 @@ var clientCmd = &cobra.Command{
 		pipelineUpdateWorker := &workers.PipelineUpdateWorker{
 			Modules:       downModules,
 			Pipeline:      pipeline,
-			LocalCloneDir: config.PIPELINE_DOWN_DIR_MODULES,
+			LocalCloneDir: PIPELINE_DOWN_DIR_MODULES,
 			Redis:         redis,
-			RedisSuffix:   config.REDIS_SUFFIX_UP_PUSHED,
-			HTTPBaseURL:   config.GIT_UP_BASE_URL,
+			RedisSuffix:   REDIS_SUFFIX_UP_PUSHED,
+			HTTPBaseURL:   GIT_UP_BASE_URL,
 		}
 
 		// Create channels
@@ -134,8 +156,8 @@ var clientCmd = &cobra.Command{
 
 		// Create a new folder watcher
 		folderWatcher := utils.FolderWatcher{
-			WatchDir:    config.PIPELINE_UP_DIR_WATCH,
-			IgnoreRegex: config.PIPELINE_UP_REGEX_IGNORE,
+			WatchDir:    PIPELINE_UP_DIR_WATCH,
+			IgnoreRegex: PIPELINE_UP_REGEX_IGNORE,
 		}
 		folderWatcher.Start()
 
@@ -169,5 +191,18 @@ var clientCmd = &cobra.Command{
 }
 
 func init() {
+	clientCmd.PersistentFlags().StringVar(&GIT_UP_BASE_URL, "git-base-url", "http://localhost:25000/repos", "Base URL of the sync remote")
+
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_SRC, "pipeline-up-dir-src", ".", "Directory in which the source code of the module to push resides")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_PUSH, "pipeline-up-dir-push", "/tmp/.push", "Temporary directory to put the module into before pushing")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_WATCH, "pipeline-up-dir-watch", ".", "Directory to watch for changes")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_FILE_MOD, "pipeline-up-file-mod", "go.mod", "Go module file of the module to push")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_BUILD_COMMAND, "pipeline-up-build-command", "go build ./...", "Command to run to build the module")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_TEST_COMMAND, "pipeline-up-test-command", "go test ./...", "Command to run to test the module")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_START_COMMAND, "pipeline-up-start-command", "go run main.go", "Command to run to start the module")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_REGEX_IGNORE, "pipeline-up-regex", "*.pb.go", "Regular expression files to ignore")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_MODULES, "pipeline-down-modules", "", "Comma-seperated list of the names of the modules to pull")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "pipeline-down-dir-modules", "/tmp/modules", "Directory to pull the modules to")
+
 	rootCmd.AddCommand(clientCmd)
 }
