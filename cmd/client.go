@@ -40,8 +40,8 @@ var clientCmd = &cobra.Command{
 
 		// Connect to Redis
 		redis := utils.Redis{
-			Addr:   config.REDIS_URL,
-			Prefix: config.REDIS_PREFIX,
+			Addr:   REDIS_URL,
+			Prefix: REDIS_PREFIX,
 		}
 		redis.Connect()
 
@@ -75,7 +75,7 @@ var clientCmd = &cobra.Command{
 
 		git := utils.Git{
 			RemoteName:    config.GIT_UP_REMOTE_NAME,
-			RemoteURL:     utils.GetGitURL(config.GIT_BASE_URL, module),
+			RemoteURL:     utils.GetGitURL(config.GIT_UP_BASE_URL, module),
 			UserName:      config.GIT_UP_USER_NAME,
 			UserEmail:     config.GIT_UP_USER_EMAIL,
 			CommitMessage: config.GIT_UP_COMMIT_MESSAGE,
@@ -122,7 +122,7 @@ var clientCmd = &cobra.Command{
 			LocalCloneDir: config.PIPELINE_DOWN_DIR_MODULES,
 			Redis:         redis,
 			RedisSuffix:   config.REDIS_SUFFIX_UP_PUSHED,
-			HTTPBaseURL:   config.GIT_BASE_URL,
+			HTTPBaseURL:   config.GIT_UP_BASE_URL,
 		}
 
 		// Create channels
@@ -135,7 +135,7 @@ var clientCmd = &cobra.Command{
 		// Create a new folder watcher
 		folderWatcher := utils.FolderWatcher{
 			WatchDir:    config.PIPELINE_UP_DIR_WATCH,
-			IgnoreRegex: config.PIPELINE_REGEX_IGNORE,
+			IgnoreRegex: config.PIPELINE_UP_REGEX_IGNORE,
 		}
 		folderWatcher.Start()
 
