@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -48,10 +49,6 @@ func BinaryInstall() error {
 
 func Clean() error {
 	return buildConfiguration.Clean()
-}
-
-func Start() error {
-	return buildConfiguration.Start()
 }
 
 func UnitTests() error {
@@ -104,7 +101,8 @@ var buildConfigARM = BuildConfig{
 }
 
 var buildConfigCollection = BuildConfigCollection{
-	Tag: "pojntfx/godibs",
+	StartCommand: "go run main.go server",
+	Tag:          "pojntfx/godibs",
 	BuildConfigs: []BuildConfig{
 		buildConfigAMD64,
 		buildConfigARM64,
@@ -148,6 +146,10 @@ func GetBinaryFromDockerContainerARM() error {
 	return buildConfigARM.GetBinaryFromDockerContainer()
 }
 
+func Start() error {
+	return buildConfigCollection.Start()
+}
+
 func SetupMultiArch() error {
 	return buildConfigCollection.SetupMultiArch()
 }
@@ -181,6 +183,7 @@ type BuildConfig struct {
 
 type BuildConfigCollection struct {
 	Tag          string
+	StartCommand string
 	BuildConfigs []BuildConfig
 }
 
@@ -220,6 +223,12 @@ func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
 	}
 
 	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) Start() error {
+	cmds := strings.Split(buildConfigCollection.StartCommand, " ")
+
+	return sh.RunV(cmds[0], cmds[1:]...)
 }
 
 func (buildConfigCollection *BuildConfigCollection) SetupMultiArch() error {
