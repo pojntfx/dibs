@@ -1,6 +1,6 @@
 # godibs
 
-A distributed build system for Go.
+Distributed build system for Go.
 
 ## License
 
