@@ -1,17 +1,14 @@
 package config
 
-import "os"
-
 var (
-	GIT_BASE_URL = os.Getenv("GIT_BASE_URL")
+	GIT_SERVER_REPOS_DIR string
+	GIT_SERVER_HTTP_PORT string
+	GIT_SERVER_HTTP_PATH string
 
-	GIT_SERVER_REPOS_DIR = os.Getenv("GIT_SERVER_REPOS_DIR")
-	GIT_SERVER_HTTP_PORT = os.Getenv("GIT_SERVER_HTTP_PORT")
-	GIT_SERVER_HTTP_PATH = os.Getenv("GIT_SERVER_HTTP_PATH")
-
-	GIT_UP_REMOTE_NAME = os.Getenv("GIT_UP_REMOTE_NAME")
-	GIT_UP_USER_NAME   = os.Getenv("GIT_UP_USER_NAME")
-	GIT_UP_USER_EMAIL  = os.Getenv("GIT_UP_USER_EMAIL")
+	GIT_UP_REMOTE_NAME string
+	GIT_UP_USER_NAME   string
+	GIT_UP_USER_EMAIL  string
+	GIT_UP_BASE_URL    string
 )
 
 const (

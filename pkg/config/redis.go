@@ -1,12 +1,5 @@
 package config
 
-import "os"
-
-var (
-	REDIS_URL    = os.Getenv("REDIS_URL")
-	REDIS_PREFIX = os.Getenv("REDIS_PREFIX")
-)
-
 const (
 	REDIS_SUFFIX_UP_BUILT        = "up_built"
 	REDIS_SUFFIX_UP_TESTED       = "up_tested"

@@ -17,8 +17,8 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Connect to Redis
 		redis := utils.Redis{
-			Addr:   config.REDIS_URL,
-			Prefix: config.REDIS_PREFIX,
+			Addr:   REDIS_URL,
+			Prefix: REDIS_PREFIX,
 		}
 		redis.Connect()
 
