@@ -105,7 +105,7 @@ func (buildConfigCollection *BuildConfigCollection) Clean() error {
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error {
+func (buildConfigCollection *BuildConfigCollection) BuildDockerImagesAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.BuildDockerImage(); err != nil {
 			return err
@@ -115,7 +115,7 @@ func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) PushAllDockerImages() error {
+func (buildConfigCollection *BuildConfigCollection) PushDockerImagesAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.PushDockerImage(); err != nil {
 			return err
@@ -161,7 +161,7 @@ func (buildConfigCollection *BuildConfigCollection) PushDockerManifest() error {
 	return sh.RunV("docker", "manifest", "push", buildConfigCollection.Tag)
 }
 
-func (buildConfigCollection *BuildConfigCollection) GetAllBinariesFromDockerContainers() error {
+func (buildConfigCollection *BuildConfigCollection) GetBinariesFromDockerContainersAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.GetBinaryFromDockerContainer(); err != nil {
 			return err
@@ -188,4 +188,28 @@ func (buildConfigCollection *BuildConfigCollection) BuildDockerImage(architectur
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.BuildDockerImage()
+}
+
+func (buildConfigCollection *BuildConfigCollection) PushDockerImage(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.PushDockerImage()
+}
+
+func (buildConfigCollection *BuildConfigCollection) GetBinaryFromDockerContainer(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.GetBinaryFromDockerContainer()
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.IntegrationTestDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestBinary(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.IntegrationTestBinary()
 }
