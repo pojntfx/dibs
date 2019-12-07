@@ -59,64 +59,20 @@ func BuildDockerImage() error {
 	return buildConfigCollection.BuildDockerImage(ARCHITECTURE)
 }
 
-func BuildDockerImageAMD64() error {
-	return buildConfigAMD64.BuildDockerImage()
+func PushDockerImage() error {
+	return buildConfigCollection.PushDockerImage(ARCHITECTURE)
 }
 
-func BuildDockerImageARM64() error {
-	return buildConfigARM64.BuildDockerImage()
+func GetBinaryFromDockerContainer() error {
+	return buildConfigCollection.GetBinaryFromDockerContainer(ARCHITECTURE)
 }
 
-func BuildDockerImageARM() error {
-	return buildConfigARM.BuildDockerImage()
+func IntegrationTestDocker() error {
+	return buildConfigCollection.IntegrationTestDocker(ARCHITECTURE)
 }
 
-func PushDockerImageAMD64() error {
-	return buildConfigAMD64.PushDockerImage()
-}
-
-func PushDockerImageARM64() error {
-	return buildConfigARM64.PushDockerImage()
-}
-
-func PushDockerImageARM() error {
-	return buildConfigARM.PushDockerImage()
-}
-
-func GetBinaryFromDockerContainerAMD64() error {
-	return buildConfigAMD64.GetBinaryFromDockerContainer()
-}
-
-func GetBinaryFromDockerContainerARM64() error {
-	return buildConfigARM64.GetBinaryFromDockerContainer()
-}
-
-func GetBinaryFromDockerContainerARM() error {
-	return buildConfigARM.GetBinaryFromDockerContainer()
-}
-
-func IntegrationTestDockerAMD64() error {
-	return buildConfigAMD64.IntegrationTestDocker()
-}
-
-func IntegrationTestDockerARM64() error {
-	return buildConfigARM64.IntegrationTestDocker()
-}
-
-func IntegrationTestDockerARM() error {
-	return buildConfigARM.IntegrationTestDocker()
-}
-
-func IntegrationTestBinaryAMD64() error {
-	return buildConfigAMD64.IntegrationTestDocker()
-}
-
-func IntegrationTestBinaryARM64() error {
-	return buildConfigARM64.IntegrationTestDocker()
-}
-
-func IntegrationTestBinaryARM() error {
-	return buildConfigARM.IntegrationTestDocker()
+func IntegrationTestBinary() error {
+	return buildConfigCollection.IntegrationTestBinary(ARCHITECTURE)
 }
 
 func UnitTest() error {
@@ -143,12 +99,12 @@ func Clean() error {
 	return buildConfigCollection.Clean()
 }
 
-func BuildAllDockerImages() error {
-	return buildConfigCollection.BuildAllDockerImages()
+func BuildDockerImagesAll() error {
+	return buildConfigCollection.BuildDockerImagesAll()
 }
 
-func PushAllDockerImages() error {
-	return buildConfigCollection.PushAllDockerImages()
+func PushDockerImagesAll() error {
+	return buildConfigCollection.PushDockerImagesAll()
 }
 
 func BuildDockerManifest() error {
@@ -159,6 +115,6 @@ func PushDockerManifest() error {
 	return buildConfigCollection.PushDockerManifest()
 }
 
-func GetAllBinariesFromDockerContainers() error {
-	return buildConfigCollection.GetAllBinariesFromDockerContainers()
+func GetBinariesFromDockerContainersAll() error {
+	return buildConfigCollection.GetBinariesFromDockerContainersAll()
 }
