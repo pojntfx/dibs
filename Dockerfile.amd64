@@ -14,7 +14,6 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN mage build
 RUN mage binaryBuild
 
 FROM amd64/debian:buster-slim

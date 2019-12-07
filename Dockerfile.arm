@@ -1,9 +1,9 @@
-FROM arm64v8/golang:1.13.5-buster AS build
+FROM arm32v7/golang:1.13.5-buster AS build
 WORKDIR /app
 
 ENV GO111MODULE=on
 ENV PLATFORM=linux
-ENV ARCHITECTURE=arm64
+ENV ARCHITECTURE=arm
 
 RUN go get github.com/magefile/mage
 COPY ./go.mod ./go.sum ./
@@ -16,7 +16,7 @@ COPY ./pkg ./pkg
 
 RUN mage binaryBuild
 
-FROM arm64v8/debian:buster-slim
-COPY --from=build /app/.bin/godibs-linux-arm64 /usr/local/bin/godibs
+FROM arm32v7/debian:buster-slim
+COPY --from=build /app/.bin/godibs-linux-arm /usr/local/bin/godibs
 EXPOSE 25000
 CMD ["/usr/local/bin/godibs", "server"]
