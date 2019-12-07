@@ -193,16 +193,16 @@ var clientCmd = &cobra.Command{
 func init() {
 	clientCmd.PersistentFlags().StringVar(&GIT_UP_BASE_URL, "git-base-url", "http://localhost:25000/repos", "Base URL of the sync remote")
 
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_SRC, "pipeline-up-dir-src", ".", "Directory in which the source code of the module to push resides")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_PUSH, "pipeline-up-dir-push", "/tmp/.push", "Temporary directory to put the module into before pushing")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_WATCH, "pipeline-up-dir-watch", ".", "Directory to watch for changes")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_FILE_MOD, "pipeline-up-file-mod", "go.mod", "Go module file of the module to push")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_BUILD_COMMAND, "pipeline-up-build-command", "go build ./...", "Command to run to build the module")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_TEST_COMMAND, "pipeline-up-test-command", "go test ./...", "Command to run to test the module")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_START_COMMAND, "pipeline-up-start-command", "go run main.go", "Command to run to start the module")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_REGEX_IGNORE, "pipeline-up-regex", "*.pb.go", "Regular expression files to ignore")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_MODULES, "pipeline-down-modules", "", "Comma-seperated list of the names of the modules to pull")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "pipeline-down-dir-modules", "/tmp/modules", "Directory to pull the modules to")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_SRC, "dir-src", ".", "Directory in which the source code of the module to push resides")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_PUSH, "dir-push", "/tmp/.push", "Temporary directory to put the module into before pushing")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_WATCH, "dir-watch", ".", "Directory to watch for changes")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_FILE_MOD, "modules-file", "go.mod", "Go module file of the module to push")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_BUILD_COMMAND, "cmd-build", "go build ./...", "Command to run to build the module")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_TEST_COMMAND, "cmd-test", "go test ./...", "Command to run to test the module")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_START_COMMAND, "cmd-start", "go run main.go", "Command to run to start the module")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_REGEX_IGNORE, "regex-ignore", "*.pb.go", "Regular expression files to ignore")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_MODULES, "modules-pull", "", "Comma-seperated list of the names of the modules to pull")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "dir-pull", "/tmp/modules", "Directory to pull the modules to")
 
 	rootCmd.AddCommand(clientCmd)
 }

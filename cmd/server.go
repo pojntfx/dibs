@@ -118,9 +118,9 @@ var serverCmd = &cobra.Command{
 }
 
 func init() {
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "git-server-repos-dir", "/tmp/serverrepos", "Directory in which the Git repos should be stored")
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "git-server-http-port", "25000", "Port on which the Git repos should be served")
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "git-server-http-path", "/repos", "HTTP path on which the Git repos should be served")
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "dir-repos", "/tmp/serverrepos", "Directory in which the Git repos should be stored")
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "port", "25000", "Port on which the Git repos should be served")
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "http-path", "/repos", "HTTP path on which the Git repos should be served")
 
 	rootCmd.AddCommand(serverCmd)
 }
