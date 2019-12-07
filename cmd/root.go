@@ -21,16 +21,19 @@ const (
 	REDIS_SUFFIX_DOWN_DOWNLOADED = "down_downloaded"
 )
 
+// serverCmd ist the main entry command
 var rootCmd = &cobra.Command{
 	Use:   "godibs",
-	Short: "Distributed build system for Go",
+	Short: "System for distributed multi-module development with Go",
 }
 
+// init maps the flags to the config
 func init() {
-	rootCmd.PersistentFlags().StringVar(&REDIS_URL, "redis-url", "localhost:6379", "Redis instance URL")
+	rootCmd.PersistentFlags().StringVar(&REDIS_URL, "redis-url", "localhost:6379", "URL of the Redis instance to use")
 	rootCmd.PersistentFlags().StringVar(&REDIS_PREFIX, "redis-prefix", "godibs", "Redis channel prefix")
 }
 
+// Execute starts the main entry command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
