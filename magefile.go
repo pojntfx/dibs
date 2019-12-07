@@ -10,73 +10,71 @@ import (
 )
 
 var (
-	PROJECT_NAME     = "godibs"
-	MAIN_FILE        = "main.go"
-	DOCKER_NAMESPACE = "pojntfx"
-	COMMAND_GO       = mg.GoCmd()
-	DIR_TEMP         = os.TempDir()
-	DIR_BIN          = ".bin"
-	DIR_INSTALL      = filepath.Join("/usr", "local", "bin", "godibs")
-	PROFILES_BASE    = []string{
-		PROJECT_NAME,
-		PROJECT_NAME + "-dev",
+	buildConfiguration = utils.BuildConfiguration{
+		ProjectName:      "godibs",
+		MainFile:         "main.go",
+		DockerRepoPrefix: "pojntfx",
+		GoCmd:            mg.GoCmd(),
+		DirTemp:          os.TempDir(),
+		DirBin:           ".bin",
+		DirInstall:       filepath.Join("/usr", "local", "bin", "godibs"),
+		ProfilesBase: []string{
+			"godibs",
+			"godibs" + "-dev",
+		},
+		Architectures: []string{
+			"amd64",
+			"arm64",
+		},
 	}
-	ARCHITECTURES = []string{
-		"amd64",
-		"arm64",
-	}
+	PLATFORM     = os.Getenv("PLATFORM")
+	ARCHITECTURE = os.Getenv("ARCHITECTURE")
 )
 
 func Build() error {
-	return utils.Build(COMMAND_GO)
+	return buildConfiguration.Build()
 }
 
 func BinaryBuild() error {
-	platform := os.Getenv("PLATFORM")
-	architecture := os.Getenv("ARCHITECTURE")
-
-	return utils.BinaryBuild(platform, architecture, DIR_BIN, COMMAND_GO, PROJECT_NAME, MAIN_FILE)
+	return buildConfiguration.BinaryBuild(PLATFORM, ARCHITECTURE)
 }
 
 func BinaryInstall() error {
-	platform := os.Getenv("PLATFORM")
-	architecture := os.Getenv("ARCHITECTURE")
-
-	return utils.BinaryInstall(platform, architecture, DIR_BIN, PROJECT_NAME, DIR_INSTALL)
+	return buildConfiguration.BinaryInstall(PLATFORM, ARCHITECTURE)
 }
 
 func Clean() error {
-	return utils.Clean(DIR_BIN, PROJECT_NAME)
+	return buildConfiguration.Clean()
 }
 
 func Start() error {
-	return utils.Start(COMMAND_GO, MAIN_FILE)
+	return buildConfiguration.Start()
 }
 
 func UnitTests() error {
-	return utils.UnitTests(COMMAND_GO)
+	return buildConfiguration.UnitTests()
 }
 
 func IntegrationTests() error {
-	return utils.IntegrationTests(COMMAND_GO, PROJECT_NAME)
+	return buildConfiguration.IntegrationTests()
 }
 
 func BinaryIntegrationTests() error {
 	mg.SerialDeps(BinaryInstall)
 
-	return utils.BinaryIntegrationTests(PROJECT_NAME, DIR_INSTALL)
+	return buildConfiguration.BinaryIntegrationTests()
 }
 
 func DockerMultiarchSetup() error {
-	return utils.DockerMultiarchSetup()
+	return buildConfiguration.DockerMultiarchSetup()
 }
 
 func SkaffoldBuild() error {
 	mg.SerialDeps(DockerMultiarchSetup)
 
-	return utils.SkaffoldBuild(ARCHITECTURES, PROFILES_BASE)
+	return buildConfiguration.SkaffoldBuild()
 }
 
 func DockerManifestBuild() error {
-	return utils.DockerManifestBuild(DOCKER_NAMESPACE, PROFILES_BASE, ARCHITECTURES)
+	return buildConfiguration.DockerManifestBuild()
 }
