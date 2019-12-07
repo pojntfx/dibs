@@ -76,29 +76,37 @@ func DockerManifestBuild() error {
 }
 
 var buildConfigAMD64 = BuildConfig{
-	Architecture:          "amd64",
-	Tag:                   "pojntfx/godibs:amd64",
-	BinaryInContainerPath: "/usr/local/bin/godibs",
-	BinaryDistPath:        filepath.Join(".bin", "godibs-amd64"),
+	Dockerfile:                   "Dockerfile.amd64",
+	Architecture:                 "amd64",
+	Tag:                          "pojntfx/godibs:amd64",
+	BinaryInContainerPath:        "/usr/local/bin/godibs",
+	BinaryDistPath:               filepath.Join(".bin", "godibs-amd64"),
+	IntegrationTestCommandBinary: ".bin/godibs-amd64 --help",
+	IntegrationTestCommandDocker: "docker run pojntfx/godibs:amd64",
 }
 
 var buildConfigARM64 = BuildConfig{
-	Architecture:          "arm64",
-	Tag:                   "pojntfx/godibs:arm64",
-	BinaryInContainerPath: "/usr/local/bin/godibs",
-	BinaryDistPath:        filepath.Join(".bin", "godibs-arm64"),
+	Dockerfile:                   "Dockerfile.arm64",
+	Architecture:                 "arm64",
+	Tag:                          "pojntfx/godibs:arm64",
+	BinaryInContainerPath:        "/usr/local/bin/godibs",
+	BinaryDistPath:               filepath.Join(".bin", "godibs-arm64"),
+	IntegrationTestCommandBinary: ".bin/godibs-arm64 --help",
+	IntegrationTestCommandDocker: "docker run pojntfx/godibs:arm64",
 }
 
 var buildConfigARM = BuildConfig{
-	Architecture:          "arm",
-	Tag:                   "pojntfx/godibs:arm",
-	BinaryInContainerPath: "/usr/local/bin/godibs",
-	BinaryDistPath:        filepath.Join(".bin", "godibs-arm"),
+	Dockerfile:                   "Dockerfile.arm",
+	Architecture:                 "arm",
+	Tag:                          "pojntfx/godibs:arm",
+	BinaryInContainerPath:        "/usr/local/bin/godibs",
+	BinaryDistPath:               filepath.Join(".bin", "godibs-arm"),
+	IntegrationTestCommandBinary: ".bin/godibs-arm --help",
+	IntegrationTestCommandDocker: "docker run pojntfx/godibs:arm",
 }
 
 var buildConfigCollection = BuildConfigCollection{
 	Tag:                    "pojntfx/godibs",
-	StartCommand:           "go run main.go server",
 	UnitTestCommand:        "go test ./...",
 	IntegrationTestCommand: "go run main.go server --help",
 	BuildConfigs: []BuildConfig{
@@ -112,20 +120,20 @@ func BuildDockerImageAMD64() error {
 	return buildConfigAMD64.BuildDockerImage()
 }
 
-func PushDockerImageAMD64() error {
-	return buildConfigAMD64.PushDockerImage()
-}
-
 func BuildDockerImageARM64() error {
 	return buildConfigARM64.BuildDockerImage()
 }
 
-func PushDockerImageARM64() error {
-	return buildConfigARM64.PushDockerImage()
-}
-
 func BuildDockerImageARM() error {
 	return buildConfigARM.BuildDockerImage()
+}
+
+func PushDockerImageAMD64() error {
+	return buildConfigAMD64.PushDockerImage()
+}
+
+func PushDockerImageARM64() error {
+	return buildConfigARM64.PushDockerImage()
 }
 
 func PushDockerImageARM() error {
@@ -144,8 +152,28 @@ func GetBinaryFromDockerContainerARM() error {
 	return buildConfigARM.GetBinaryFromDockerContainer()
 }
 
-func Start() error {
-	return buildConfigCollection.Start()
+func IntegrationTestDockerAMD64() error {
+	return buildConfigAMD64.IntegrationTestDocker()
+}
+
+func IntegrationTestDockerARM64() error {
+	return buildConfigARM64.IntegrationTestDocker()
+}
+
+func IntegrationTestDockerARM() error {
+	return buildConfigARM.IntegrationTestDocker()
+}
+
+func IntegrationTestBinaryAMD64() error {
+	return buildConfigAMD64.IntegrationTestDocker()
+}
+
+func IntegrationTestBinaryARM64() error {
+	return buildConfigARM64.IntegrationTestDocker()
+}
+
+func IntegrationTestBinaryARM() error {
+	return buildConfigARM.IntegrationTestDocker()
 }
 
 func UnitTest() error {
@@ -181,22 +209,24 @@ func GetAllBinariesFromDockerContainers() error {
 }
 
 type BuildConfig struct {
-	Architecture          string
-	Tag                   string
-	BinaryInContainerPath string
-	BinaryDistPath        string
+	Dockerfile                   string
+	Architecture                 string
+	Tag                          string
+	BinaryInContainerPath        string
+	BinaryDistPath               string
+	IntegrationTestCommandBinary string
+	IntegrationTestCommandDocker string
 }
 
 type BuildConfigCollection struct {
 	Tag                    string
-	StartCommand           string
 	UnitTestCommand        string
 	IntegrationTestCommand string
 	BuildConfigs           []BuildConfig
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
-	return sh.RunV("docker", "build", "-f", "Dockerfile."+buildConfig.Architecture, "-t", buildConfig.Tag, ".")
+	return sh.RunV("docker", "build", "-f", buildConfig.Dockerfile, "-t", buildConfig.Tag, ".")
 }
 
 func (buildConfig *BuildConfig) PushDockerImage() error {
@@ -233,8 +263,14 @@ func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) Start() error {
-	cmds := strings.Split(buildConfigCollection.StartCommand, " ")
+func (buildConfig *BuildConfig) IntegrationTestBinary() error {
+	cmds := strings.Split(buildConfig.IntegrationTestCommandBinary, " ")
+
+	return sh.RunV(cmds[0], cmds[1:]...)
+}
+
+func (buildConfig *BuildConfig) IntegrationTestDocker() error {
+	cmds := strings.Split(buildConfig.IntegrationTestCommandDocker, " ")
 
 	return sh.RunV(cmds[0], cmds[1:]...)
 }
