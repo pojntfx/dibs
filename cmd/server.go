@@ -40,12 +40,12 @@ var serverCmd = &cobra.Command{
 			ReposDir:    reposDirWithHTTPPathPrefix,
 			DeleteOnly:  false,
 			Redis:       redis,
-			RedisSuffix: config.REDIS_SUFFIX_UP_REGISTERED,
+			RedisSuffix: REDIS_SUFFIX_UP_REGISTERED,
 		}, &workers.GitRepoWorker{
 			ReposDir:    reposDirWithHTTPPathPrefix,
 			DeleteOnly:  true,
 			Redis:       redis,
-			RedisSuffix: config.REDIS_SUFFIX_UP_UNREGISTERED,
+			RedisSuffix: REDIS_SUFFIX_UP_UNREGISTERED,
 		}
 
 		// Create error channels
