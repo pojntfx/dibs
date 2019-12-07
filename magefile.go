@@ -97,9 +97,10 @@ var buildConfigARM = BuildConfig{
 }
 
 var buildConfigCollection = BuildConfigCollection{
-	Tag:             "pojntfx/godibs",
-	StartCommand:    "go run main.go server",
-	UnitTestCommand: "go test ./...",
+	Tag:                    "pojntfx/godibs",
+	StartCommand:           "go run main.go server",
+	UnitTestCommand:        "go test ./...",
+	IntegrationTestCommand: "go run main.go server --help",
 	BuildConfigs: []BuildConfig{
 		buildConfigAMD64,
 		buildConfigARM64,
@@ -151,6 +152,10 @@ func UnitTest() error {
 	return buildConfigCollection.UnitTest()
 }
 
+func IntegrationTest() error {
+	return buildConfigCollection.IntegrationTest()
+}
+
 func SetupMultiArch() error {
 	return buildConfigCollection.SetupMultiArch()
 }
@@ -183,10 +188,11 @@ type BuildConfig struct {
 }
 
 type BuildConfigCollection struct {
-	Tag             string
-	StartCommand    string
-	UnitTestCommand string
-	BuildConfigs    []BuildConfig
+	Tag                    string
+	StartCommand           string
+	UnitTestCommand        string
+	IntegrationTestCommand string
+	BuildConfigs           []BuildConfig
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
@@ -235,6 +241,12 @@ func (buildConfigCollection *BuildConfigCollection) Start() error {
 
 func (buildConfigCollection *BuildConfigCollection) UnitTest() error {
 	cmds := strings.Split(buildConfigCollection.UnitTestCommand, " ")
+
+	return sh.RunV(cmds[0], cmds[1:]...)
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTest() error {
+	cmds := strings.Split(buildConfigCollection.IntegrationTestCommand, " ")
 
 	return sh.RunV(cmds[0], cmds[1:]...)
 }
