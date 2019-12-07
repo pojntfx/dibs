@@ -47,10 +47,6 @@ func BinaryInstall() error {
 	return buildConfiguration.BinaryInstall(PLATFORM, ARCHITECTURE)
 }
 
-func Clean() error {
-	return buildConfiguration.Clean()
-}
-
 func IntegrationTests() error {
 	return buildConfiguration.IntegrationTests()
 }
@@ -109,6 +105,7 @@ var buildConfigCollection = BuildConfigCollection{
 	Tag:                    "pojntfx/godibs",
 	UnitTestCommand:        "go test ./...",
 	IntegrationTestCommand: "go run main.go server --help",
+	CleanGlob:              ".bin",
 	BuildConfigs: []BuildConfig{
 		buildConfigAMD64,
 		buildConfigARM64,
@@ -196,6 +193,10 @@ func SetupMultiArch() error {
 	return buildConfigCollection.SetupMultiArch()
 }
 
+func Clean() error {
+	return buildConfigCollection.Clean()
+}
+
 func BuildAllDockerImages() error {
 	return buildConfigCollection.BuildAllDockerImages()
 }
@@ -230,6 +231,7 @@ type BuildConfigCollection struct {
 	Tag                    string
 	UnitTestCommand        string
 	IntegrationTestCommand string
+	CleanGlob              string
 	BuildConfigs           []BuildConfig
 }
 
@@ -297,6 +299,17 @@ func (buildConfigCollection *BuildConfigCollection) IntegrationTest() error {
 
 func (buildConfigCollection *BuildConfigCollection) SetupMultiArch() error {
 	return sh.RunV("docker", "run", "--rm", "--privileged", "multiarch/qemu-user-static", "--reset", "-p", "yes")
+}
+
+func (buildConfigCollection *BuildConfigCollection) Clean() error {
+	filesToRemove, _ := filepath.Glob(buildConfigCollection.CleanGlob)
+	for _, fileToRemove := range filesToRemove {
+		if err := os.Remove(fileToRemove); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error {
