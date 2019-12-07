@@ -89,12 +89,27 @@ var buildConfigAMD64 = BuildConfig{
 	BinaryDistPath:        filepath.Join(".bin", "godibs-amd64"),
 }
 
+var buildConfigARM64 = BuildConfig{
+	Architecture:          "arm64",
+	Tag:                   "pojntfx/godibs-arm64",
+	BinaryInContainerPath: "/usr/local/bin/godibs",
+	BinaryDistPath:        filepath.Join(".bin", "godibs-arm64"),
+}
+
 func BuildDockerImageAMD64() error {
 	return buildConfigAMD64.BuildDockerImage()
 }
 
+func BuildDockerImageARM64() error {
+	return buildConfigARM64.BuildDockerImage()
+}
+
 func GetBinaryFromDockerContainerAMD64() error {
 	return buildConfigAMD64.GetBinaryFromDockerContainer()
+}
+
+func GetBinaryFromDockerContainerARM64() error {
+	return buildConfigARM64.GetBinaryFromDockerContainer()
 }
 
 type BuildConfig struct {
