@@ -68,6 +68,9 @@ func BinaryIntegrationTests() error {
 	return buildConfiguration.BinaryIntegrationTests()
 }
 
+// TODO:
+// - Add DockerMultiarchSetup to buildConfigCollection
+// - Add push methods
 func DockerMultiarchSetup() error {
 	return buildConfiguration.DockerMultiarchSetup()
 }
@@ -84,16 +87,24 @@ func DockerManifestBuild() error {
 
 var buildConfigAMD64 = BuildConfig{
 	Architecture:          "amd64",
-	Tag:                   "pojntfx/godibs-amd64",
+	Tag:                   "pojntfx/godibs:amd64",
 	BinaryInContainerPath: "/usr/local/bin/godibs",
 	BinaryDistPath:        filepath.Join(".bin", "godibs-amd64"),
 }
 
 var buildConfigARM64 = BuildConfig{
 	Architecture:          "arm64",
-	Tag:                   "pojntfx/godibs-arm64",
+	Tag:                   "pojntfx/godibs:arm64",
 	BinaryInContainerPath: "/usr/local/bin/godibs",
 	BinaryDistPath:        filepath.Join(".bin", "godibs-arm64"),
+}
+
+var buildConfigCollection = BuildConfigCollection{
+	Tag: "pojntfx/godibs",
+	BuildConfigs: []BuildConfig{
+		buildConfigAMD64,
+		buildConfigARM64,
+	},
 }
 
 func BuildDockerImageAMD64() error {
@@ -112,11 +123,28 @@ func GetBinaryFromDockerContainerARM64() error {
 	return buildConfigARM64.GetBinaryFromDockerContainer()
 }
 
+func BuildAllDockerImages() error {
+	return buildConfigCollection.BuildAllDockerImages()
+}
+
+func BuildDockerManifest() error {
+	return buildConfigCollection.BuildDockerManifest()
+}
+
+func GetAllBinariesFromDockerContainers() error {
+	return buildConfigCollection.GetAllBinariesFromDockerContainers()
+}
+
 type BuildConfig struct {
 	Architecture          string
 	Tag                   string
 	BinaryInContainerPath string
 	BinaryDistPath        string
+}
+
+type BuildConfigCollection struct {
+	Tag          string
+	BuildConfigs []BuildConfig
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
@@ -148,6 +176,38 @@ func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
 		}
 	} else {
 		return buildConfig.GetBinaryFromDockerContainer()
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.BuildDockerImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) BuildDockerManifest() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := sh.RunWith(map[string]string{
+			"DOCKER_CLI_EXPERIMENTAL": "enabled",
+		}, "docker", "manifest", "create", "--amend", buildConfigCollection.Tag, buildConfig.Tag); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) GetAllBinariesFromDockerContainers() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.GetBinaryFromDockerContainer(); err != nil {
+			return err
+		}
 	}
 
 	return nil

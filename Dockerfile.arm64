@@ -18,6 +18,6 @@ RUN mage build
 RUN mage binaryBuild
 
 FROM arm64v8/debian:buster-slim
-COPY --from=build /app/.bin/godibs-linux-amd64 /usr/local/bin/godibs
+COPY --from=build /app/.bin/godibs-linux-arm64 /usr/local/bin/godibs
 EXPOSE 25000
 CMD ["/usr/local/bin/godibs", "server"]
