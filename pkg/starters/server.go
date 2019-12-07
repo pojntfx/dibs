@@ -9,16 +9,19 @@ import (
 	"strconv"
 )
 
+// Server is a server for godibs client
 type Server struct {
-	ServerReposDir            string
-	ServerHTTPPort            string
-	ServerHTTPPath            string
-	RedisUrl                  string
-	RedisPrefix               string
-	RedisSuffixUpRegistered   string
-	RedisSuffixUpUnRegistered string
+	ServerReposDir string // Directory in which the Git repos should be stored
+	ServerHTTPPort string // Port on which the Git repos should be served
+	ServerHTTPPath string // HTTP path prefix for the served Git repos
+
+	RedisUrl                  string // URL of the Redis instance to use
+	RedisPrefix               string // Redis channel prefix
+	RedisSuffixUpRegistered   string // Redis channel suffix for "module registered" messages
+	RedisSuffixUpUnRegistered string // Redis channel suffix for "module unregistered" messages
 }
 
+// Start starts the server
 func (server *Server) Start() {
 	// Connect to Redis
 	redis := utils.Redis{

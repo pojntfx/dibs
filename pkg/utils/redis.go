@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Redis is a configured Redis instance holder
 type Redis struct {
 	client *redis.Client
 	Addr   string

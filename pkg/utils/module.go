@@ -113,12 +113,3 @@ func GetModulesFromRawInputString(rawInput string) []string {
 
 	return modules
 }
-
-// GetHostAndPortFromUrl parses the host and port from a URL
-func GetHostAndPortFromUrl(url string) string {
-	urlWithoutProtocol := strings.Split(url, "://")[1]
-
-	urlWithoutPath := strings.Split(urlWithoutProtocol, "/")[0]
-
-	return urlWithoutPath
-}

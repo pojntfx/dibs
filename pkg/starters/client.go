@@ -12,32 +12,36 @@ import (
 	"syscall"
 )
 
+// Client is a client for godibs server
 type Client struct {
-	PipelineUpFileMod         string
-	PipelineDownModules       string
-	PipelineDownDirModules    string
-	RedisUrl                  string
-	RedisPrefix               string
-	RedisSuffixUpRegistered   string
-	RedisSuffixUpUnRegistered string
-	GitUpRemoteName           string
-	GitUpBaseURL              string
-	GitUpUserName             string
-	GitUpUserEmail            string
-	GitUpCommitMessage        string
-	PipelineUpTestCommand     string
-	RedisSuffixUpTested       string
-	PipelineUpBuildCommand    string
-	RedisSuffixUpBuilt        string
-	PipelineUpStartCommand    string
-	RedisSuffixUpStarted      string
-	RedisSuffixUpPushed       string
-	PipelineUpDirSrc          string
-	PipelineUpDirPush         string
-	PipelineUpDirWatch        string
-	PipelineUpRegexIgnore     string
+	PipelineUpFileMod      string // Go module file of the module to push
+	PipelineDownModules    string // Comma-seperated list of the names of the modules to pull
+	PipelineDownDirModules string // Directory to pull the modules to
+	PipelineUpTestCommand  string // Command to run to test the module
+	PipelineUpBuildCommand string // Command to run to build the module
+	PipelineUpStartCommand string // Command to run to start the module
+	PipelineUpDirSrc       string // Directory in which the source code of the module to push resides
+	PipelineUpDirPush      string // Temporary directory to put the module into before pushing
+	PipelineUpDirWatch     string // Directory to watch for changes
+	PipelineUpRegexIgnore  string // Regular expression for files to ignore
+
+	RedisUrl                  string // URL of the Redis instance to use
+	RedisPrefix               string // Redis channel prefix
+	RedisSuffixUpRegistered   string // Redis channel suffix for "module registered" messages
+	RedisSuffixUpUnRegistered string // Redis channel suffix for "module unregistered" messages
+	RedisSuffixUpTested       string // Redis channel suffix for "module tested" messages
+	RedisSuffixUpBuilt        string // Redis channel suffix for "module built" messages
+	RedisSuffixUpStarted      string // Redis channel suffix for "module started" messages
+	RedisSuffixUpPushed       string // Redis channel suffix for "module pushed" messages
+
+	GitUpRemoteName    string // Name of the sync remote to add
+	GitUpBaseURL       string // Base URL of the sync remote
+	GitUpUserName      string // Username for Git commits
+	GitUpUserEmail     string // Email for Git commits
+	GitUpCommitMessage string // Message for Git commits
 }
 
+// Start starts the client
 func (client *Client) Start() {
 	// Get the name of the module that is to be pushed
 	rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
