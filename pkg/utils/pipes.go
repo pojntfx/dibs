@@ -10,6 +10,7 @@ import (
 )
 
 type BuildConfig struct {
+	DockerContext                string
 	Dockerfile                   string
 	Architecture                 string
 	Tag                          string
@@ -28,7 +29,7 @@ type BuildConfigCollection struct {
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
-	return sh.RunV("docker", "build", "-f", buildConfig.Dockerfile, "-t", buildConfig.Tag, ".")
+	return sh.RunV("docker", "build", "-f", buildConfig.Dockerfile, "-t", buildConfig.Tag, buildConfig.DockerContext)
 }
 
 func (buildConfig *BuildConfig) PushDockerImage() error {

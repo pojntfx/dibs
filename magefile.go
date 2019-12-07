@@ -8,6 +8,7 @@ import (
 )
 
 var buildConfigAMD64 = utils.BuildConfig{
+	DockerContext:                ".",
 	Dockerfile:                   "Dockerfile.amd64",
 	Architecture:                 "amd64",
 	Tag:                          "pojntfx/godibs:amd64",
@@ -18,6 +19,7 @@ var buildConfigAMD64 = utils.BuildConfig{
 }
 
 var buildConfigARM64 = utils.BuildConfig{
+	DockerContext:                ".",
 	Dockerfile:                   "Dockerfile.arm64",
 	Architecture:                 "arm64",
 	Tag:                          "pojntfx/godibs:arm64",
@@ -28,6 +30,7 @@ var buildConfigARM64 = utils.BuildConfig{
 }
 
 var buildConfigARM = utils.BuildConfig{
+	DockerContext:                ".",
 	Dockerfile:                   "Dockerfile.arm",
 	Architecture:                 "arm",
 	Tag:                          "pojntfx/godibs:arm",
