@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/google/uuid"
 	"github.com/pojntfx/godibs/pkg/starters"
 	"github.com/spf13/cobra"
 	"os"
@@ -69,10 +70,12 @@ var clientCmd = &cobra.Command{
 
 // init maps the flags to the config
 func init() {
+	id := uuid.New().String()
+
 	clientCmd.PersistentFlags().StringVar(&GIT_UP_BASE_URL, "git-base-url", "http://localhost:25000/repos", "Base URL of the sync remote")
 
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_SRC, "dir-src", ".", "Directory in which the source code of the module to push resides")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_PUSH, "dir-push", filepath.Join(os.TempDir(), "godibs", "push"), "Temporary directory to put the module into before pushing")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_PUSH, "dir-push", filepath.Join(os.TempDir(), "godibs", "push", id), "Temporary directory to put the module into before pushing")
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_WATCH, "dir-watch", ".", "Directory to watch for changes")
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_FILE_MOD, "modules-file", "go.mod", "Go module file of the module to push")
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_BUILD_COMMAND, "cmd-build", "go build ./...", "Command to run to build the module")
@@ -80,7 +83,7 @@ func init() {
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_START_COMMAND, "cmd-start", "go run main.go", "Command to run to start the module")
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_UP_REGEX_IGNORE, "regex-ignore", "*.pb.go", "Regular expression for files to ignore")
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_MODULES, "modules-pull", "", "Comma-seperated list of the names of the modules to pull")
-	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "dir-pull", filepath.Join(os.TempDir(), "godibs", "pull"), "Directory to pull the modules to")
+	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "dir-pull", filepath.Join(os.TempDir(), "godibs", "pull", id), "Directory to pull the modules to")
 
 	rootCmd.AddCommand(clientCmd)
 }

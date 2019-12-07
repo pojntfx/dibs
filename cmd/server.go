@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/google/uuid"
 	"github.com/pojntfx/godibs/pkg/starters"
 	"github.com/spf13/cobra"
 	"os"
@@ -35,7 +36,9 @@ var serverCmd = &cobra.Command{
 
 // init maps the flags to the config
 func init() {
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos"), "Directory in which the Git repos should be stored")
+	id := uuid.New().String()
+
+	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos", id), "Directory in which the Git repos should be stored")
 	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "port", "25000", "Port on which the Git repos should be served")
 	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "path", "/repos", "HTTP path prefix for the served Git repos")
 
