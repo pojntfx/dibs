@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/pojntfx/godibs/pkg/utils"
+	"os"
 	"path/filepath"
 )
 
@@ -50,6 +51,12 @@ var buildConfigCollection = utils.BuildConfigCollection{
 		buildConfigARM64,
 		buildConfigARM,
 	},
+}
+
+var ARCHITECTURE = os.Getenv("ARCHITECTURE")
+
+func BuildDockerImage() error {
+	return buildConfigCollection.BuildDockerImage(ARCHITECTURE)
 }
 
 func BuildDockerImageAMD64() error {

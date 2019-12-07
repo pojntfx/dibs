@@ -170,3 +170,22 @@ func (buildConfigCollection *BuildConfigCollection) GetAllBinariesFromDockerCont
 
 	return nil
 }
+
+func (buildConfigCollection *BuildConfigCollection) getBuildConfigForArchitecture(architecture string) BuildConfig {
+	var buildConfigForArchitecture BuildConfig
+
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if buildConfig.Architecture == architecture {
+			buildConfigForArchitecture = buildConfig
+			break
+		}
+	}
+
+	return buildConfigForArchitecture
+}
+
+func (buildConfigCollection *BuildConfigCollection) BuildDockerImage(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildDockerImage()
+}
