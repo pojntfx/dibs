@@ -30,7 +30,8 @@ var (
 			"arm64",
 		},
 	}
-	PLATFORM = os.Getenv("PLATFORM")
+	ARCHITECTURE = os.Getenv("ARCHITECTURE")
+	PLATFORM     = os.Getenv("PLATFORM")
 )
 
 func Build() error {
@@ -81,38 +82,49 @@ func DockerManifestBuild() error {
 	return buildConfiguration.DockerManifestBuild()
 }
 
-var (
-	ARCHITECTURE = os.Getenv("ARCHITECTURE")
-	TAG          = os.Getenv("TAG")
-)
-
-func BuildDocker() error {
-	return buildDocker(ARCHITECTURE, TAG)
+var buildConfigAMD64 = BuildConfig{
+	Architecture:          "amd64",
+	Tag:                   "pojntfx/godibs-amd64",
+	BinaryInContainerPath: "/usr/local/bin/godibs",
+	BinaryDistPath:        filepath.Join(".bin", "godibs-amd64"),
 }
 
-func BuildBinary() error {
-	mg.SerialDeps(BuildDocker)
-
-	return buildBinary(TAG, "/usr/local/bin/godibs", filepath.Join(".bin", "godibs-"+ARCHITECTURE))
+func BuildDockerImageAMD64() error {
+	return buildConfigAMD64.BuildDockerImage()
 }
 
-func buildDocker(architecture, tag string) error {
-	return sh.RunV("docker", "build", "-f", "Dockerfile."+architecture, "-t", tag, ".")
+func GetBinaryFromDockerContainerAMD64() error {
+	return buildConfigAMD64.GetBinaryFromDockerContainer()
 }
 
-func buildBinary(tag, srcDir, distDir string) error {
+type BuildConfig struct {
+	Architecture          string
+	Tag                   string
+	BinaryInContainerPath string
+	BinaryDistPath        string
+}
+
+func (buildConfig *BuildConfig) BuildDockerImage() error {
+	return sh.RunV("docker", "build", "-f", "Dockerfile."+buildConfig.Architecture, "-t", buildConfig.Tag, ".")
+}
+
+func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
 	id := uuid.New().String()
+	distDir, _ := filepath.Split(buildConfig.BinaryDistPath)
+	if err := os.MkdirAll(distDir, 0777); err != nil {
+		return err
+	}
 
 	out, err := exec.Command("docker", "ps", "-aqf", "name="+id).Output()
 	if err != nil {
 		return err
 	}
 	if string(out) != "\n" {
-		if err := sh.RunV("docker", "run", "--name", id, tag, "echo"); err != nil {
+		if err := sh.RunV("docker", "run", "--name", id, buildConfig.Tag, "echo"); err != nil {
 			return err
 		}
 
-		if err := sh.RunV("docker", "cp", id+":"+srcDir, distDir); err != nil {
+		if err := sh.RunV("docker", "cp", id+":"+buildConfig.BinaryInContainerPath, buildConfig.BinaryDistPath); err != nil {
 			return err
 		}
 
@@ -120,7 +132,7 @@ func buildBinary(tag, srcDir, distDir string) error {
 			return err
 		}
 	} else {
-		return buildBinary(tag, srcDir, distDir)
+		return buildConfig.GetBinaryFromDockerContainer()
 	}
 
 	return nil
