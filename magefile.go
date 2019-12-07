@@ -184,6 +184,14 @@ func IntegrationTest() error {
 	return buildConfigCollection.IntegrationTest()
 }
 
+func IntegrationTestDockerAll() error {
+	return buildConfigCollection.IntegrationTestDockerAll()
+}
+
+func IntegrationTestBinaryAll() error {
+	return buildConfigCollection.IntegrationTestBinaryAll()
+}
+
 func SetupMultiArch() error {
 	return buildConfigCollection.SetupMultiArch()
 }
@@ -304,6 +312,26 @@ func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error
 func (buildConfigCollection *BuildConfigCollection) PushAllDockerImages() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.PushDockerImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.IntegrationTestDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestBinaryAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.IntegrationTestBinary(); err != nil {
 			return err
 		}
 	}
