@@ -116,12 +116,24 @@ func BuildDockerImageAMD64() error {
 	return buildConfigAMD64.BuildDockerImage()
 }
 
+func PushDockerImageAMD64() error {
+	return buildConfigAMD64.PushDockerImage()
+}
+
 func BuildDockerImageARM64() error {
 	return buildConfigARM64.BuildDockerImage()
 }
 
+func PushDockerImageARM64() error {
+	return buildConfigARM64.PushDockerImage()
+}
+
 func BuildDockerImageARM() error {
 	return buildConfigARM.BuildDockerImage()
+}
+
+func PushDockerImageARM() error {
+	return buildConfigARM.PushDockerImage()
 }
 
 func GetBinaryFromDockerContainerAMD64() error {
@@ -144,8 +156,16 @@ func BuildAllDockerImages() error {
 	return buildConfigCollection.BuildAllDockerImages()
 }
 
+func PushAllDockerImages() error {
+	return buildConfigCollection.PushAllDockerImages()
+}
+
 func BuildDockerManifest() error {
 	return buildConfigCollection.BuildDockerManifest()
+}
+
+func PushDockerManifest() error {
+	return buildConfigCollection.PushDockerManifest()
 }
 
 func GetAllBinariesFromDockerContainers() error {
@@ -166,6 +186,10 @@ type BuildConfigCollection struct {
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
 	return sh.RunV("docker", "build", "-f", "Dockerfile."+buildConfig.Architecture, "-t", buildConfig.Tag, ".")
+}
+
+func (buildConfig *BuildConfig) PushDockerImage() error {
+	return sh.RunV("docker", "push", buildConfig.Tag)
 }
 
 func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
@@ -212,6 +236,16 @@ func (buildConfigCollection *BuildConfigCollection) BuildAllDockerImages() error
 	return nil
 }
 
+func (buildConfigCollection *BuildConfigCollection) PushAllDockerImages() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.PushDockerImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (buildConfigCollection *BuildConfigCollection) BuildDockerManifest() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := sh.RunWith(map[string]string{
@@ -222,6 +256,10 @@ func (buildConfigCollection *BuildConfigCollection) BuildDockerManifest() error 
 	}
 
 	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) PushDockerManifest() error {
+	return sh.RunV("docker", "manifest", "push", buildConfigCollection.Tag)
 }
 
 func (buildConfigCollection *BuildConfigCollection) GetAllBinariesFromDockerContainers() error {
