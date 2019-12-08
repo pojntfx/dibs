@@ -22,11 +22,13 @@ type BuildConfig struct {
 }
 
 type BuildConfigCollection struct {
-	Tag                    string
-	UnitTestCommand        string
-	IntegrationTestCommand string
-	CleanGlob              string
-	BuildConfigs           []BuildConfig
+	Tag                            string
+	UnitTestCommand                string
+	UnitTestCommandInDocker        string
+	IntegrationTestCommand         string
+	IntegrationTestCommandInDocker string
+	CleanGlob                      string
+	BuildConfigs                   []BuildConfig
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
@@ -91,8 +93,20 @@ func (buildConfigCollection *BuildConfigCollection) UnitTest() error {
 	return sh.RunV(cmds[0], cmds[1:]...)
 }
 
+func (buildConfigCollection *BuildConfigCollection) UnitTestInDocker() error {
+	cmds := strings.Split(buildConfigCollection.UnitTestCommandInDocker, " ")
+
+	return sh.RunV(cmds[0], cmds[1:]...)
+}
+
 func (buildConfigCollection *BuildConfigCollection) IntegrationTest() error {
 	cmds := strings.Split(buildConfigCollection.IntegrationTestCommand, " ")
+
+	return sh.RunV(cmds[0], cmds[1:]...)
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestInDocker() error {
+	cmds := strings.Split(buildConfigCollection.IntegrationTestCommandInDocker, " ")
 
 	return sh.RunV(cmds[0], cmds[1:]...)
 }
