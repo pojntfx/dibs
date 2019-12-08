@@ -24,7 +24,7 @@ const (
 // serverCmd ist the main entry command
 var rootCmd = &cobra.Command{
 	Use:   "godibs",
-	Short: "System for distributed multi-module development with Go",
+	Short: "System for distributed multi-module, multi-architecture development with Go",
 }
 
 // init maps the flags to the config

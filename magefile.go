@@ -11,9 +11,11 @@ var (
 	PLATFORM = os.Getenv("TARGETPLATFORM")
 
 	buildConfigs = utils.BuildConfigCollectionV2{
+		ManifestTag: "pojntfx/godibs:latest",
+
 		BuildConfigs: []utils.BuildConfigV2{
 			utils.BuildConfigV2{
-				Tag:      "pojntfx/godibs:amd64",
+				Tag:      "pojntfx/godibs:linux-amd64",
 				Platform: "linux/amd64",
 
 				BinaryInContainerPath: "/usr/local/bin/godibs",
@@ -24,7 +26,7 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildDockerTag:           "pojntfx/godibs-builddockerindocker:amd64",
+				BuildDockerTag:           "pojntfx/godibs-builddockerindocker:linux-amd64",
 				BuildDockerCommand:       "mage buildInDocker",
 				BuildDockerDockerContext: ".",
 				BuildDockerDockerfile:    "Dockerfile.docker",
@@ -41,8 +43,8 @@ var (
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
-				TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:amd64",
-				TestIntegrationDockerCommand:       "docker run --platform linux/amd64 pojntfx/godibs:amd64 /usr/local/bin/godibs --help",
+				TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:linux-amd64",
+				TestIntegrationDockerCommand:       "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
 				TestIntegrationDockerDockerContext: ".",
 				TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
 			}}}
@@ -106,6 +108,14 @@ func GetBinaryFromDockerImage() error {
 
 func Clean() error {
 	return buildConfigs.Clean(PLATFORM)
+}
+
+func BuildDockerManifest() error {
+	return buildConfigs.BuildDockerManifest()
+}
+
+func PushDockerManifest() error {
+	return buildConfigs.PushDockerManifest()
 }
 
 func BuildAll() error {
