@@ -14,46 +14,55 @@
                 - mv mage /usr/local/bin
                 - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
-testUnitInDockerAll:
+stages:
+        - test
+        - dockerBuild
+        - dockerPush
+        - dockerManifestBuild
+        - dockerManifestPush
+        - binaryBuild
+
+test:testUnitInDockerAll:
         <<: *dindMageJob
         script:
                 - mage testUnitInDockerAll
 
-testIntegrationGoInDockerAll:
+test:testIntegrationGoInDockerAll:
         <<: *dindMageJob
         script:
                 - mage testIntegrationGoInDockerAll
 
-testIntegrationBinaryInDockerAll:
+test:testIntegrationBinaryInDockerAll:
         <<: *dindMageJob
         script:
                 - mage testIntegrationBinaryInDockerAll
 
-testIntegrationDockerInDockerAll:
+test:testIntegrationDockerInDockerAll:
         <<: *dindMageJob
         script:
                 - mage testIntegrationDockerInDockerAll
 
-buildAndPushDockerImageAll:
+dockerBuild:buildDockerAll:
         <<: *dindMageJob
         script:
-                - mage buildDockerAll pushDockerImageAll
-        dependencies:
-                - testUnitInDockerAll
-                - testIntegrationGoInDockerAll
-                - testIntegrationDockerInDockerAll
-                - testIntegrationBinaryInDockerAll
+                - mage buildDockerAll
 
-buildAndPushDockerManifest:
+dockerPush:pushDockerImageAll:
         <<: *dindMageJob
         script:
-                - mage buildDockerManifest pushDockerManifest
-        dependencies:
-                - buildAndPushDockerImageAll
+                - mage pushDockerImageAll
 
-getBinaryFromDockerImageAll:
+dockerManifestBuild:buildDockerManifest:
+        <<: *dindMageJob
+        script:
+                - mage buildDockerManifest
+
+dockerManifestPush:pushDockerManifest:
+        <<: *dindMageJob
+        script:
+                - mage pushDockerManifest
+
+binaryBuild:getBinaryFromDockerImageAll:
         <<: *dindMageJob
         script:
                 - mage getBinaryFromDockerImageAll
-        dependencies:
-                - buildAndPushDockerImageAll
