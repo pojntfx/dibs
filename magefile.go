@@ -20,6 +20,10 @@ var (
 		TestUnitCommand:       "go test ./...",
 		TestUnitDockerfile:    "Dockerfile.testUnit",
 		TestUnitDockerContext: ".",
+
+		TestIntegrationGoCommand:       "go run main.go --help",
+		TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
+		TestIntegrationGoDockerContext: ".",
 	}
 )
 
@@ -37,4 +41,12 @@ func TestUnit() error {
 
 func TestUnitInDocker() error {
 	return buildConfigAMD64.TestUnitInDocker()
+}
+
+func TestIntegrationGo() error {
+	return buildConfigAMD64.TestIntegrationGo()
+}
+
+func TestIntegrationGoInDocker() error {
+	return buildConfigAMD64.TestIntegrationGoInDocker()
 }
