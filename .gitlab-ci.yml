@@ -16,19 +16,19 @@
 testUnitInDockerAll:
         <<: *dindMageJob
         script:
-                - mage testUnitInDocker
+                - mage testUnitInDockerAll
 
 testIntegrationGoInDockerAll:
         <<: *dindMageJob
         script:
-                - mage testIntegrationGoInDocker
+                - mage testIntegrationGoInDockerAll
 
 testIntegrationBinaryInDockerAll:
         <<: *dindMageJob
         script:
-                - mage testIntegrationBinaryInDocker
+                - mage testIntegrationBinaryInDockerAll
 
 testIntegrationDockerInDockerAll:
         <<: *dindMageJob
         script:
-                - mage testIntegrationDockerInDocker
+                - mage testIntegrationDockerInDockerAll

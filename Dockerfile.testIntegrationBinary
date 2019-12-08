@@ -16,6 +16,7 @@ RUN mage build
 
 FROM --platform=$TARGETPLATFORM golang:1.13.5-buster
 WORKDIR /app
+ARG TARGETPLATFORM
 
 RUN go get github.com/magefile/mage
 COPY ./go.mod ./go.sum ./
