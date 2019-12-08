@@ -7,6 +7,7 @@ import (
 )
 
 type BuildConfigV2 struct {
+	Tag      string
 	Platform string
 
 	BuildCommand       string
@@ -25,6 +26,7 @@ type BuildConfigV2 struct {
 	TestIntegrationDockerDockerContext string
 	TestIntegrationDockerDockerfile    string
 
+	TestIntegrationDockerTag           string
 	TestIntegrationBinaryCommand       string
 	TestIntegrationBinaryDockerContext string
 	TestIntegrationBinaryDockerfile    string
@@ -57,7 +59,7 @@ func (buildConfig *BuildConfigV2) Build() error {
 }
 
 func (buildConfig *BuildConfigV2) BuildInDocker() error {
-	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
+	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.Tag, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
 }
 
 func (buildConfig *BuildConfigV2) TestUnit() error {
@@ -82,4 +84,20 @@ func (buildConfig *BuildConfigV2) TestIntegrationBinary() error {
 
 func (buildConfig *BuildConfigV2) TestIntegrationBinaryInDocker() error {
 	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext)
+}
+
+func (buildConfig *BuildConfigV2) TestIntegrationDocker() error {
+	return buildConfig.execString(buildConfig.TestIntegrationDockerCommand)
+}
+
+func (buildConfig *BuildConfigV2) TestIntegrationDockerInDocker() error {
+	if err := buildConfig.BuildInDocker(); err != nil {
+		return nil
+	}
+
+	if err := buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationDockerTag, "-f", buildConfig.TestIntegrationDockerDockerfile, buildConfig.TestIntegrationDockerDockerContext); err != nil {
+		return err
+	}
+
+	return buildConfig.execDocker("run", "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
 }
