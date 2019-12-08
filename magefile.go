@@ -45,10 +45,12 @@ var buildConfigARM = utils.BuildConfig{
 }
 
 var buildConfigCollection = utils.BuildConfigCollection{
-	Tag:                    "pojntfx/godibs",
-	UnitTestCommand:        "go test ./...",
-	IntegrationTestCommand: "go run main.go server --help",
-	CleanGlob:              ".bin",
+	Tag:                            "pojntfx/godibs",
+	UnitTestCommand:                "go test ./...",
+	UnitTestCommandInDocker:        "docker build -f Dockerfile.unitTest .",
+	IntegrationTestCommand:         "go run main.go server --help",
+	IntegrationTestCommandInDocker: "docker build -f Dockerfile.integrationTest .",
+	CleanGlob:                      ".bin",
 	BuildConfigs: []utils.BuildConfig{
 		buildConfigAMD64,
 		buildConfigARM64,
@@ -86,8 +88,16 @@ func UnitTest() error {
 	return buildConfigCollection.UnitTest()
 }
 
+func UnitTestInDocker() error {
+	return buildConfigCollection.UnitTestInDocker()
+}
+
 func IntegrationTest() error {
 	return buildConfigCollection.IntegrationTest()
+}
+
+func IntegrationTestInDocker() error {
+	return buildConfigCollection.IntegrationTestInDocker()
 }
 
 func IntegrationTestDockerAll() error {
