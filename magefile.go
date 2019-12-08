@@ -42,7 +42,7 @@ var (
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
 				TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:amd64",
-				TestIntegrationDockerCommand:       "docker run --platform amd64 pojntfx/godibs:amd64 /usr/local/bin/godibs --help",
+				TestIntegrationDockerCommand:       "docker run --platform linux/amd64 pojntfx/godibs:amd64 /usr/local/bin/godibs --help",
 				TestIntegrationDockerDockerContext: ".",
 				TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
 			}}}
@@ -106,4 +106,64 @@ func GetBinaryFromDockerImage() error {
 
 func Clean() error {
 	return buildConfigs.Clean(PLATFORM)
+}
+
+func BuildAll() error {
+	return buildConfigs.BuildAll()
+}
+
+func BuildInDockerAll() error {
+	return buildConfigs.BuildInDockerAll()
+}
+
+func BuildDockerAll() error {
+	return buildConfigs.BuildDockerAll()
+}
+
+func BuildDockerInDockerAll() error {
+	return buildConfigs.BuildDockerInDockerAll()
+}
+
+func TestUnitAll() error {
+	return buildConfigs.TestUnitAll()
+}
+
+func TestUnitInDockerAll() error {
+	return buildConfigs.TestUnitInDockerAll()
+}
+
+func TestIntegrationGoAll() error {
+	return buildConfigs.TestIntegrationGoAll()
+}
+
+func TestIntegrationGoInDockerAll() error {
+	return buildConfigs.TestIntegrationGoInDockerAll()
+}
+
+func TestIntegrationBinaryAll() error {
+	return buildConfigs.TestIntegrationBinaryAll()
+}
+
+func TestIntegrationBinaryInDockerAll() error {
+	return buildConfigs.TestIntegrationBinaryInDockerAll()
+}
+
+func TestIntegrationDockerAll() error {
+	return buildConfigs.TestIntegrationDockerAll()
+}
+
+func TestIntegrationDockerInDockerAll() error {
+	return buildConfigs.TestIntegrationDockerInDockerAll()
+}
+
+func PushDockerImageAll() error {
+	return buildConfigs.PushDockerImageAll()
+}
+
+func GetBinaryFromDockerImageAll() error {
+	return buildConfigs.GetBinaryFromDockerImageAll()
+}
+
+func CleanAll() error {
+	return buildConfigs.CleanAll()
 }

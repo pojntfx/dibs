@@ -70,6 +70,8 @@ func (buildConfig *BuildConfigV2) execDocker(args ...string) error {
 }
 
 func (buildConfig *BuildConfigV2) Build() error {
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	return buildConfig.execString(buildConfig.BuildCommand)
 }
 
@@ -78,6 +80,8 @@ func (buildConfig *BuildConfigV2) BuildInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) BuildDocker() error {
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	return buildConfig.execString(buildConfig.BuildDockerCommand)
 }
 
@@ -86,10 +90,12 @@ func (buildConfig *BuildConfigV2) BuildDockerInDocker() error {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.BuildDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.BuildDockerTag)
 }
 
 func (buildConfig *BuildConfigV2) TestUnit() error {
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	return buildConfig.execString(buildConfig.TestUnitCommand)
 }
 
@@ -98,6 +104,8 @@ func (buildConfig *BuildConfigV2) TestUnitInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationGo() error {
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	return buildConfig.execString(buildConfig.TestIntegrationGoCommand)
 }
 
@@ -106,6 +114,8 @@ func (buildConfig *BuildConfigV2) TestIntegrationGoInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationBinary() error {
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	return buildConfig.execString(buildConfig.TestIntegrationBinaryCommand)
 }
 
@@ -114,6 +124,8 @@ func (buildConfig *BuildConfigV2) TestIntegrationBinaryInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationDocker() error {
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	return buildConfig.execString(buildConfig.TestIntegrationDockerCommand)
 }
 
@@ -126,7 +138,7 @@ func (buildConfig *BuildConfigV2) TestIntegrationDockerInDocker() error {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
 }
 
 func (buildConfig *BuildConfigV2) PushDockerImage() error {
@@ -145,7 +157,7 @@ func (buildConfig *BuildConfigV2) GetBinaryFromDockerImage() error {
 		return err
 	}
 	if string(out) != "\n" {
-		if err := buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--name", id, buildConfig.Tag, "echo"); err != nil {
+		if err := buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--name", id, buildConfig.Tag, "echo"); err != nil {
 			return err
 		}
 
@@ -276,4 +288,154 @@ func (buildConfigCollection *BuildConfigCollectionV2) Clean(architecture string)
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.Clean()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.Build(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.BuildInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.BuildDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildDockerInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.BuildDockerInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestUnitAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestUnit(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestUnitInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestUnitInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationGoAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationGo(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationGoInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationGoInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationBinaryAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationBinary(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationBinaryInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationBinaryInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationDockerInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationDockerInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) PushDockerImageAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.PushDockerImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) GetBinaryFromDockerImageAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.GetBinaryFromDockerImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) CleanAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.Clean(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
