@@ -22,13 +22,15 @@ type BuildConfig struct {
 }
 
 type BuildConfigCollection struct {
-	Tag                            string
-	UnitTestCommand                string
-	UnitTestCommandInDocker        string
-	IntegrationTestCommand         string
-	IntegrationTestCommandInDocker string
-	CleanGlob                      string
-	BuildConfigs                   []BuildConfig
+	Tag                          string
+	UnitTestCommand              string
+	UnitTestDockerfile           string
+	UnitTestDockerContext        string
+	IntegrationTestCommand       string
+	IntegrationTestDockerfile    string
+	IntegrationTestDockerContext string
+	CleanGlob                    string
+	BuildConfigs                 []BuildConfig
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
@@ -94,9 +96,7 @@ func (buildConfigCollection *BuildConfigCollection) UnitTest() error {
 }
 
 func (buildConfigCollection *BuildConfigCollection) UnitTestInDocker() error {
-	cmds := strings.Split(buildConfigCollection.UnitTestCommandInDocker, " ")
-
-	return sh.RunV(cmds[0], cmds[1:]...)
+	return sh.RunV("docker", "build", "-f", buildConfigCollection.UnitTestDockerfile, buildConfigCollection.UnitTestDockerContext)
 }
 
 func (buildConfigCollection *BuildConfigCollection) IntegrationTest() error {
@@ -106,13 +106,7 @@ func (buildConfigCollection *BuildConfigCollection) IntegrationTest() error {
 }
 
 func (buildConfigCollection *BuildConfigCollection) IntegrationTestInDocker() error {
-	cmds := strings.Split(buildConfigCollection.IntegrationTestCommandInDocker, " ")
-
-	return sh.RunV(cmds[0], cmds[1:]...)
-}
-
-func (buildConfigCollection *BuildConfigCollection) SetupMultiArch() error {
-	return sh.RunV("docker", "run", "--rm", "--privileged", "multiarch/qemu-user-static", "--reset", "-p", "yes")
+	return sh.RunV("docker", "build", "-f", buildConfigCollection.IntegrationTestDockerfile, buildConfigCollection.IntegrationTestDockerContext)
 }
 
 func (buildConfigCollection *BuildConfigCollection) Clean() error {

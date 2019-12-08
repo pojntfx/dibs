@@ -1,13 +1,11 @@
 unitTest:
-        image: golang:1.13.5-buster
+        image: docker:stable
+        services:
+                - docker:dind
+        variables:
+                DOCKER_HOST: tcp://docker:2375/
         before_script:
+                - apk add go git musl-dev
                 - go get github.com/magefile/mage
         script:
-                - mage unitTest
-
-integrationTest:
-        image: golang:1.13.5-buster
-        before_script:
-                - go get github.com/magefile/mage
-        script:
-                - mage integrationTest
+                - mage unitTestInDocker
