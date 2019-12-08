@@ -20,3 +20,13 @@ integrationTest:
         <<: *dindMageJob
         script:
                 - mage integrationTestInDocker
+
+integrationTestDockerAll:
+        <<: *dindMageJob
+        script:
+                - mage buildDockerImagesAll integrationTestDockerAll
+
+integrationTestBinariesAll:
+        <<: *dindMageJob
+        script:
+                - mage buildDockerImagesAll getBinariesFromDockerContainersAll integrationTestBinariesAll
