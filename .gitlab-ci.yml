@@ -17,10 +17,9 @@
 stages:
         - test
         - dockerBuild
-        - dockerPush
+        - dockerPushBinaryBuild
         - dockerManifestBuild
         - dockerManifestPush
-        - binaryBuild
 
 testUnitInDockerAll:
         <<: *dindMageJob
@@ -54,9 +53,15 @@ buildDockerAll:
 
 pushDockerImageAll:
         <<: *dindMageJob
-        stage: dockerPush
+        stage: dockerPushBinaryBuild
         script:
                 - mage pushDockerImageAll
+
+getBinaryFromDockerImageAll:
+        <<: *dindMageJob
+        stage: dockerPushBinaryBuild
+        script:
+                - mage getBinaryFromDockerImageAll
 
 buildDockerManifest:
         <<: *dindMageJob
@@ -69,9 +74,3 @@ pushDockerManifest:
         stage: dockerManifestPush
         script:
                 - mage pushDockerManifest
-
-getBinaryFromDockerImageAll:
-        <<: *dindMageJob
-        stage: binaryBuild
-        script:
-                - mage getBinaryFromDockerImageAll
