@@ -18,6 +18,11 @@ var (
 		BuildDockerContext: ".",
 		BuildDockerfile:    "Dockerfile",
 
+		BuildDockerTag:           "pojntfx/godibs-builddockerindocker:amd64",
+		BuildDockerCommand:       "mage buildInDocker",
+		BuildDockerDockerContext: ".",
+		BuildDockerDockerfile:    "Dockerfile.docker",
+
 		TestUnitCommand:       "go test ./...",
 		TestUnitDockerContext: ".",
 		TestUnitDockerfile:    "Dockerfile.testUnit",
@@ -43,6 +48,14 @@ func Build() error {
 
 func BuildInDocker() error {
 	return buildConfigAMD64.BuildInDocker()
+}
+
+func BuildDocker() error {
+	return buildConfigAMD64.BuildDocker()
+}
+
+func BuildDockerInDocker() error {
+	return buildConfigAMD64.BuildDockerInDocker()
 }
 
 func TestUnit() error {
