@@ -1,4 +1,5 @@
-FROM golang:1.13.5-buster AS build
+# syntax=docker/dockerfile:experimental
+FROM --platform=$TARGETPLATFORM golang:1.13.5-buster AS build
 WORKDIR /app
 
 RUN go get github.com/magefile/mage
@@ -10,4 +11,4 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN mage unitTest
+RUN mage testUnit
