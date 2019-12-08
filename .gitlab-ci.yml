@@ -12,6 +12,7 @@
                 - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
                 - chmod +x mage
                 - mv mage /usr/local/bin
+                - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 testUnitInDockerAll:
         <<: *dindMageJob
