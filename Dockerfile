@@ -17,4 +17,4 @@ RUN mage build
 FROM --platform=$TARGETPLATFORM debian:buster-slim
 COPY --from=build /app/.bin/godibs-* /usr/local/bin/godibs
 EXPOSE 25000
-CMD ["/usr/local/bin/godibs", "server"]
+CMD /usr/local/bin/godibs server
