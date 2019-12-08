@@ -1,7 +1,6 @@
-FROM arm64v8/golang:1.13.5-buster AS build
+# syntax=docker/dockerfile:experimental
+FROM --platform=$TARGETPLATFORM golang:1.13.5-buster AS build
 WORKDIR /app
-
-ENV ARCHITECTURE=arm64
 
 RUN go get github.com/magefile/mage
 COPY ./go.mod ./go.sum ./
@@ -12,9 +11,9 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN mage buildBinary
+RUN mage build
 
-FROM arm64v8/debian:buster-slim
-COPY --from=build /app/.bin/godibs-arm64 /usr/local/bin/godibs
+FROM --platform=$TARGETPLATFORM debian:buster-slim
+COPY --from=build /app/.bin/godibs-* /usr/local/bin/godibs
 EXPOSE 25000
 CMD ["/usr/local/bin/godibs", "server"]
