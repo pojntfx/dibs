@@ -46,6 +46,7 @@ func (buildConfig *BuildConfigV2) execString(command string) error {
 }
 
 func (buildConfig *BuildConfigV2) execDocker(args ...string) error {
+	os.Setenv("DOCKER_CLI_EXPERIMENTAL", "enabled")
 	os.Setenv("DOCKER_BUILDKIT", "1")
 
 	return buildConfig.exec(append([]string{"docker"}, args...)...)
@@ -56,5 +57,13 @@ func (buildConfig *BuildConfigV2) Build() error {
 }
 
 func (buildConfig *BuildConfigV2) BuildInDocker() error {
-	return buildConfig.execDocker("build", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
+	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
+}
+
+func (buildConfig *BuildConfigV2) TestUnit() error {
+	return buildConfig.execString(buildConfig.TestUnitCommand)
+}
+
+func (buildConfig *BuildConfigV2) TestUnitInDocker() error {
+	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestUnitDockerfile, buildConfig.TestUnitDockerContext)
 }
