@@ -67,3 +67,11 @@ func (buildConfig *BuildConfigV2) TestUnit() error {
 func (buildConfig *BuildConfigV2) TestUnitInDocker() error {
 	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestUnitDockerfile, buildConfig.TestUnitDockerContext)
 }
+
+func (buildConfig *BuildConfigV2) TestIntegrationGo() error {
+	return buildConfig.execString(buildConfig.TestIntegrationGoCommand)
+}
+
+func (buildConfig *BuildConfigV2) TestIntegrationGoInDocker() error {
+	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationGoDockerfile, buildConfig.TestIntegrationGoDockerContext)
+}
