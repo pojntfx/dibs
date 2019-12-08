@@ -5,7 +5,9 @@ unitTest:
         variables:
                 DOCKER_HOST: tcp://docker:2375/
         before_script:
-                - apk add go git musl-dev
-                - go get github.com/magefile/mage
+                - apk add curl go git musl-dev
+                - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
+                - chmod +x mage
+                - mv mage /usr/local/bin
         script:
                 - mage unitTestInDocker
