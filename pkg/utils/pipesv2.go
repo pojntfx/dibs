@@ -14,6 +14,11 @@ type BuildConfigV2 struct {
 	BuildDockerfile    string
 	BuildDockerContext string
 
+	BuildDockerTag           string
+	BuildDockerCommand       string
+	BuildDockerDockerContext string
+	BuildDockerDockerfile    string
+
 	TestUnitCommand       string
 	TestUnitDockerfile    string
 	TestUnitDockerContext string
@@ -62,6 +67,18 @@ func (buildConfig *BuildConfigV2) BuildInDocker() error {
 	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.Tag, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
 }
 
+func (buildConfig *BuildConfigV2) BuildDocker() error {
+	return buildConfig.execString(buildConfig.BuildDockerCommand)
+}
+
+func (buildConfig *BuildConfigV2) BuildDockerInDocker() error {
+	if err := buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.BuildDockerTag, "-f", buildConfig.BuildDockerDockerfile, buildConfig.BuildDockerDockerContext); err != nil {
+		return err
+	}
+
+	return buildConfig.execDocker("run", "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.BuildDockerTag)
+}
+
 func (buildConfig *BuildConfigV2) TestUnit() error {
 	return buildConfig.execString(buildConfig.TestUnitCommand)
 }
@@ -91,7 +108,7 @@ func (buildConfig *BuildConfigV2) TestIntegrationDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationDockerInDocker() error {
-	if err := buildConfig.BuildInDocker(); err != nil {
+	if err := buildConfig.BuildDocker(); err != nil {
 		return nil
 	}
 
