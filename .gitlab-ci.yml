@@ -52,12 +52,12 @@ buildPushDockerAll:
         script:
                 - mage buildDockerAll pushDockerImageAll
 
-getBinaryFromDockerImageAll:
+getPushBinaryFromDockerImageAll:
         <<: *dindMageJob
         stage: dockerManifestBinaryBuildPushAll
         script:
                 - mage getBinaryFromDockerImageAll
-                - ghr ${GITHUB_RELEASES_VERSION} -replace -t ${GITHUB_RELEASES_TOKEN} .bin
+                - ghr -replace -t ${GITHUB_RELEASES_TOKEN} ${GITHUB_RELEASES_VERSION} .bin
         artifacts:
                 name: binaries
                 paths:
