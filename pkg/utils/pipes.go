@@ -14,6 +14,7 @@ type BuildConfig struct {
 	Dockerfile                   string
 	Architecture                 string
 	Tag                          string
+	BuildBinaryCommand           string
 	BinaryInContainerPath        string
 	BinaryDistPath               string
 	IntegrationTestCommandBinary string
@@ -64,6 +65,12 @@ func (buildConfig *BuildConfig) GetBinaryFromDockerContainer() error {
 	}
 
 	return nil
+}
+
+func (buildConfig *BuildConfig) BuildBinary() error {
+	cmds := strings.Split(buildConfig.BuildBinaryCommand, " ")
+
+	return sh.RunV(cmds[0], cmds[1:]...)
 }
 
 func (buildConfig *BuildConfig) IntegrationTestBinary() error {
@@ -135,7 +142,7 @@ func (buildConfigCollection *BuildConfigCollection) IntegrationTestDockerAll() e
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) IntegrationTestBinaryAll() error {
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestBinariesAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.IntegrationTestBinary(); err != nil {
 			return err
@@ -212,4 +219,10 @@ func (buildConfigCollection *BuildConfigCollection) IntegrationTestBinary(archit
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.IntegrationTestBinary()
+}
+
+func (buildConfigCollection *BuildConfigCollection) BuildBinary(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildBinary()
 }

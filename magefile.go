@@ -13,6 +13,7 @@ var buildConfigAMD64 = utils.BuildConfig{
 	Dockerfile:                   "Dockerfile.amd64",
 	Architecture:                 "amd64",
 	Tag:                          "pojntfx/godibs:amd64",
+	BuildBinaryCommand:           "go build -o .bin/godibs-amd64 main.go",
 	BinaryInContainerPath:        "/usr/local/bin/godibs",
 	BinaryDistPath:               filepath.Join(".bin", "godibs-amd64"),
 	IntegrationTestCommandBinary: ".bin/godibs-amd64 --help",
@@ -24,6 +25,7 @@ var buildConfigARM64 = utils.BuildConfig{
 	Dockerfile:                   "Dockerfile.arm64",
 	Architecture:                 "arm64",
 	Tag:                          "pojntfx/godibs:arm64",
+	BuildBinaryCommand:           "go build -o .bin/godibs-arm64 main.go",
 	BinaryInContainerPath:        "/usr/local/bin/godibs",
 	BinaryDistPath:               filepath.Join(".bin", "godibs-arm64"),
 	IntegrationTestCommandBinary: ".bin/godibs-arm64 --help",
@@ -35,6 +37,7 @@ var buildConfigARM = utils.BuildConfig{
 	Dockerfile:                   "Dockerfile.arm",
 	Architecture:                 "arm",
 	Tag:                          "pojntfx/godibs:arm",
+	BuildBinaryCommand:           "go build -o .bin/godibs-arm main.go",
 	BinaryInContainerPath:        "/usr/local/bin/godibs",
 	BinaryDistPath:               filepath.Join(".bin", "godibs-arm"),
 	IntegrationTestCommandBinary: ".bin/godibs-arm --help",
@@ -75,6 +78,10 @@ func IntegrationTestBinary() error {
 	return buildConfigCollection.IntegrationTestBinary(ARCHITECTURE)
 }
 
+func BuildBinary() error {
+	return buildConfigCollection.BuildBinary(ARCHITECTURE)
+}
+
 func UnitTest() error {
 	return buildConfigCollection.UnitTest()
 }
@@ -87,8 +94,8 @@ func IntegrationTestDockerAll() error {
 	return buildConfigCollection.IntegrationTestDockerAll()
 }
 
-func IntegrationTestBinaryAll() error {
-	return buildConfigCollection.IntegrationTestBinaryAll()
+func IntegrationTestBinariesAll() error {
+	return buildConfigCollection.IntegrationTestBinariesAll()
 }
 
 func SetupMultiArch() error {

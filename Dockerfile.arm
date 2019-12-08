@@ -1,8 +1,6 @@
 FROM arm32v7/golang:1.13.5-buster AS build
 WORKDIR /app
 
-ENV GO111MODULE=on
-ENV PLATFORM=linux
 ENV ARCHITECTURE=arm
 
 RUN go get github.com/magefile/mage
@@ -17,6 +15,6 @@ COPY ./pkg ./pkg
 RUN mage binaryBuild
 
 FROM arm32v7/debian:buster-slim
-COPY --from=build /app/.bin/godibs-linux-arm /usr/local/bin/godibs
+COPY --from=build /app/.bin/godibs-arm /usr/local/bin/godibs
 EXPOSE 25000
 CMD ["/usr/local/bin/godibs", "server"]

@@ -1,8 +1,6 @@
 FROM amd64/golang:1.13.5-buster AS build
 WORKDIR /app
 
-ENV GO111MODULE=on
-ENV PLATFORM=linux
 ENV ARCHITECTURE=amd64
 
 RUN go get github.com/magefile/mage
@@ -17,6 +15,6 @@ COPY ./pkg ./pkg
 RUN mage binaryBuild
 
 FROM amd64/debian:buster-slim
-COPY --from=build /app/.bin/godibs-linux-amd64 /usr/local/bin/godibs
+COPY --from=build /app/.bin/godibs-amd64 /usr/local/bin/godibs
 EXPOSE 25000
 CMD ["/usr/local/bin/godibs", "server"]
