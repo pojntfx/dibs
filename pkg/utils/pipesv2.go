@@ -75,3 +75,11 @@ func (buildConfig *BuildConfigV2) TestIntegrationGo() error {
 func (buildConfig *BuildConfigV2) TestIntegrationGoInDocker() error {
 	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationGoDockerfile, buildConfig.TestIntegrationGoDockerContext)
 }
+
+func (buildConfig *BuildConfigV2) TestIntegrationBinary() error {
+	return buildConfig.execString(buildConfig.TestIntegrationBinaryCommand)
+}
+
+func (buildConfig *BuildConfigV2) TestIntegrationBinaryInDocker() error {
+	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext)
+}

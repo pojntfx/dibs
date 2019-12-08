@@ -24,6 +24,10 @@ var (
 		TestIntegrationGoCommand:       "go run main.go --help",
 		TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
 		TestIntegrationGoDockerContext: ".",
+
+		TestIntegrationBinaryCommand:       ".bin/godibs-amd64 --help",
+		TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
+		TestIntegrationBinaryDockerContext: ".",
 	}
 )
 
@@ -49,4 +53,12 @@ func TestIntegrationGo() error {
 
 func TestIntegrationGoInDocker() error {
 	return buildConfigAMD64.TestIntegrationGoInDocker()
+}
+
+func TestIntegrationBinary() error {
+	return buildConfigAMD64.TestIntegrationBinary()
+}
+
+func TestIntegrationBinaryInDocker() error {
+	return buildConfigAMD64.TestIntegrationBinaryInDocker()
 }

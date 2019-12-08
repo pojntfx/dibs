@@ -1,7 +1,9 @@
 .dindMageJob: &dindMageJob
         image: docker:stable
         services:
-                - docker:dind
+                - name: docker:dind
+                  command:
+                          - "--experimental"
         variables:
                 DOCKER_HOST: tcp://docker:2375/
         before_script:
@@ -11,22 +13,17 @@
                 - chmod +x mage
                 - mv mage /usr/local/bin
 
-unitTestInDockerAll:
+testUnitInDockerAll:
         <<: *dindMageJob
         script:
-                - mage unitTestInDockerAll
+                - mage testUnitInDocker
 
-integrationTestInDockerAll:
+testIntegrationGoInDockerAll:
         <<: *dindMageJob
         script:
-                - mage integrationTestInDockerAll
+                - mage testIntegrationGoInDocker
 
-integrationTestDockerAll:
+testIntegrationBinaryInDockerAll:
         <<: *dindMageJob
         script:
-                - mage buildDockerImagesAll integrationTestDockerAll || true
-
-# integrationTestBinariesAll:
-# <<: *dindMageJob
-# script:
-# - mage buildDockerImagesAll getBinariesFromDockerContainersAll integrationTestBinariesAll || true
+                - mage testIntegrationBinaryInDocker
