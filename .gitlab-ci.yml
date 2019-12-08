@@ -1,6 +1,13 @@
-unittests:
+unitTest:
         image: golang:1.13.5-buster
         before_script:
                 - go get github.com/magefile/mage
         script:
-                - mage unittest
+                - mage unitTest
+
+integrationTest:
+        image: golang:1.13.5-buster
+        before_script:
+                - go get github.com/magefile/mage
+        script:
+                - mage integrationTest
