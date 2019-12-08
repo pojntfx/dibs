@@ -19,10 +19,10 @@ var (
 				Platform: "linux/amd64",
 
 				BinaryInContainerPath: "/usr/local/bin/godibs",
-				BinaryDistPath:        ".bin/godibs-amd64",
-				CleanGlob:             ".bin/godibs-amd64",
+				BinaryDistPath:        ".bin/godibs-linux-amd64",
+				CleanGlob:             ".bin/godibs-linux-amd64",
 
-				BuildCommand:       "go build -o .bin/godibs-amd64 main.go",
+				BuildCommand:       "go build -o .bin/godibs-linux-amd64 main.go",
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
@@ -39,7 +39,7 @@ var (
 				TestIntegrationGoDockerContext: ".",
 				TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
 
-				TestIntegrationBinaryCommand:       ".bin/godibs-amd64 --help",
+				TestIntegrationBinaryCommand:       ".bin/godibs-linux-amd64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
