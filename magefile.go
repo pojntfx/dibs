@@ -45,12 +45,14 @@ var buildConfigARM = utils.BuildConfig{
 }
 
 var buildConfigCollection = utils.BuildConfigCollection{
-	Tag:                            "pojntfx/godibs",
-	UnitTestCommand:                "go test ./...",
-	UnitTestCommandInDocker:        "docker build -f Dockerfile.unitTest .",
-	IntegrationTestCommand:         "go run main.go server --help",
-	IntegrationTestCommandInDocker: "docker build -f Dockerfile.integrationTest .",
-	CleanGlob:                      ".bin",
+	Tag:                          "pojntfx/godibs",
+	UnitTestCommand:              "go test ./...",
+	UnitTestDockerfile:           "Dockerfile.unitTest",
+	UnitTestDockerContext:        ".",
+	IntegrationTestCommand:       "go run main.go server --help",
+	IntegrationTestDockerfile:    "Dockerfile.integrationTest",
+	IntegrationTestDockerContext: ".",
+	CleanGlob:                    ".bin",
 	BuildConfigs: []utils.BuildConfig{
 		buildConfigAMD64,
 		buildConfigARM64,
@@ -106,10 +108,6 @@ func IntegrationTestDockerAll() error {
 
 func IntegrationTestBinariesAll() error {
 	return buildConfigCollection.IntegrationTestBinariesAll()
-}
-
-func SetupMultiArch() error {
-	return buildConfigCollection.SetupMultiArch()
 }
 
 func Clean() error {
