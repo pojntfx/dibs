@@ -1,14 +1,19 @@
 package utils
 
 import (
+	"github.com/google/uuid"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 type BuildConfigV2 struct {
 	Tag      string
 	Platform string
+
+	BinaryInContainerPath string
+	BinaryDistPath        string
 
 	BuildCommand       string
 	BuildDockerfile    string
@@ -123,6 +128,40 @@ func (buildConfig *BuildConfigV2) TestIntegrationDockerInDocker() error {
 	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
 }
 
+func (buildConfig *BuildConfigV2) PushDockerImage() error {
+	return buildConfig.execDocker("push", buildConfig.Tag)
+}
+
+func (buildConfig *BuildConfigV2) GetBinaryFromDockerImage() error {
+	id := uuid.New().String()
+	distDir, _ := filepath.Split(buildConfig.BinaryDistPath)
+	if err := os.MkdirAll(distDir, 0777); err != nil {
+		return err
+	}
+
+	out, err := exec.Command("docker", "ps", "-aqf", "name="+id).Output()
+	if err != nil {
+		return err
+	}
+	if string(out) != "\n" {
+		if err := buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--name", id, buildConfig.Tag, "echo"); err != nil {
+			return err
+		}
+
+		if err := buildConfig.execDocker("cp", id+":"+buildConfig.BinaryInContainerPath, buildConfig.BinaryDistPath); err != nil {
+			return err
+		}
+
+		if err := buildConfig.execDocker("rm", "-f", id); err != nil {
+			return err
+		}
+	} else {
+		return buildConfig.GetBinaryFromDockerImage()
+	}
+
+	return nil
+}
+
 func (buildConfigCollection *BuildConfigCollectionV2) getBuildConfigForArchitecture(architecture string) BuildConfigV2 {
 	var buildConfigForArchitecture BuildConfigV2
 
@@ -206,4 +245,16 @@ func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationDockerInDoc
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.TestIntegrationDockerInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) PushDockerImage(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.PushDockerImage()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) GetBinaryFromDockerImage(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.GetBinaryFromDockerImage()
 }

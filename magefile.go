@@ -16,6 +16,9 @@ var (
 				Tag:      "pojntfx/godibs:amd64",
 				Platform: "linux/amd64",
 
+				BinaryInContainerPath: "/usr/local/bin/godibs",
+				BinaryDistPath:        ".bin/godibs-amd64",
+
 				BuildCommand:       "go build -o .bin/godibs-amd64 main.go",
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
@@ -90,4 +93,12 @@ func TestIntegrationDocker() error {
 
 func TestIntegrationDockerInDocker() error {
 	return buildConfigs.TestIntegrationDockerInDocker(PLATFORM)
+}
+
+func PushDockerImage() error {
+	return buildConfigs.PushDockerImage(PLATFORM)
+}
+
+func GetBinaryFromDockerImage() error {
+	return buildConfigs.GetBinaryFromDockerImage(PLATFORM)
 }

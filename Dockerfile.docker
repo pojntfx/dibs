@@ -17,4 +17,4 @@ COPY ./pkg ./pkg
 
 COPY ./Dockerfile ./Dockerfile
 
-CMD ["mage", "buildDocker"]
+CMD mage buildDocker

@@ -15,4 +15,4 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-CMD ["mage", "testIntegrationDocker"]
+CMD mage testIntegrationDocker
