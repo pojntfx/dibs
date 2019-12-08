@@ -19,10 +19,8 @@
 
 stages:
         - test
-        - dockerBuild
-        - dockerPushBinaryBuild
-        - dockerManifestBuildBinaryPush
-        - dockerManifestPush
+        - dockerBuildPushAll
+        - dockerManifestBinaryBuildPushAll
 
 testUnitInDockerAll:
         <<: *dindMageJob
@@ -48,43 +46,26 @@ testIntegrationDockerInDockerAll:
         script:
                 - mage testIntegrationDockerInDockerAll
 
-buildDockerAll:
+buildPushDockerAll:
         <<: *dindMageJob
-        stage: dockerBuild
+        stage: dockerBuildPushAll
         script:
-                - mage buildDockerAll
-
-pushDockerImageAll:
-        <<: *dindMageJob
-        stage: dockerPushBinaryBuild
-        script:
-                - mage pushDockerImageAll
+                - mage buildDockerAll pushDockerImageAll
 
 getBinaryFromDockerImageAll:
         <<: *dindMageJob
-        stage: dockerPushBinaryBuild
+        stage: dockerManifestBinaryBuildPushAll
         script:
                 - mage getBinaryFromDockerImageAll
+                - ghr ${GITHUB_RELEASES_VERSION} -replace -t ${GITHUB_RELEASES_TOKEN} .bin
         artifacts:
                 name: binaries
                 paths:
                         - .bin
                 expire_in: 120 day
 
-buildDockerManifest:
+buildPushDockerManifest:
         <<: *dindMageJob
-        stage: dockerManifestBuildBinaryPush
+        stage: dockerManifestBinaryBuildPushAll
         script:
-                - mage buildDockerManifest
-
-pushBinaryAll:
-        <<: *dindMageJob
-        stage: dockerManifestBuildBinaryPush
-        script:
-                - ghr ${GITHUB_RELEASES_VERSION} -replace -t ${GITHUB_RELEASES_TOKEN}
-
-pushDockerManifest:
-        <<: *dindMageJob
-        stage: dockerManifestPush
-        script:
-                - mage pushDockerManifest
+                - mage buildDockerManifest pushDockerManifest
