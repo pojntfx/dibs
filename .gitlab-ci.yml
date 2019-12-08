@@ -27,3 +27,8 @@ testIntegrationBinaryInDockerAll:
         <<: *dindMageJob
         script:
                 - mage testIntegrationBinaryInDocker
+
+testIntegrationDockerInDockerAll:
+        <<: *dindMageJob
+        script:
+                - mage testIntegrationDockerInDocker

@@ -11,23 +11,29 @@ var (
 	ARCHITECTURE = os.Getenv("ARCHITECTURE")
 
 	buildConfigAMD64 = utils.BuildConfigV2{
+		Tag:      "pojntfx/godibs:amd64",
 		Platform: "amd64",
 
 		BuildCommand:       "go build -o .bin/godibs-amd64 main.go",
-		BuildDockerfile:    "Dockerfile",
 		BuildDockerContext: ".",
+		BuildDockerfile:    "Dockerfile",
 
 		TestUnitCommand:       "go test ./...",
-		TestUnitDockerfile:    "Dockerfile.testUnit",
 		TestUnitDockerContext: ".",
+		TestUnitDockerfile:    "Dockerfile.testUnit",
 
 		TestIntegrationGoCommand:       "go run main.go --help",
-		TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
 		TestIntegrationGoDockerContext: ".",
+		TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
 
 		TestIntegrationBinaryCommand:       ".bin/godibs-amd64 --help",
-		TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 		TestIntegrationBinaryDockerContext: ".",
+		TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
+
+		TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:amd64",
+		TestIntegrationDockerCommand:       "docker run pojntfx/godibs:amd64 /usr/local/bin/godibs --help",
+		TestIntegrationDockerDockerContext: ".",
+		TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
 	}
 )
 
@@ -61,4 +67,12 @@ func TestIntegrationBinary() error {
 
 func TestIntegrationBinaryInDocker() error {
 	return buildConfigAMD64.TestIntegrationBinaryInDocker()
+}
+
+func TestIntegrationDocker() error {
+	return buildConfigAMD64.TestIntegrationDocker()
+}
+
+func TestIntegrationDockerInDocker() error {
+	return buildConfigAMD64.TestIntegrationDockerInDocker()
 }
