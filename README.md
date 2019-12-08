@@ -1,6 +1,6 @@
 # godibs
 
-System for distributed multi-module development with Go.
+System for distributed multi-module, multi-architecture development with Go.
 
 [![pipeline status](https://gitlab.com/pojntfx/godibs/badges/master/pipeline.svg)](https://gitlab.com/pojntfx/godibs/commits/master)
 

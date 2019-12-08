@@ -44,6 +44,8 @@ type BuildConfigV2 struct {
 }
 
 type BuildConfigCollectionV2 struct {
+	ManifestTag string
+
 	BuildConfigs []BuildConfigV2
 }
 
@@ -288,6 +290,20 @@ func (buildConfigCollection *BuildConfigCollectionV2) Clean(architecture string)
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.Clean()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildDockerManifest() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.execDocker("manifest", "create", "--amend", buildConfigCollection.ManifestTag, buildConfig.Tag); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) PushDockerManifest() error {
+	return buildConfigCollection.BuildConfigs[0].execDocker("manifest", "push", buildConfigCollection.ManifestTag)
 }
 
 func (buildConfigCollection *BuildConfigCollectionV2) BuildAll() error {
