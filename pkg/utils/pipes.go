@@ -11,7 +11,11 @@ import (
 
 type BuildConfig struct {
 	DockerContext                string
+	DockerContextUnitTest        string
+	DockerContextIntegrationTest string
 	Dockerfile                   string
+	DockerfileUnitTest           string
+	DockerfileIntegrationTest    string
 	Architecture                 string
 	Tag                          string
 	BuildBinaryCommand           string
@@ -22,19 +26,23 @@ type BuildConfig struct {
 }
 
 type BuildConfigCollection struct {
-	Tag                          string
-	UnitTestCommand              string
-	UnitTestDockerfile           string
-	UnitTestDockerContext        string
-	IntegrationTestCommand       string
-	IntegrationTestDockerfile    string
-	IntegrationTestDockerContext string
-	CleanGlob                    string
-	BuildConfigs                 []BuildConfig
+	Tag                    string
+	UnitTestCommand        string
+	IntegrationTestCommand string
+	CleanGlob              string
+	BuildConfigs           []BuildConfig
 }
 
 func (buildConfig *BuildConfig) BuildDockerImage() error {
 	return sh.RunV("docker", "build", "-f", buildConfig.Dockerfile, "-t", buildConfig.Tag, buildConfig.DockerContext)
+}
+
+func (buildConfig *BuildConfig) UnitTestInDocker() error {
+	return sh.RunV("docker", "build", "-f", buildConfig.DockerfileUnitTest, buildConfig.DockerContextUnitTest)
+}
+
+func (buildConfig *BuildConfig) IntegrationTestInDocker() error {
+	return sh.RunV("docker", "build", "-f", buildConfig.DockerfileIntegrationTest, buildConfig.DockerContextIntegrationTest)
 }
 
 func (buildConfig *BuildConfig) PushDockerImage() error {
@@ -95,18 +103,10 @@ func (buildConfigCollection *BuildConfigCollection) UnitTest() error {
 	return sh.RunV(cmds[0], cmds[1:]...)
 }
 
-func (buildConfigCollection *BuildConfigCollection) UnitTestInDocker() error {
-	return sh.RunV("docker", "build", "-f", buildConfigCollection.UnitTestDockerfile, buildConfigCollection.UnitTestDockerContext)
-}
-
 func (buildConfigCollection *BuildConfigCollection) IntegrationTest() error {
 	cmds := strings.Split(buildConfigCollection.IntegrationTestCommand, " ")
 
 	return sh.RunV(cmds[0], cmds[1:]...)
-}
-
-func (buildConfigCollection *BuildConfigCollection) IntegrationTestInDocker() error {
-	return sh.RunV("docker", "build", "-f", buildConfigCollection.IntegrationTestDockerfile, buildConfigCollection.IntegrationTestDockerContext)
 }
 
 func (buildConfigCollection *BuildConfigCollection) Clean() error {
@@ -123,6 +123,26 @@ func (buildConfigCollection *BuildConfigCollection) Clean() error {
 func (buildConfigCollection *BuildConfigCollection) BuildDockerImagesAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.BuildDockerImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) UnitTestInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.UnitTestInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.IntegrationTestInDocker(); err != nil {
 			return err
 		}
 	}
@@ -215,6 +235,18 @@ func (buildConfigCollection *BuildConfigCollection) GetBinaryFromDockerContainer
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.GetBinaryFromDockerContainer()
+}
+
+func (buildConfigCollection *BuildConfigCollection) UnitTestInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.UnitTestInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollection) IntegrationTestInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.IntegrationTestInDocker()
 }
 
 func (buildConfigCollection *BuildConfigCollection) IntegrationTestDocker(architecture string) error {

@@ -10,7 +10,11 @@ import (
 
 var buildConfigAMD64 = utils.BuildConfig{
 	DockerContext:                ".",
+	DockerContextUnitTest:        ".",
+	DockerContextIntegrationTest: ".",
 	Dockerfile:                   "Dockerfile.amd64",
+	DockerfileUnitTest:           "Dockerfile.unitTest.amd64",
+	DockerfileIntegrationTest:    "Dockerfile.integrationTest.amd64",
 	Architecture:                 "amd64",
 	Tag:                          "pojntfx/godibs:amd64",
 	BuildBinaryCommand:           "go build -o .bin/godibs-amd64 main.go",
@@ -22,8 +26,11 @@ var buildConfigAMD64 = utils.BuildConfig{
 
 var buildConfigARM64 = utils.BuildConfig{
 	DockerContext:                ".",
+	DockerContextUnitTest:        ".",
+	DockerContextIntegrationTest: ".",
 	Dockerfile:                   "Dockerfile.arm64",
-	Architecture:                 "arm64",
+	DockerfileUnitTest:           "Dockerfile.unitTest.arm64",
+	DockerfileIntegrationTest:    "Dockerfile.integrationTest.arm64",
 	Tag:                          "pojntfx/godibs:arm64",
 	BuildBinaryCommand:           "go build -o .bin/godibs-arm64 main.go",
 	BinaryInContainerPath:        "/usr/local/bin/godibs",
@@ -34,8 +41,11 @@ var buildConfigARM64 = utils.BuildConfig{
 
 var buildConfigARM = utils.BuildConfig{
 	DockerContext:                ".",
+	DockerContextUnitTest:        ".",
+	DockerContextIntegrationTest: ".",
 	Dockerfile:                   "Dockerfile.arm",
-	Architecture:                 "arm",
+	DockerfileUnitTest:           "Dockerfile.unitTest.arm",
+	DockerfileIntegrationTest:    "Dockerfile.integrationTest.arm",
 	Tag:                          "pojntfx/godibs:arm",
 	BuildBinaryCommand:           "go build -o .bin/godibs-arm main.go",
 	BinaryInContainerPath:        "/usr/local/bin/godibs",
@@ -45,14 +55,10 @@ var buildConfigARM = utils.BuildConfig{
 }
 
 var buildConfigCollection = utils.BuildConfigCollection{
-	Tag:                          "pojntfx/godibs",
-	UnitTestCommand:              "go test ./...",
-	UnitTestDockerfile:           "Dockerfile.unitTest",
-	UnitTestDockerContext:        ".",
-	IntegrationTestCommand:       "go run main.go server --help",
-	IntegrationTestDockerfile:    "Dockerfile.integrationTest",
-	IntegrationTestDockerContext: ".",
-	CleanGlob:                    ".bin",
+	Tag:                    "pojntfx/godibs",
+	UnitTestCommand:        "go test ./...",
+	IntegrationTestCommand: "go run main.go server --help",
+	CleanGlob:              ".bin",
 	BuildConfigs: []utils.BuildConfig{
 		buildConfigAMD64,
 		buildConfigARM64,
@@ -78,6 +84,10 @@ func IntegrationTestDocker() error {
 	return buildConfigCollection.IntegrationTestDocker(ARCHITECTURE)
 }
 
+func IntegrationTestInDocker() error {
+	return buildConfigCollection.IntegrationTestInDocker(ARCHITECTURE)
+}
+
 func IntegrationTestBinary() error {
 	return buildConfigCollection.IntegrationTestBinary(ARCHITECTURE)
 }
@@ -91,19 +101,23 @@ func UnitTest() error {
 }
 
 func UnitTestInDocker() error {
-	return buildConfigCollection.UnitTestInDocker()
+	return buildConfigCollection.UnitTestInDocker(ARCHITECTURE)
+}
+
+func UnitTestInDockerAll() error {
+	return buildConfigCollection.UnitTestInDockerAll()
 }
 
 func IntegrationTest() error {
 	return buildConfigCollection.IntegrationTest()
 }
 
-func IntegrationTestInDocker() error {
-	return buildConfigCollection.IntegrationTestInDocker()
-}
-
 func IntegrationTestDockerAll() error {
 	return buildConfigCollection.IntegrationTestDockerAll()
+}
+
+func IntegrationTestInDockerAll() error {
+	return buildConfigCollection.IntegrationTestInDockerAll()
 }
 
 func IntegrationTestBinariesAll() error {
