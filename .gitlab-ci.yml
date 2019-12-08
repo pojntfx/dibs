@@ -12,13 +12,16 @@
                 - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
                 - chmod +x mage
                 - mv mage /usr/local/bin
+                - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
+                - chmod +x ghr_v0.13.0_linux_amd64/ghr
+                - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
                 - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
         - test
         - dockerBuild
         - dockerPushBinaryBuild
-        - dockerManifestBuild
+        - dockerManifestBuildBinaryPush
         - dockerManifestPush
 
 testUnitInDockerAll:
@@ -70,9 +73,15 @@ getBinaryFromDockerImageAll:
 
 buildDockerManifest:
         <<: *dindMageJob
-        stage: dockerManifestBuild
+        stage: dockerManifestBuildBinaryPush
         script:
                 - mage buildDockerManifest
+
+pushBinaryAll:
+        <<: *dindMageJob
+        stage: dockerManifestBuildBinaryPush
+        script:
+                - ghr ${GITHUB_RELEASES_VERSION} -replace -t ${GITHUB_RELEASES_TOKEN}
 
 pushDockerManifest:
         <<: *dindMageJob
