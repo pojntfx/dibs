@@ -37,6 +37,10 @@ type BuildConfigV2 struct {
 	TestIntegrationBinaryDockerfile    string
 }
 
+type BuildConfigCollectionV2 struct {
+	BuildConfigs []BuildConfigV2
+}
+
 func (buildConfig *BuildConfigV2) exec(commands ...string) error {
 	command := exec.Command(commands[0], commands[1:]...)
 
@@ -76,7 +80,7 @@ func (buildConfig *BuildConfigV2) BuildDockerInDocker() error {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.BuildDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.BuildDockerTag)
 }
 
 func (buildConfig *BuildConfigV2) TestUnit() error {
@@ -116,5 +120,90 @@ func (buildConfig *BuildConfigV2) TestIntegrationDockerInDocker() error {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) getBuildConfigForArchitecture(architecture string) BuildConfigV2 {
+	var buildConfigForArchitecture BuildConfigV2
+
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if buildConfig.Platform == architecture {
+			buildConfigForArchitecture = buildConfig
+			break
+		}
+	}
+
+	return buildConfigForArchitecture
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) Build(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.Build()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) BuildDockerInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildDockerInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestUnit(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestUnit()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestUnitInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestUnitInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationGo(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationGo()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationGoInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationGoInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationBinary(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationBinary()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationBinaryInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationBinaryInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) TestIntegrationDockerInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationDockerInDocker()
 }

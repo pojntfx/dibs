@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:experimental
 FROM --platform=$TARGETPLATFORM golang:1.13.5-buster AS build
 WORKDIR /app
+ARG TARGETPLATFORM
 
 RUN go get github.com/magefile/mage
 COPY ./go.mod ./go.sum ./

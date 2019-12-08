@@ -8,84 +8,86 @@ import (
 )
 
 var (
-	ARCHITECTURE = os.Getenv("ARCHITECTURE")
+	PLATFORM = os.Getenv("TARGETPLATFORM")
 
-	buildConfigAMD64 = utils.BuildConfigV2{
-		Tag:      "pojntfx/godibs:amd64",
-		Platform: "amd64",
+	buildConfigs = utils.BuildConfigCollectionV2{
+		BuildConfigs: []utils.BuildConfigV2{
+			utils.BuildConfigV2{
+				Tag:      "pojntfx/godibs:amd64",
+				Platform: "linux/amd64",
 
-		BuildCommand:       "go build -o .bin/godibs-amd64 main.go",
-		BuildDockerContext: ".",
-		BuildDockerfile:    "Dockerfile",
+				BuildCommand:       "go build -o .bin/godibs-amd64 main.go",
+				BuildDockerContext: ".",
+				BuildDockerfile:    "Dockerfile",
 
-		BuildDockerTag:           "pojntfx/godibs-builddockerindocker:amd64",
-		BuildDockerCommand:       "mage buildInDocker",
-		BuildDockerDockerContext: ".",
-		BuildDockerDockerfile:    "Dockerfile.docker",
+				BuildDockerTag:           "pojntfx/godibs-builddockerindocker:amd64",
+				BuildDockerCommand:       "mage buildInDocker",
+				BuildDockerDockerContext: ".",
+				BuildDockerDockerfile:    "Dockerfile.docker",
 
-		TestUnitCommand:       "go test ./...",
-		TestUnitDockerContext: ".",
-		TestUnitDockerfile:    "Dockerfile.testUnit",
+				TestUnitCommand:       "go test ./...",
+				TestUnitDockerContext: ".",
+				TestUnitDockerfile:    "Dockerfile.testUnit",
 
-		TestIntegrationGoCommand:       "go run main.go --help",
-		TestIntegrationGoDockerContext: ".",
-		TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationGoCommand:       "go run main.go --help",
+				TestIntegrationGoDockerContext: ".",
+				TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
 
-		TestIntegrationBinaryCommand:       ".bin/godibs-amd64 --help",
-		TestIntegrationBinaryDockerContext: ".",
-		TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
+				TestIntegrationBinaryCommand:       ".bin/godibs-amd64 --help",
+				TestIntegrationBinaryDockerContext: ".",
+				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
-		TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:amd64",
-		TestIntegrationDockerCommand:       "docker run pojntfx/godibs:amd64 /usr/local/bin/godibs --help",
-		TestIntegrationDockerDockerContext: ".",
-		TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
-	}
+				TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:amd64",
+				TestIntegrationDockerCommand:       "docker run --platform amd64 pojntfx/godibs:amd64 /usr/local/bin/godibs --help",
+				TestIntegrationDockerDockerContext: ".",
+				TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
+			}}}
 )
 
 func Build() error {
-	return buildConfigAMD64.Build()
+	return buildConfigs.Build(PLATFORM)
 }
 
 func BuildInDocker() error {
-	return buildConfigAMD64.BuildInDocker()
+	return buildConfigs.BuildInDocker(PLATFORM)
 }
 
 func BuildDocker() error {
-	return buildConfigAMD64.BuildDocker()
+	return buildConfigs.BuildDocker(PLATFORM)
 }
 
 func BuildDockerInDocker() error {
-	return buildConfigAMD64.BuildDockerInDocker()
+	return buildConfigs.BuildDockerInDocker(PLATFORM)
 }
 
 func TestUnit() error {
-	return buildConfigAMD64.TestUnit()
+	return buildConfigs.TestUnit(PLATFORM)
 }
 
 func TestUnitInDocker() error {
-	return buildConfigAMD64.TestUnitInDocker()
+	return buildConfigs.TestUnitInDocker(PLATFORM)
 }
 
 func TestIntegrationGo() error {
-	return buildConfigAMD64.TestIntegrationGo()
+	return buildConfigs.TestIntegrationGo(PLATFORM)
 }
 
 func TestIntegrationGoInDocker() error {
-	return buildConfigAMD64.TestIntegrationGoInDocker()
+	return buildConfigs.TestIntegrationGoInDocker(PLATFORM)
 }
 
 func TestIntegrationBinary() error {
-	return buildConfigAMD64.TestIntegrationBinary()
+	return buildConfigs.TestIntegrationBinary(PLATFORM)
 }
 
 func TestIntegrationBinaryInDocker() error {
-	return buildConfigAMD64.TestIntegrationBinaryInDocker()
+	return buildConfigs.TestIntegrationBinaryInDocker(PLATFORM)
 }
 
 func TestIntegrationDocker() error {
-	return buildConfigAMD64.TestIntegrationDocker()
+	return buildConfigs.TestIntegrationDocker(PLATFORM)
 }
 
 func TestIntegrationDockerInDocker() error {
-	return buildConfigAMD64.TestIntegrationDockerInDocker()
+	return buildConfigs.TestIntegrationDockerInDocker(PLATFORM)
 }

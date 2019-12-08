@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:experimental
 FROM --platform=$TARGETPLATFORM docker:stable
+ARG TARGETPLATFORM
 
 RUN apk add curl go git musl-dev
 RUN curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
