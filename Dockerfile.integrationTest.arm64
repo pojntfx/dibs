@@ -1,4 +1,4 @@
-FROM golang:1.13.5-buster AS build
+FROM arm64v8/golang:1.13.5-buster AS build
 WORKDIR /app
 
 RUN go get github.com/magefile/mage
@@ -10,4 +10,4 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN mage unitTest
+RUN mage integrationTest
