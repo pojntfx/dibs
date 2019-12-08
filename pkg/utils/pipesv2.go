@@ -14,6 +14,7 @@ type BuildConfigV2 struct {
 
 	BinaryInContainerPath string
 	BinaryDistPath        string
+	CleanGlob             string
 
 	BuildCommand       string
 	BuildDockerfile    string
@@ -162,6 +163,18 @@ func (buildConfig *BuildConfigV2) GetBinaryFromDockerImage() error {
 	return nil
 }
 
+func (buildConfig *BuildConfigV2) Clean() error {
+	filesToRemove, _ := filepath.Glob(buildConfig.CleanGlob)
+
+	for _, fileToRemove := range filesToRemove {
+		if err := os.Remove(fileToRemove); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (buildConfigCollection *BuildConfigCollectionV2) getBuildConfigForArchitecture(architecture string) BuildConfigV2 {
 	var buildConfigForArchitecture BuildConfigV2
 
@@ -257,4 +270,10 @@ func (buildConfigCollection *BuildConfigCollectionV2) GetBinaryFromDockerImage(a
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.GetBinaryFromDockerImage()
+}
+
+func (buildConfigCollection *BuildConfigCollectionV2) Clean(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.Clean()
 }

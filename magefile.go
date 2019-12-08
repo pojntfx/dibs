@@ -18,6 +18,7 @@ var (
 
 				BinaryInContainerPath: "/usr/local/bin/godibs",
 				BinaryDistPath:        ".bin/godibs-amd64",
+				CleanGlob:             ".bin/godibs-amd64",
 
 				BuildCommand:       "go build -o .bin/godibs-amd64 main.go",
 				BuildDockerContext: ".",
@@ -101,4 +102,8 @@ func PushDockerImage() error {
 
 func GetBinaryFromDockerImage() error {
 	return buildConfigs.GetBinaryFromDockerImage(PLATFORM)
+}
+
+func Clean() error {
+	return buildConfigs.Clean(PLATFORM)
 }
