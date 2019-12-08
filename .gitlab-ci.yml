@@ -22,47 +22,56 @@ stages:
         - dockerManifestPush
         - binaryBuild
 
-test:testUnitInDockerAll:
+testUnitInDockerAll:
         <<: *dindMageJob
+        stage: test
         script:
                 - mage testUnitInDockerAll
 
-test:testIntegrationGoInDockerAll:
+testIntegrationGoInDockerAll:
         <<: *dindMageJob
+        stage: test
         script:
                 - mage testIntegrationGoInDockerAll
 
-test:testIntegrationBinaryInDockerAll:
+testIntegrationBinaryInDockerAll:
         <<: *dindMageJob
+        stage: test
         script:
                 - mage testIntegrationBinaryInDockerAll
 
-test:testIntegrationDockerInDockerAll:
+testIntegrationDockerInDockerAll:
         <<: *dindMageJob
+        stage: test
         script:
                 - mage testIntegrationDockerInDockerAll
 
-dockerBuild:buildDockerAll:
+buildDockerAll:
         <<: *dindMageJob
+        stage: dockerBuild
         script:
                 - mage buildDockerAll
 
-dockerPush:pushDockerImageAll:
+pushDockerImageAll:
         <<: *dindMageJob
+        stage: dockerPush
         script:
                 - mage pushDockerImageAll
 
-dockerManifestBuild:buildDockerManifest:
+buildDockerManifest:
         <<: *dindMageJob
+        stage: dockerManifestBuild
         script:
                 - mage buildDockerManifest
 
-dockerManifestPush:pushDockerManifest:
+pushDockerManifest:
         <<: *dindMageJob
+        stage: dockerManifestPush
         script:
                 - mage pushDockerManifest
 
-binaryBuild:getBinaryFromDockerImageAll:
+getBinaryFromDockerImageAll:
         <<: *dindMageJob
+        stage: binaryBuild
         script:
                 - mage getBinaryFromDockerImageAll
