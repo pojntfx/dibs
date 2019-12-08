@@ -6,6 +6,12 @@ System for distributed multi-module, multi-architecture development with Go.
 
 ## Installation
 
+### From Prebuilt Binaries
+
+Prebuilt binaries are available on the [releases page](https://github.com/pojntfx/godibs/releases/latest).
+
+### From Go
+
 ```bash
 % go get github.com/pojntfx/godibs
 ```
