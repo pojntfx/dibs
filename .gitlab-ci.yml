@@ -33,3 +33,27 @@ testIntegrationDockerInDockerAll:
         <<: *dindMageJob
         script:
                 - mage testIntegrationDockerInDockerAll
+
+buildAndPushDockerImageAll:
+        <<: *dindMageJob
+        script:
+                - mage buildDockerAll pushDockerImageAll
+        dependencies:
+                - testUnitInDockerAll
+                - testIntegrationGoInDockerAll
+                - testIntegrationDockerInDockerAll
+                - testIntegrationBinaryInDockerAll
+
+buildAndPushDockerManifest:
+        <<: *dindMageJob
+        script:
+                - mage buildDockerManifest pushDockerManifest
+        dependencies:
+                - buildAndPushDockerImageAll
+
+getBinaryFromDockerImageAll:
+        <<: *dindMageJob
+        script:
+                - mage getBinaryFromDockerImageAll
+        dependencies:
+                - buildAndPushDockerImageAll
