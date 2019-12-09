@@ -6,7 +6,13 @@
                           - "--experimental"
         variables:
                 DOCKER_HOST: tcp://docker:2375/
+                DOCKER_BUILDKIT: 1
+                DOCKER_CLI_EXPERIMENTAL: 1
         before_script:
+                - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
+                - docker buildx create --name nubuilder
+                - docker buildx use nubuilder
+                - docker buildx inspect --bootstrap
                 - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
                 - apk add curl go git musl-dev
                 - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
@@ -15,7 +21,6 @@
                 - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
                 - chmod +x ghr_v0.13.0_linux_amd64/ghr
                 - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
-                - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
         - test
