@@ -12,7 +12,7 @@
                 - apk add curl go git musl-dev
                 - curl -L https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64 -o docker-buildx
                 - chmod +x docker-buildx
-                - mkdir -p /.docker/cli-plugins/
+                - mkdir -p ~/.docker/cli-plugins/
                 - cp docker-buildx ~/.docker/cli-plugins/
                 - docker buildx create --name nubuilder
                 - docker buildx use nubuilder
