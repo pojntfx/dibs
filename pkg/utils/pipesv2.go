@@ -50,6 +50,10 @@ type BuildConfigCollectionV2 struct {
 }
 
 func (buildConfig *BuildConfigV2) exec(commands ...string) error {
+	os.Setenv("DOCKER_CLI_EXPERIMENTAL", "enabled")
+	os.Setenv("DOCKER_BUILDKIT", "1")
+	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+
 	command := exec.Command(commands[0], commands[1:]...)
 
 	command.Stdout = os.Stdout
@@ -65,15 +69,10 @@ func (buildConfig *BuildConfigV2) execString(command string) error {
 }
 
 func (buildConfig *BuildConfigV2) execDocker(args ...string) error {
-	os.Setenv("DOCKER_CLI_EXPERIMENTAL", "enabled")
-	os.Setenv("DOCKER_BUILDKIT", "1")
-
 	return buildConfig.exec(append([]string{"docker"}, args...)...)
 }
 
 func (buildConfig *BuildConfigV2) Build() error {
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
-
 	return buildConfig.execString(buildConfig.BuildCommand)
 }
 
@@ -82,8 +81,6 @@ func (buildConfig *BuildConfigV2) BuildInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) BuildDocker() error {
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
-
 	return buildConfig.execString(buildConfig.BuildDockerCommand)
 }
 
@@ -96,8 +93,6 @@ func (buildConfig *BuildConfigV2) BuildDockerInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestUnit() error {
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
-
 	return buildConfig.execString(buildConfig.TestUnitCommand)
 }
 
@@ -106,8 +101,6 @@ func (buildConfig *BuildConfigV2) TestUnitInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationGo() error {
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
-
 	return buildConfig.execString(buildConfig.TestIntegrationGoCommand)
 }
 
@@ -116,8 +109,6 @@ func (buildConfig *BuildConfigV2) TestIntegrationGoInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationBinary() error {
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
-
 	return buildConfig.execString(buildConfig.TestIntegrationBinaryCommand)
 }
 
@@ -126,8 +117,6 @@ func (buildConfig *BuildConfigV2) TestIntegrationBinaryInDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationDocker() error {
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
-
 	return buildConfig.execString(buildConfig.TestIntegrationDockerCommand)
 }
 
