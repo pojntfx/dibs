@@ -9,18 +9,22 @@
                 DOCKER_BUILDKIT: 1
                 DOCKER_CLI_EXPERIMENTAL: enabled
         before_script:
-                - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
-                - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --name nubuilder
-                - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx use nubuilder
-                - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx inspect --bootstrap
-                - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
                 - apk add curl go git musl-dev
+                - curl -L https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64 -o docker-buildx
+                - chmod +x docker-buildx
+                - mkdir -p /.docker/cli-plugins/
+                - cp docker-buildx ~/.docker/cli-plugins/
+                - docker buildx create --name nubuilder
+                - docker buildx use nubuilder
+                - docker buildx inspect --bootstrap
+                - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
                 - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
                 - chmod +x mage
                 - mv mage /usr/local/bin
                 - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
                 - chmod +x ghr_v0.13.0_linux_amd64/ghr
                 - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
+                - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
         - test
