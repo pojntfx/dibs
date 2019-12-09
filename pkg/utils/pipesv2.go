@@ -78,7 +78,7 @@ func (buildConfig *BuildConfigV2) Build() error {
 }
 
 func (buildConfig *BuildConfigV2) BuildInDocker() error {
-	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.Tag, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
+	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.Tag, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
 }
 
 func (buildConfig *BuildConfigV2) BuildDocker() error {
@@ -88,7 +88,7 @@ func (buildConfig *BuildConfigV2) BuildDocker() error {
 }
 
 func (buildConfig *BuildConfigV2) BuildDockerInDocker() error {
-	if err := buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.BuildDockerTag, "-f", buildConfig.BuildDockerDockerfile, buildConfig.BuildDockerDockerContext); err != nil {
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.BuildDockerTag, "-f", buildConfig.BuildDockerDockerfile, buildConfig.BuildDockerDockerContext); err != nil {
 		return err
 	}
 
@@ -102,7 +102,7 @@ func (buildConfig *BuildConfigV2) TestUnit() error {
 }
 
 func (buildConfig *BuildConfigV2) TestUnitInDocker() error {
-	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestUnitDockerfile, buildConfig.TestUnitDockerContext)
+	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestUnitDockerfile, buildConfig.TestUnitDockerContext)
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationGo() error {
@@ -112,7 +112,7 @@ func (buildConfig *BuildConfigV2) TestIntegrationGo() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationGoInDocker() error {
-	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationGoDockerfile, buildConfig.TestIntegrationGoDockerContext)
+	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationGoDockerfile, buildConfig.TestIntegrationGoDockerContext)
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationBinary() error {
@@ -122,7 +122,7 @@ func (buildConfig *BuildConfigV2) TestIntegrationBinary() error {
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationBinaryInDocker() error {
-	return buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext)
+	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext)
 }
 
 func (buildConfig *BuildConfigV2) TestIntegrationDocker() error {
@@ -136,7 +136,7 @@ func (buildConfig *BuildConfigV2) TestIntegrationDockerInDocker() error {
 		return nil
 	}
 
-	if err := buildConfig.execDocker("build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationDockerTag, "-f", buildConfig.TestIntegrationDockerDockerfile, buildConfig.TestIntegrationDockerDockerContext); err != nil {
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationDockerTag, "-f", buildConfig.TestIntegrationDockerDockerfile, buildConfig.TestIntegrationDockerDockerContext); err != nil {
 		return err
 	}
 
