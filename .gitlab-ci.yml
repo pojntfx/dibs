@@ -7,7 +7,7 @@
         variables:
                 DOCKER_HOST: tcp://docker:2375/
                 DOCKER_BUILDKIT: 1
-                DOCKER_CLI_EXPERIMENTAL: 1
+                DOCKER_CLI_EXPERIMENTAL: enabled
         before_script:
                 - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
                 - docker buildx create --name nubuilder
