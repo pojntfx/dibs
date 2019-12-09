@@ -15,7 +15,8 @@
                 - chmod +x docker-buildx
                 - mkdir -p ~/.docker/cli-plugins/
                 - cp docker-buildx ~/.docker/cli-plugins/
-                - docker buildx create --use
+                - docker buildx create --name godibs
+                - docker buildx use godibs
                 - docker buildx inspect --bootstrap
                 - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
                 - chmod +x mage
