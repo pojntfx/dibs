@@ -42,5 +42,5 @@ func init() {
 	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "port", "25000", "Port on which the Git repos should be served")
 	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "path", "/repos", "HTTP path prefix for the served Git repos")
 
-	rootCmd.AddCommand(serverCmd)
+	moduleCmd.AddCommand(serverCmd)
 }

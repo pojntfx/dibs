@@ -85,5 +85,5 @@ func init() {
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_MODULES, "modules-pull", "", "Comma-seperated list of the names of the modules to pull")
 	clientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "dir-pull", filepath.Join(os.TempDir(), "godibs", "pull", id), "Directory to pull the modules to")
 
-	rootCmd.AddCommand(clientCmd)
+	moduleCmd.AddCommand(clientCmd)
 }
