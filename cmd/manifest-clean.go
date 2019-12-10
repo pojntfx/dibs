@@ -2,14 +2,14 @@ package cmd
 
 import "github.com/spf13/cobra"
 
-var imageCleanCmd = &cobra.Command{
+var manifestCleanCmd = &cobra.Command{
 	Use:   "clean",
-	Short: "Clean the Docker image output",
+	Short: "Clean the Docker manifest output",
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfigs.Clean(PLATFORM)
 	},
 }
 
 func init() {
-	imageCmd.AddCommand(imageCleanCmd)
+	manifestCmd.AddCommand(manifestCleanCmd)
 }
