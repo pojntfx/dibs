@@ -21,7 +21,7 @@ const (
 	REDIS_SUFFIX_DOWN_DOWNLOADED = "down_downloaded"
 )
 
-// serverCmd ist the main entry command
+// rootCmd ist the main entry command
 var rootCmd = &cobra.Command{
 	Use:   "godibs",
 	Short: "System for distributed multi-module, multi-architecture development with Go",
