@@ -14,8 +14,8 @@ var (
 	GIT_SERVER_HTTP_PATH string
 )
 
-// serverCmd ist the command to start the server
-var serverCmd = &cobra.Command{
+// moduleServerCmd ist the command to start the server
+var moduleServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the server",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -38,9 +38,9 @@ var serverCmd = &cobra.Command{
 func init() {
 	id := uuid.New().String()
 
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos", id), "Directory in which the Git repos should be stored")
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "port", "25000", "Port on which the Git repos should be served")
-	serverCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "path", "/repos", "HTTP path prefix for the served Git repos")
+	moduleServerCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos", id), "Directory in which the Git repos should be stored")
+	moduleServerCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "port", "25000", "Port on which the Git repos should be served")
+	moduleServerCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "path", "/repos", "HTTP path prefix for the served Git repos")
 
-	moduleCmd.AddCommand(serverCmd)
+	moduleCmd.AddCommand(moduleServerCmd)
 }
