@@ -10,11 +10,11 @@ import (
 var (
 	PLATFORM = os.Getenv("TARGETPLATFORM")
 
-	buildConfigs = utils.BuildConfigCollectionV2{
+	buildConfigs = utils.BuildConfigCollection{
 		ManifestTag: "pojntfx/godibs:latest",
 
-		BuildConfigs: []utils.BuildConfigV2{
-			utils.BuildConfigV2{
+		BuildConfigs: []utils.BuildConfig{
+			utils.BuildConfig{
 				Tag:      "pojntfx/godibs:linux-amd64",
 				Platform: "linux/amd64",
 
@@ -48,7 +48,7 @@ var (
 				TestIntegrationDockerDockerContext: ".",
 				TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
 			},
-			utils.BuildConfigV2{
+			utils.BuildConfig{
 				Tag:      "pojntfx/godibs:linux-arm64",
 				Platform: "linux/arm64",
 
