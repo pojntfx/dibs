@@ -9,8 +9,8 @@ import (
 var (
 	RedisUrl    string
 	RedisPrefix string
-	ON          string
-	PLATFORM    string
+	On          string
+	Platform    string
 )
 
 const (
@@ -38,8 +38,8 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringVar(&RedisUrl, "redis-url", "localhost:6379", "URL of the Redis instance to use")
 	rootCmd.PersistentFlags().StringVar(&RedisPrefix, "redis-prefix", "godibs", "Redis channel prefix")
-	rootCmd.PersistentFlags().StringVar(&ON, "on", OnNative, "System to run on (native|docker)")
-	rootCmd.PersistentFlags().StringVar(&PLATFORM, "platform", PlatformDefault, "Platform specified in configuration to use (\""+PlatformAll+"\" to run for every platform)")
+	rootCmd.PersistentFlags().StringVar(&On, "on", OnNative, "System to run on (native|docker)")
+	rootCmd.PersistentFlags().StringVar(&Platform, "platform", PlatformDefault, "Platform specified in configuration to use (\""+PlatformAll+"\" to run for every platform)")
 }
 
 // Execute starts the main entry command
@@ -48,7 +48,7 @@ func Execute() {
 		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 	}
 
-	if !(ON == OnNative || ON == OnDocker) {
-		log.Fatal("Unsupported value for --on, must be either \""+OnNative+"\" or \""+OnDocker+"\"", rz.String("--on", ON))
+	if !(On == OnNative || On == OnDocker) {
+		log.Fatal("Unsupported value for --on, must be either \""+OnNative+"\" or \""+OnDocker+"\"", rz.String("--on", On))
 	}
 }

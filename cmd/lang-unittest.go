@@ -10,8 +10,8 @@ var langUnittestCmd = &cobra.Command{
 	Use:   "unittest",
 	Short: "Run the unit tests",
 	Run: func(cmd *cobra.Command, args []string) {
-		if PLATFORM == PlatformAll {
-			switch ON {
+		if Platform == PlatformAll {
+			switch On {
 			case OnNative:
 				if err := buildConfigs.TestUnitAll(); err != nil {
 					log.Error("Unit tests failed", rz.Err(err))
@@ -22,13 +22,13 @@ var langUnittestCmd = &cobra.Command{
 				}
 			}
 		} else {
-			switch ON {
+			switch On {
 			case OnNative:
-				if err := buildConfigs.TestUnit(PLATFORM); err != nil {
+				if err := buildConfigs.TestUnit(Platform); err != nil {
 					log.Error("Unit test failed", rz.Err(err))
 				}
 			case OnDocker:
-				if err := buildConfigs.TestUnitInDocker(PLATFORM); err != nil {
+				if err := buildConfigs.TestUnitInDocker(Platform); err != nil {
 					log.Error("Unit test failed in Docker", rz.Err(err))
 				}
 			}

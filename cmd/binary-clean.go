@@ -8,10 +8,10 @@ import (
 
 var binaryCleanCmd = &cobra.Command{
 	Use:   "clean",
-	Short: "Clean the binary output",
+	Short: "Clean the Docker image or binary output",
 	Run: func(cmd *cobra.Command, args []string) {
-		if PLATFORM == PlatformAll {
-			switch ON {
+		if Platform == PlatformAll {
+			switch On {
 			case OnNative:
 				if err := buildConfigs.BuildCleanAll(); err != nil {
 					log.Error("Could not clean binaries", rz.Err(err))
@@ -22,13 +22,13 @@ var binaryCleanCmd = &cobra.Command{
 				}
 			}
 		} else {
-			switch ON {
+			switch On {
 			case OnNative:
-				if err := buildConfigs.BuildClean(PLATFORM); err != nil {
+				if err := buildConfigs.BuildClean(Platform); err != nil {
 					log.Error("Could not clean binary", rz.Err(err))
 				}
 			case OnDocker:
-				if err := buildConfigs.BuildInDockerClean(PLATFORM); err != nil {
+				if err := buildConfigs.BuildInDockerClean(Platform); err != nil {
 					log.Error("Could not clean binary in Docker", rz.Err(err))
 				}
 			}
