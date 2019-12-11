@@ -6,7 +6,12 @@ var binaryBuildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build the binary",
 	Run: func(cmd *cobra.Command, args []string) {
-		buildConfigs.Build(PLATFORM)
+		switch ON {
+		case ON_NATIVE:
+			buildConfigs.Build(PLATFORM)
+		case ON_DOCKER:
+			buildConfigs.BuildInDocker(PLATFORM)
+		}
 	},
 }
 
