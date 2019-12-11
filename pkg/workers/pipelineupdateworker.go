@@ -2,7 +2,7 @@ package workers
 
 import (
 	"github.com/pojntfx/godibs/pkg/utils"
-	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"path/filepath"
 )
@@ -28,7 +28,11 @@ func (worker *PipelineUpdateWorker) Start(errors chan error, events chan utils.E
 	if err != nil {
 		errors <- err
 	}
-	defer pubSub.Close()
+	defer func() {
+		if err := pubSub.Close(); err != nil {
+			errors <- err
+		}
+	}()
 
 	for message := range channel {
 		pushedModule, _ := utils.ParseModuleFromMessage(message.Payload)

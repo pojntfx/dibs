@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/otiai10/copy"
-	rz "gitlab.com/z0mbie42/rz-go/v2"
+	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"os/exec"
@@ -47,19 +47,23 @@ func (pipeline *Pipeline) RunCommandsOnly() error {
 func (pipeline *Pipeline) RunAll() error {
 	if pipeline.StartCommandState != nil {
 		log.Info("Stopping module ...", rz.String("Module", pipeline.Module))
-		pipeline.StartCommandState.Process.Kill()
+		if err := pipeline.StartCommandState.Process.Kill(); err != nil {
+			log.Error("Could not stop module", rz.Err(err))
+		}
 	}
 
 	if err := setupPushDir(pipeline.SrcDir, pipeline.PushDir); err != nil {
 		return err
 	}
 
-	if err := pipeline.Git.PushModule(pipeline.Module, pipeline.PushDir); err != nil {
+	if err := pipeline.Git.PushModule(pipeline.PushDir); err != nil {
 		return err
 	}
 	pipeline.Redis.PublishWithTimestamp(pipeline.ModulePushedRedisSuffix, pipeline.Module)
 
-	pipeline.RunCommandsOnly()
+	if err := pipeline.RunCommandsOnly(); err != nil {
+		log.Error("Could not run pipeline's command", rz.Err(err))
+	}
 
 	log.Info(pipeline.StartCommand.LogMessage, rz.String("Module", pipeline.Module))
 	if err := RunCommand(pipeline.StartCommand.ExecLine, true); err != nil {

@@ -3,7 +3,7 @@ package starters
 import (
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
-	rz "gitlab.com/z0mbie42/rz-go/v2"
+	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"path/filepath"
 	"strconv"

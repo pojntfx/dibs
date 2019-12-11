@@ -3,7 +3,7 @@ package starters
 import (
 	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/pojntfx/godibs/pkg/workers"
-	rz "gitlab.com/z0mbie42/rz-go/v2"
+	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"io/ioutil"
 	"os"
@@ -60,8 +60,13 @@ func (client *Client) Start() {
 	downModulesDir := client.PipelineDownDirModules
 
 	// Replace the modules that are specified
-	moduleWithReplaces := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
-	ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithReplaces), 0777)
+	moduleWithReplaces, err := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
+	if err != nil {
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+	}
+	if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithReplaces), 0777); err != nil {
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+	}
 
 	// Connect to Redis
 	redis := utils.Redis{
@@ -90,7 +95,9 @@ func (client *Client) Start() {
 		}
 		goModContent := string(rawGoModContent)
 		moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
-		ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777)
+		if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777); err != nil {
+			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+		}
 
 		os.Exit(0)
 	}()

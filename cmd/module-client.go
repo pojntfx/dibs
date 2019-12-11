@@ -9,26 +9,26 @@ import (
 )
 
 var (
-	GIT_UP_BASE_URL string
+	GitUpBaseUrl string
 
-	PIPELINE_UP_DIR_SRC       string
-	PIPELINE_UP_DIR_PUSH      string
-	PIPELINE_UP_DIR_WATCH     string
-	PIPELINE_UP_FILE_MOD      string
-	PIPELINE_UP_BUILD_COMMAND string
-	PIPELINE_UP_TEST_COMMAND  string
-	PIPELINE_UP_START_COMMAND string
-	PIPELINE_UP_REGEX_IGNORE  string
+	PipelineUpDirSrc       string
+	PipelineUpDirPush      string
+	PipelineUpDirWatch     string
+	PipelineUpFileMod      string
+	PipelineUpBuildCommand string
+	PipelineUpTestCommand  string
+	PipelineUpStartCommand string
+	PipelineUpRegexIgnore  string
 
-	PIPELINE_DOWN_MODULES     string
-	PIPELINE_DOWN_DIR_MODULES string
+	PipelineDownModules    string
+	PipelineDownDirModules string
 )
 
 const (
-	GIT_UP_COMMIT_MESSAGE = "up_synced"
-	GIT_UP_REMOTE_NAME    = "godibs-sync"
-	GIT_UP_USER_NAME      = "godibs-syncer"
-	GIT_UP_USER_EMAIL     = "godibs-syncer@pojtinger.space"
+	GitUpCommitMessage = "up_synced"
+	GitUpRemoteName    = "godibs-sync"
+	GitUpUserName      = "godibs-syncer"
+	GitUpUserEmail     = "godibs-syncer@pojtinger.space"
 )
 
 // moduleClientCmd ist the command to start the client
@@ -37,31 +37,31 @@ var moduleClientCmd = &cobra.Command{
 	Short: "Start the module development client",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := starters.Client{
-			PipelineUpFileMod:      PIPELINE_UP_FILE_MOD,
-			PipelineDownModules:    PIPELINE_DOWN_MODULES,
-			PipelineDownDirModules: PIPELINE_DOWN_DIR_MODULES,
-			PipelineUpBuildCommand: PIPELINE_UP_BUILD_COMMAND,
-			PipelineUpStartCommand: PIPELINE_UP_START_COMMAND,
-			PipelineUpTestCommand:  PIPELINE_UP_TEST_COMMAND,
-			PipelineUpDirSrc:       PIPELINE_UP_DIR_SRC,
-			PipelineUpDirPush:      PIPELINE_UP_DIR_PUSH,
-			PipelineUpDirWatch:     PIPELINE_UP_DIR_WATCH,
-			PipelineUpRegexIgnore:  PIPELINE_UP_REGEX_IGNORE,
+			PipelineUpFileMod:      PipelineUpFileMod,
+			PipelineDownModules:    PipelineDownModules,
+			PipelineDownDirModules: PipelineDownDirModules,
+			PipelineUpBuildCommand: PipelineUpBuildCommand,
+			PipelineUpStartCommand: PipelineUpStartCommand,
+			PipelineUpTestCommand:  PipelineUpTestCommand,
+			PipelineUpDirSrc:       PipelineUpDirSrc,
+			PipelineUpDirPush:      PipelineUpDirPush,
+			PipelineUpDirWatch:     PipelineUpDirWatch,
+			PipelineUpRegexIgnore:  PipelineUpRegexIgnore,
 
-			RedisUrl:                  REDIS_URL,
-			RedisPrefix:               REDIS_PREFIX,
-			RedisSuffixUpRegistered:   REDIS_SUFFIX_UP_REGISTERED,
-			RedisSuffixUpUnRegistered: REDIS_SUFFIX_UP_UNREGISTERED,
-			RedisSuffixUpTested:       REDIS_SUFFIX_UP_TESTED,
-			RedisSuffixUpBuilt:        REDIS_SUFFIX_UP_BUILT,
-			RedisSuffixUpStarted:      REDIS_SUFFIX_UP_STARTED,
-			RedisSuffixUpPushed:       REDIS_SUFFIX_UP_PUSHED,
+			RedisUrl:                  RedisUrl,
+			RedisPrefix:               RedisPrefix,
+			RedisSuffixUpRegistered:   RedisSuffixUpRegistered,
+			RedisSuffixUpUnRegistered: RedisSuffixUpUnregistered,
+			RedisSuffixUpTested:       RedisSuffixUpTested,
+			RedisSuffixUpBuilt:        RedisSuffixUpBuilt,
+			RedisSuffixUpStarted:      RedisSuffixUpStarted,
+			RedisSuffixUpPushed:       RedisSuffixUpPushed,
 
-			GitUpRemoteName:    GIT_UP_REMOTE_NAME,
-			GitUpBaseURL:       GIT_UP_BASE_URL,
-			GitUpUserName:      GIT_UP_USER_NAME,
-			GitUpUserEmail:     GIT_UP_USER_EMAIL,
-			GitUpCommitMessage: GIT_UP_COMMIT_MESSAGE,
+			GitUpRemoteName:    GitUpRemoteName,
+			GitUpBaseURL:       GitUpBaseUrl,
+			GitUpUserName:      GitUpUserName,
+			GitUpUserEmail:     GitUpUserEmail,
+			GitUpCommitMessage: GitUpCommitMessage,
 		}
 
 		client.Start()
@@ -72,18 +72,18 @@ var moduleClientCmd = &cobra.Command{
 func init() {
 	id := uuid.New().String()
 
-	moduleClientCmd.PersistentFlags().StringVar(&GIT_UP_BASE_URL, "git-base-url", "http://localhost:25000/repos", "Base URL of the sync remote")
+	moduleClientCmd.PersistentFlags().StringVar(&GitUpBaseUrl, "git-base-url", "http://localhost:25000/repos", "Base URL of the sync remote")
 
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_SRC, "dir-src", ".", "Directory in which the source code of the module to push resides")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_PUSH, "dir-push", filepath.Join(os.TempDir(), "godibs", "push", id), "Temporary directory to put the module into before pushing")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_DIR_WATCH, "dir-watch", ".", "Directory to watch for changes")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_FILE_MOD, "modules-file", "go.mod", "Go module file of the module to push")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_BUILD_COMMAND, "cmd-build", "go build ./...", "Command to run to build the module")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_TEST_COMMAND, "cmd-test", "go test ./...", "Command to run to test the module")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_START_COMMAND, "cmd-start", "go run main.go", "Command to run to start the module")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_UP_REGEX_IGNORE, "regex-ignore", "*.pb.go", "Regular expression for files to ignore")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_MODULES, "modules-pull", "", "Comma-seperated list of the names of the modules to pull")
-	moduleClientCmd.PersistentFlags().StringVar(&PIPELINE_DOWN_DIR_MODULES, "dir-pull", filepath.Join(os.TempDir(), "godibs", "pull", id), "Directory to pull the modules to")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpDirSrc, "dir-src", ".", "Directory in which the source code of the module to push resides")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpDirPush, "dir-push", filepath.Join(os.TempDir(), "godibs", "push", id), "Temporary directory to put the module into before pushing")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpDirWatch, "dir-watch", ".", "Directory to watch for changes")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpFileMod, "modules-file", "go.mod", "Go module file of the module to push")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpBuildCommand, "cmd-build", "go build ./...", "Command to run to build the module")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpTestCommand, "cmd-test", "go test ./...", "Command to run to test the module")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpStartCommand, "cmd-start", "go run main.go", "Command to run to start the module")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineUpRegexIgnore, "regex-ignore", "*.pb.go", "Regular expression for files to ignore")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineDownModules, "modules-pull", "", "Comma-seperated list of the names of the modules to pull")
+	moduleClientCmd.PersistentFlags().StringVar(&PipelineDownDirModules, "dir-pull", filepath.Join(os.TempDir(), "godibs", "pull", id), "Directory to pull the modules to")
 
 	moduleCmd.AddCommand(moduleClientCmd)
 }

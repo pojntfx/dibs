@@ -7,7 +7,7 @@ var (
 		ManifestTag: "pojntfx/godibs:latest",
 
 		BuildConfigs: []utils.BuildConfig{
-			utils.BuildConfig{
+			{
 				Tag:      "pojntfx/godibs:linux-amd64",
 				Platform: "linux/amd64",
 
@@ -42,7 +42,7 @@ var (
 				TestIntegrationImageDockerfile:    "Dockerfile.testIntegrationImage",
 				TestIntegrationImageImageTag:      "pojntfx/godibs-integrationtest-image:linux-amd64",
 			},
-			utils.BuildConfig{
+			{
 				Tag:      "pojntfx/godibs:linux-arm64",
 				Platform: "linux/arm64",
 

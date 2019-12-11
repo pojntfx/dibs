@@ -1,7 +1,7 @@
 package utils
 
 import (
-	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4"
 	gitconf "gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"path/filepath"
@@ -25,7 +25,7 @@ func GetGitURL(baseURL, module string) string {
 }
 
 // PushModule adds all files to a git repo, commits and pushes them to a remote
-func (metadata *Git) PushModule(module, pushDir string) error {
+func (metadata *Git) PushModule(pushDir string) error {
 	g, err := git.PlainOpen(filepath.Join(pushDir))
 	if err != nil {
 		return err

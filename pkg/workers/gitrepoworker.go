@@ -1,9 +1,9 @@
 package workers
 
 import (
-	redis "github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v7"
 	"github.com/pojntfx/godibs/pkg/utils"
-	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"sync"
 )
@@ -27,7 +27,11 @@ func (worker *GitRepoWorker) Start(errors chan error, events chan utils.Event) {
 	if err != nil {
 		errors <- err
 	}
-	defer pubSub.Close()
+	defer func() {
+		if err := pubSub.Close(); err != nil {
+			errors <- err
+		}
+	}()
 
 	for message := range channel {
 		var innerWg sync.WaitGroup

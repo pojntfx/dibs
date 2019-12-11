@@ -24,17 +24,17 @@ func GetPathForModule(baseDir, module string) string {
 
 // GetModuleName returns the module name from `go.mod`
 func GetModuleName(content string) (error, string) {
-	for _, line := range strings.Split(string(content), "\n") {
+	for _, line := range strings.Split(content, "\n") {
 		if strings.Contains(line, "module") {
 			return nil, strings.Split(line, "module ")[1]
 		}
 	}
 
-	return errors.New("Could find module declaration"), ""
+	return errors.New("could find module declaration"), ""
 }
 
 // GetModuleWithReplaces returns the module file content with additional replacement declarations
-func GetModuleWithReplaces(content string, modulesToReplace []string, dirToReplaceHost string) string {
+func GetModuleWithReplaces(content string, modulesToReplace []string, dirToReplaceHost string) (string, error) {
 	var requires []string
 	var isInRequiresBlock bool
 
@@ -73,14 +73,18 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, dirToRepla
 	replaceBlock := "// GODIBS:TEMPREPLACE:START"
 
 	for index, replace := range replaces {
-		moduleWithReplacePrefix := "replace " + requires[index] + " => " + replace
+		if requires != nil {
+			moduleWithReplacePrefix := "replace " + requires[index] + " => " + replace
 
-		replaceBlock = replaceBlock + "\n" + moduleWithReplacePrefix
+			replaceBlock = replaceBlock + "\n" + moduleWithReplacePrefix
+		} else {
+			return "", errors.New("failure in parsing requires")
+		}
 	}
 
 	replaceBlock = replaceBlock + "\n// GODIBS:TEMPREPLACE:END"
 
-	return content + replaceBlock
+	return content + replaceBlock, nil
 }
 
 // GetModuleWithoutReplaces returns the content without the replaces

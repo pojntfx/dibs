@@ -67,9 +67,15 @@ func (buildConfig *BuildConfig) removeDockerImage(tag string) error {
 }
 
 func (buildConfig *BuildConfig) exec(commands ...string) error {
-	os.Setenv("DOCKER_CLI_EXPERIMENTAL", "enabled")
-	os.Setenv("DOCKER_BUILDKIT", "1")
-	os.Setenv("TARGETPLATFORM", buildConfig.Platform)
+	if err := os.Setenv("DOCKER_CLI_EXPERIMENTAL", "enabled"); err != nil {
+		return err
+	}
+	if err := os.Setenv("DOCKER_BUILDKIT", "1"); err != nil {
+		return err
+	}
+	if err := os.Setenv("TARGETPLATFORM", buildConfig.Platform); err != nil {
+		return err
+	}
 
 	command := exec.Command(commands[0], commands[1:]...)
 
