@@ -20,7 +20,7 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildImageCommand: "mage buildInDocker",
+				BuildImageCommand: "go run main.go binary build --platform $TARGETPLATFORM",
 
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
@@ -55,7 +55,7 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildImageCommand: "mage buildInDocker",
+				BuildImageCommand: "go run main.go binary build --platform $TARGETPLATFORM",
 
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
