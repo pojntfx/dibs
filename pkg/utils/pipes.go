@@ -221,13 +221,13 @@ func (buildConfigCollection *BuildConfigCollection) TestUnitInDocker(architectur
 	return buildConfig.TestUnitInDocker()
 }
 
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationGo(architecture string) error {
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationLang(architecture string) error {
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.TestIntegrationGo()
 }
 
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationGoInDocker(architecture string) error {
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationLangInDocker(architecture string) error {
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.TestIntegrationGoInDocker()
@@ -339,7 +339,7 @@ func (buildConfigCollection *BuildConfigCollection) TestUnitInDockerAll() error 
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationGoAll() error {
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationLangAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.TestIntegrationGo(); err != nil {
 			return err
@@ -349,7 +349,7 @@ func (buildConfigCollection *BuildConfigCollection) TestIntegrationGoAll() error
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationGoInDockerAll() error {
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationLangInDockerAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.TestIntegrationGoInDocker(); err != nil {
 			return err
@@ -382,6 +382,16 @@ func (buildConfigCollection *BuildConfigCollection) TestIntegrationBinaryInDocke
 func (buildConfigCollection *BuildConfigCollection) TestIntegrationImageAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.TestIntegrationImage(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationImageInDockerAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.TestIntegrationImageInDocker(); err != nil {
 			return err
 		}
 	}

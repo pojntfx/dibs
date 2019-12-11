@@ -34,7 +34,7 @@ const (
 // moduleClientCmd ist the command to start the client
 var moduleClientCmd = &cobra.Command{
 	Use:   "client",
-	Short: "Start the client",
+	Short: "Start the module development client",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := starters.Client{
 			PipelineUpFileMod:      PIPELINE_UP_FILE_MOD,

@@ -6,11 +6,20 @@ var langUnittestCmd = &cobra.Command{
 	Use:   "unittest",
 	Short: "Run the unit tests",
 	Run: func(cmd *cobra.Command, args []string) {
-		switch ON {
-		case ON_NATIVE:
-			buildConfigs.TestUnit(PLATFORM)
-		case ON_DOCKER:
-			buildConfigs.TestUnitInDocker(PLATFORM)
+		if PLATFORM == PLATFORM_ALL {
+			switch ON {
+			case ON_NATIVE:
+				buildConfigs.TestUnitAll()
+			case ON_DOCKER:
+				buildConfigs.TestUnitInDockerAll()
+			}
+		} else {
+			switch ON {
+			case ON_NATIVE:
+				buildConfigs.TestUnit(PLATFORM)
+			case ON_DOCKER:
+				buildConfigs.TestUnitInDocker(PLATFORM)
+			}
 		}
 	},
 }

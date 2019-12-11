@@ -17,7 +17,7 @@ var (
 // moduleServerCmd ist the command to start the server
 var moduleServerCmd = &cobra.Command{
 	Use:   "server",
-	Short: "Start the server",
+	Short: "Start the module development server",
 	Run: func(cmd *cobra.Command, args []string) {
 		server := starters.Server{
 			ServerReposDir: GIT_SERVER_REPOS_DIR,
