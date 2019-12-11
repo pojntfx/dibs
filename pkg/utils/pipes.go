@@ -17,6 +17,7 @@ type BuildConfig struct {
 	CleanGlob             string
 
 	BuildCommand       string
+	BuildCleanGlob     string
 	BuildDockerfile    string
 	BuildDockerContext string
 
@@ -49,6 +50,22 @@ type BuildConfigCollection struct {
 	BuildConfigs []BuildConfig
 }
 
+func (buildConfig *BuildConfig) clean(glob string) error {
+	filesToRemove, _ := filepath.Glob(glob)
+
+	for _, fileToRemove := range filesToRemove {
+		if err := os.Remove(fileToRemove); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfig *BuildConfig) removeDockerImage(tag string) error {
+	return buildConfig.execDocker("rmi", "-f", tag)
+}
+
 func (buildConfig *BuildConfig) exec(commands ...string) error {
 	os.Setenv("DOCKER_CLI_EXPERIMENTAL", "enabled")
 	os.Setenv("DOCKER_BUILDKIT", "1")
@@ -76,8 +93,16 @@ func (buildConfig *BuildConfig) Build() error {
 	return buildConfig.execString(buildConfig.BuildCommand)
 }
 
+func (buildConfig *BuildConfig) BuildClean() error {
+	return buildConfig.clean(buildConfig.BuildCleanGlob)
+}
+
 func (buildConfig *BuildConfig) BuildInDocker() error {
 	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.Tag, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
+}
+
+func (buildConfig *BuildConfig) BuildInDockerClean() error {
+	return buildConfig.removeDockerImage(buildConfig.Tag)
 }
 
 func (buildConfig *BuildConfig) BuildImage() error {
@@ -197,10 +222,22 @@ func (buildConfigCollection *BuildConfigCollection) Build(architecture string) e
 	return buildConfig.Build()
 }
 
+func (buildConfigCollection *BuildConfigCollection) BuildClean(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildClean()
+}
+
 func (buildConfigCollection *BuildConfigCollection) BuildInDocker(architecture string) error {
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.BuildInDocker()
+}
+
+func (buildConfigCollection *BuildConfigCollection) BuildInDockerClean(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.BuildInDockerClean()
 }
 
 func (buildConfigCollection *BuildConfigCollection) BuildImage(architecture string) error {
@@ -299,9 +336,29 @@ func (buildConfigCollection *BuildConfigCollection) BuildAll() error {
 	return nil
 }
 
+func (buildConfigCollection *BuildConfigCollection) BuildCleanAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.BuildClean(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (buildConfigCollection *BuildConfigCollection) BuildInDockerAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.BuildInDocker(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (buildConfigCollection *BuildConfigCollection) BuildInDockerCleanAll() error {
+	for _, buildConfig := range buildConfigCollection.BuildConfigs {
+		if err := buildConfig.BuildInDockerClean(); err != nil {
 			return err
 		}
 	}
