@@ -28,6 +28,7 @@ var (
 				TestIntegrationGoCommand:       "go run main.go --help",
 				TestIntegrationGoDockerContext: ".",
 				TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationGoDockerTag:     "pojntfx/godibs-integrationtest-go:linux-amd64",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-amd64 --help",
 				TestIntegrationBinaryDockerContext: ".",
@@ -57,6 +58,7 @@ var (
 				TestIntegrationGoCommand:       "go run main.go --help",
 				TestIntegrationGoDockerContext: ".",
 				TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationGoDockerTag:     "pojntfx/godibs-integrationtest-go:linux-arm64",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-arm64 --help",
 				TestIntegrationBinaryDockerContext: ".",
