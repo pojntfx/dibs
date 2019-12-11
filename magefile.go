@@ -81,7 +81,7 @@ func BuildInDocker() error {
 }
 
 func BuildDocker() error {
-	return buildConfigs.BuildDocker(PLATFORM)
+	return buildConfigs.BuildImage(PLATFORM)
 }
 
 func TestUnit() error {
@@ -141,7 +141,7 @@ func BuildInDockerAll() error {
 }
 
 func BuildDockerAll() error {
-	return buildConfigs.BuildDockerAll()
+	return buildConfigs.BuildImageAll()
 }
 
 func TestUnitAll() error {

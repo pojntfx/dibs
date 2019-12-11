@@ -6,7 +6,11 @@ var binaryGetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get the binary from the Docker image",
 	Run: func(cmd *cobra.Command, args []string) {
-		buildConfigs.GetBinaryFromDockerImage(PLATFORM)
+		if PLATFORM == PLATFORM_ALL {
+			buildConfigs.GetBinaryFromDockerImageAll()
+		} else {
+			buildConfigs.GetBinaryFromDockerImage(PLATFORM)
+		}
 	},
 }
 

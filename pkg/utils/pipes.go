@@ -80,7 +80,7 @@ func (buildConfig *BuildConfig) BuildInDocker() error {
 	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.Tag, "-f", buildConfig.BuildDockerfile, buildConfig.BuildDockerContext)
 }
 
-func (buildConfig *BuildConfig) BuildDocker() error {
+func (buildConfig *BuildConfig) BuildImage() error {
 	return buildConfig.execString(buildConfig.BuildImageCommand)
 }
 
@@ -203,10 +203,10 @@ func (buildConfigCollection *BuildConfigCollection) BuildInDocker(architecture s
 	return buildConfig.BuildInDocker()
 }
 
-func (buildConfigCollection *BuildConfigCollection) BuildDocker(architecture string) error {
+func (buildConfigCollection *BuildConfigCollection) BuildImage(architecture string) error {
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
-	return buildConfig.BuildDocker()
+	return buildConfig.BuildImage()
 }
 
 func (buildConfigCollection *BuildConfigCollection) TestUnit(architecture string) error {
@@ -309,9 +309,9 @@ func (buildConfigCollection *BuildConfigCollection) BuildInDockerAll() error {
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) BuildDockerAll() error {
+func (buildConfigCollection *BuildConfigCollection) BuildImageAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
-		if err := buildConfig.BuildDocker(); err != nil {
+		if err := buildConfig.BuildImage(); err != nil {
 			return err
 		}
 	}
