@@ -8,10 +8,10 @@ import (
 
 var binaryBuildCmd = &cobra.Command{
 	Use:   "build",
-	Short: "Build the binary",
+	Short: "Build the Docker images or binaries",
 	Run: func(cmd *cobra.Command, args []string) {
-		if PLATFORM == PlatformAll {
-			switch ON {
+		if Platform == PlatformAll {
+			switch On {
 			case OnNative:
 				if err := buildConfigs.BuildAll(); err != nil {
 					log.Error("Could not build the binaries", rz.Err(err))
@@ -25,13 +25,13 @@ var binaryBuildCmd = &cobra.Command{
 				}
 			}
 		} else {
-			switch ON {
+			switch On {
 			case OnNative:
-				if err := buildConfigs.Build(PLATFORM); err != nil {
+				if err := buildConfigs.Build(Platform); err != nil {
 					log.Error("Could not build the binary", rz.Err(err))
 				}
 			case OnDocker:
-				if err := buildConfigs.BuildInDocker(PLATFORM); err != nil {
+				if err := buildConfigs.BuildInDocker(Platform); err != nil {
 					log.Error("Could not build the binary in Docker", rz.Err(err))
 				}
 				if err := buildConfigs.GetBinaryFromDockerImageAll(); err != nil {

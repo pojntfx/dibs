@@ -8,26 +8,26 @@ import (
 
 var binaryPushCmd = &cobra.Command{
 	Use:   "push",
-	Short: "Push the Docker image",
+	Short: "Push Docker images or binaries",
 	Run: func(cmd *cobra.Command, args []string) {
-		if NESTED {
-			if PLATFORM == PlatformAll {
+		if Image {
+			if Platform == PlatformAll {
 				if err := buildConfigs.PushDockerImageAll(); err != nil {
 					log.Error("Could not push Docker images", rz.Err(err))
 				}
 			} else {
-				if err := buildConfigs.PushDockerImage(PLATFORM); err != nil {
+				if err := buildConfigs.PushDockerImage(Platform); err != nil {
 					log.Error("Could not push Docker image", rz.Err(err))
 				}
 			}
 		} else {
-			log.Fatal("Not yet implementated")
+			log.Fatal("Not yet implemented")
 		}
 	},
 }
 
 func init() {
-	binaryPushCmd.PersistentFlags().BoolVar(&NESTED, "nested", false, "Whether to push the image instead of the binary")
+	binaryPushCmd.PersistentFlags().BoolVar(&Image, "image", false, "Whether to work on images or binaries")
 
 	binaryCmd.AddCommand(binaryPushCmd)
 }

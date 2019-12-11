@@ -10,7 +10,7 @@ var manifestCleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean the Docker manifest output",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := buildConfigs.Clean(PLATFORM); err != nil {
+		if err := buildConfigs.Clean(Platform); err != nil {
 			log.Error("Could not clean the Docker manifest output", rz.Err(err))
 		}
 	},

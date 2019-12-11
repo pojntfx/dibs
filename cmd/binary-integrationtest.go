@@ -7,43 +7,43 @@ import (
 )
 
 var (
-	NESTED bool
+	Image bool
 )
 
 var binaryIntegrationtestCmd = &cobra.Command{
 	Use:   "integrationtest",
-	Short: "Run the binary integration tests",
+	Short: "Run the Docker image or binary integration tests",
 	Run: func(cmd *cobra.Command, args []string) {
-		if NESTED {
-			if PLATFORM == PlatformAll {
-				switch ON {
+		if Image {
+			if Platform == PlatformAll {
+				switch On {
 				case OnNative:
 					if err := buildConfigs.TestIntegrationImageAll(); err != nil {
-						log.Error("Nested integration tests failed", rz.Err(err))
+						log.Error("Image integration tests failed", rz.Err(err))
 					}
 				case OnDocker:
 					if err := buildConfigs.TestIntegrationImageInDockerAll(); err != nil {
-						log.Error("Nested integration tests in Docker failed", rz.Err(err))
+						log.Error("Image integration tests in Docker failed", rz.Err(err))
 					}
 				}
 			} else {
-				switch ON {
+				switch On {
 				case OnNative:
-					if err := buildConfigs.TestIntegrationImage(PLATFORM); err != nil {
-						log.Error("Nested integration test failed", rz.Err(err))
+					if err := buildConfigs.TestIntegrationImage(Platform); err != nil {
+						log.Error("Image integration test failed", rz.Err(err))
 					}
 				case OnDocker:
-					if err := buildConfigs.TestIntegrationImageInDocker(PLATFORM); err != nil {
-						log.Error("Nested integration tests in Docker failed", rz.Err(err))
+					if err := buildConfigs.TestIntegrationImageInDocker(Platform); err != nil {
+						log.Error("Image integration tests in Docker failed", rz.Err(err))
 					}
 				}
 			}
 		} else {
-			if PLATFORM == PlatformAll {
-				switch ON {
+			if Platform == PlatformAll {
+				switch On {
 				case OnNative:
 					if err := buildConfigs.TestIntegrationBinaryAll(); err != nil {
-						log.Error("Integration tests failed", rz.Err(err))
+						log.Error("Binary integration tests failed", rz.Err(err))
 					}
 				case OnDocker:
 					if err := buildConfigs.TestIntegrationBinaryInDockerAll(); err != nil {
@@ -51,13 +51,13 @@ var binaryIntegrationtestCmd = &cobra.Command{
 					}
 				}
 			} else {
-				switch ON {
+				switch On {
 				case OnNative:
-					if err := buildConfigs.TestIntegrationBinary(PLATFORM); err != nil {
+					if err := buildConfigs.TestIntegrationBinary(Platform); err != nil {
 						log.Error("Integration test failed", rz.Err(err))
 					}
 				case OnDocker:
-					if err := buildConfigs.TestIntegrationBinaryInDocker(PLATFORM); err != nil {
+					if err := buildConfigs.TestIntegrationBinaryInDocker(Platform); err != nil {
 						log.Error("Integration test in Docker failed", rz.Err(err))
 					}
 				}
@@ -66,7 +66,7 @@ var binaryIntegrationtestCmd = &cobra.Command{
 	}}
 
 func init() {
-	binaryIntegrationtestCmd.PersistentFlags().BoolVar(&NESTED, "nested", false, "Whether to integration test the image instead of the binary")
+	binaryIntegrationtestCmd.PersistentFlags().BoolVar(&Image, "image", false, "Whether to work on images or binaries")
 
 	binaryCmd.AddCommand(binaryIntegrationtestCmd)
 }
