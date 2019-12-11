@@ -1,13 +1,8 @@
 package cmd
 
-import (
-	"github.com/pojntfx/godibs/pkg/utils"
-	"os"
-)
+import "github.com/pojntfx/godibs/pkg/utils"
 
 var (
-	PLATFORM = os.Getenv("TARGETPLATFORM")
-
 	buildConfigs = utils.BuildConfigCollection{
 		ManifestTag: "pojntfx/godibs:latest",
 
