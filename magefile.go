@@ -34,7 +34,7 @@ var (
 
 				TestIntegrationLangCommand:       "go run main.go --help",
 				TestIntegrationLangDockerContext: ".",
-				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationLang",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-amd64 --help",
 				TestIntegrationBinaryDockerContext: ".",
@@ -62,7 +62,7 @@ var (
 
 				TestIntegrationLangCommand:       "go run main.go --help",
 				TestIntegrationLangDockerContext: ".",
-				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationLang",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-arm64 --help",
 				TestIntegrationBinaryDockerContext: ".",
@@ -109,7 +109,7 @@ func TestIntegrationBinaryInDocker() error {
 }
 
 func TestIntegrationDocker() error {
-	return buildConfigs.TestIntegrationDocker(PLATFORM)
+	return buildConfigs.TestIntegrationImage(PLATFORM)
 }
 
 func PushDockerImage() error {
@@ -169,7 +169,7 @@ func TestIntegrationBinaryInDockerAll() error {
 }
 
 func TestIntegrationDockerAll() error {
-	return buildConfigs.TestIntegrationDockerAll()
+	return buildConfigs.TestIntegrationImageAll()
 }
 
 func PushDockerImageAll() error {

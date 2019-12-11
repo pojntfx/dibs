@@ -32,7 +32,10 @@ type BuildConfig struct {
 	TestIntegrationLangDockerfile    string
 	TestIntegrationLangImageTag      string
 
-	TestIntegrationImageCommand string
+	TestIntegrationImageCommand       string
+	TestIntegrationImageDockerContext string
+	TestIntegrationImageDockerfile    string
+	TestIntegrationImageImageTag      string
 
 	TestIntegrationBinaryCommand       string
 	TestIntegrationBinaryDockerContext string
@@ -117,8 +120,16 @@ func (buildConfig *BuildConfig) TestIntegrationBinaryInDocker() error {
 	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationBinaryImageTag)
 }
 
-func (buildConfig *BuildConfig) TestIntegrationDocker() error {
+func (buildConfig *BuildConfig) TestIntegrationImage() error {
 	return buildConfig.execString(buildConfig.TestIntegrationImageCommand)
+}
+
+func (buildConfig *BuildConfig) TestIntegrationImageInDocker() error {
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationImageImageTag, "-f", buildConfig.TestIntegrationImageDockerfile, buildConfig.TestIntegrationImageDockerContext); err != nil {
+		return err
+	}
+
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationImageImageTag)
 }
 
 func (buildConfig *BuildConfig) PushDockerImage() error {
@@ -234,10 +245,16 @@ func (buildConfigCollection *BuildConfigCollection) TestIntegrationBinaryInDocke
 	return buildConfig.TestIntegrationBinaryInDocker()
 }
 
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationDocker(architecture string) error {
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationImage(architecture string) error {
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
-	return buildConfig.TestIntegrationDocker()
+	return buildConfig.TestIntegrationImage()
+}
+
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationImageInDocker(architecture string) error {
+	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
+
+	return buildConfig.TestIntegrationImageInDocker()
 }
 
 func (buildConfigCollection *BuildConfigCollection) PushDockerImage(architecture string) error {
@@ -362,9 +379,9 @@ func (buildConfigCollection *BuildConfigCollection) TestIntegrationBinaryInDocke
 	return nil
 }
 
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationDockerAll() error {
+func (buildConfigCollection *BuildConfigCollection) TestIntegrationImageAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
-		if err := buildConfig.TestIntegrationDocker(); err != nil {
+		if err := buildConfig.TestIntegrationImage(); err != nil {
 			return err
 		}
 	}

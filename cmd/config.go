@@ -28,15 +28,18 @@ var (
 
 				TestIntegrationLangCommand:       "go run main.go --help",
 				TestIntegrationLangDockerContext: ".",
-				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationGo",
-				TestIntegrationLangImageTag:      "pojntfx/godibs-integrationtest-go:linux-amd64",
+				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationLang",
+				TestIntegrationLangImageTag:      "pojntfx/godibs-integrationtest-lang:linux-amd64",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-amd64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 				TestIntegrationBinaryImageTag:      "pojntfx/godibs-integrationtest-binary:linux-amd64",
 
-				TestIntegrationImageCommand: "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
+				TestIntegrationImageCommand:       "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
+				TestIntegrationImageDockerContext: ".",
+				TestIntegrationImageDockerfile:    "Dockerfile.testIntegrationImage",
+				TestIntegrationImageImageTag:      "pojntfx/godibs-integrationtest-image:linux-amd64",
 			},
 			utils.BuildConfig{
 				Tag:      "pojntfx/godibs:linux-arm64",
@@ -59,7 +62,7 @@ var (
 
 				TestIntegrationLangCommand:       "go run main.go --help",
 				TestIntegrationLangDockerContext: ".",
-				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationLang",
 				TestIntegrationLangImageTag:      "pojntfx/godibs-integrationtest-go:linux-arm64",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-arm64 --help",

@@ -6,7 +6,12 @@ var imageIntegrationtestCmd = &cobra.Command{
 	Use:   "integrationtest",
 	Short: "Run the Docker image integration tests",
 	Run: func(cmd *cobra.Command, args []string) {
-		buildConfigs.TestIntegrationDocker(PLATFORM)
+		switch ON {
+		case ON_NATIVE:
+			buildConfigs.TestIntegrationImage(PLATFORM)
+		case ON_DOCKER:
+			buildConfigs.TestIntegrationImageInDocker(PLATFORM)
+		}
 	},
 }
 

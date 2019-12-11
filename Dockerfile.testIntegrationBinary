@@ -12,9 +12,12 @@ COPY ./pkg ./pkg
 
 RUN go run main.go --platform $TARGETPLATFORM binary build
 
-FROM --platform=$TARGETPLATFORM golang:1.13.5-buster
+FROM --platform=$TARGETPLATFORM debian:buster-slim
 WORKDIR /app
 ARG TARGETPLATFORM
+
+RUN apt update -y
+RUN apt install -y go git
 
 COPY ./go.mod ./go.sum ./
 RUN go mod download
