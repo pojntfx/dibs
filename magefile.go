@@ -93,11 +93,11 @@ func TestUnitInDocker() error {
 }
 
 func TestIntegrationGo() error {
-	return buildConfigs.TestIntegrationGo(PLATFORM)
+	return buildConfigs.TestIntegrationLang(PLATFORM)
 }
 
 func TestIntegrationGoInDocker() error {
-	return buildConfigs.TestIntegrationGoInDocker(PLATFORM)
+	return buildConfigs.TestIntegrationLangInDocker(PLATFORM)
 }
 
 func TestIntegrationBinary() error {
@@ -153,11 +153,11 @@ func TestUnitInDockerAll() error {
 }
 
 func TestIntegrationGoAll() error {
-	return buildConfigs.TestIntegrationGoAll()
+	return buildConfigs.TestIntegrationLangAll()
 }
 
 func TestIntegrationGoInDockerAll() error {
-	return buildConfigs.TestIntegrationGoInDockerAll()
+	return buildConfigs.TestIntegrationLangInDockerAll()
 }
 
 func TestIntegrationBinaryAll() error {
