@@ -20,24 +20,24 @@ type BuildConfig struct {
 	BuildDockerfile    string
 	BuildDockerContext string
 
-	BuildDockerCommand string
+	BuildImageCommand string
 
 	TestUnitCommand       string
 	TestUnitDockerfile    string
 	TestUnitDockerContext string
-	TestUnitDockerTag     string
+	TestUnitImageTag      string
 
-	TestIntegrationGoCommand       string
-	TestIntegrationGoDockerContext string
-	TestIntegrationGoDockerfile    string
-	TestIntegrationGoDockerTag     string
+	TestIntegrationLangCommand       string
+	TestIntegrationLangDockerContext string
+	TestIntegrationLangDockerfile    string
+	TestIntegrationLangImageTag      string
 
-	TestIntegrationDockerCommand string
+	TestIntegrationImageCommand string
 
 	TestIntegrationBinaryCommand       string
 	TestIntegrationBinaryDockerContext string
 	TestIntegrationBinaryDockerfile    string
-	TestIntegrationBinaryDockerTag     string
+	TestIntegrationBinaryImageTag      string
 }
 
 type BuildConfigCollection struct {
@@ -78,7 +78,7 @@ func (buildConfig *BuildConfig) BuildInDocker() error {
 }
 
 func (buildConfig *BuildConfig) BuildDocker() error {
-	return buildConfig.execString(buildConfig.BuildDockerCommand)
+	return buildConfig.execString(buildConfig.BuildImageCommand)
 }
 
 func (buildConfig *BuildConfig) TestUnit() error {
@@ -86,23 +86,23 @@ func (buildConfig *BuildConfig) TestUnit() error {
 }
 
 func (buildConfig *BuildConfig) TestUnitInDocker() error {
-	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestUnitDockerTag, "-f", buildConfig.TestUnitDockerfile, buildConfig.TestUnitDockerContext); err != nil {
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestUnitImageTag, "-f", buildConfig.TestUnitDockerfile, buildConfig.TestUnitDockerContext); err != nil {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestUnitDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestUnitImageTag)
 }
 
 func (buildConfig *BuildConfig) TestIntegrationGo() error {
-	return buildConfig.execString(buildConfig.TestIntegrationGoCommand)
+	return buildConfig.execString(buildConfig.TestIntegrationLangCommand)
 }
 
 func (buildConfig *BuildConfig) TestIntegrationGoInDocker() error {
-	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationGoDockerTag, "-f", buildConfig.TestIntegrationGoDockerfile, buildConfig.TestIntegrationGoDockerContext); err != nil {
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationLangImageTag, "-f", buildConfig.TestIntegrationLangDockerfile, buildConfig.TestIntegrationLangDockerContext); err != nil {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationGoDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationLangImageTag)
 }
 
 func (buildConfig *BuildConfig) TestIntegrationBinary() error {
@@ -110,15 +110,15 @@ func (buildConfig *BuildConfig) TestIntegrationBinary() error {
 }
 
 func (buildConfig *BuildConfig) TestIntegrationBinaryInDocker() error {
-	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationBinaryDockerTag, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext); err != nil {
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationBinaryImageTag, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext); err != nil {
 		return err
 	}
 
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationBinaryDockerTag)
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationBinaryImageTag)
 }
 
 func (buildConfig *BuildConfig) TestIntegrationDocker() error {
-	return buildConfig.execString(buildConfig.TestIntegrationDockerCommand)
+	return buildConfig.execString(buildConfig.TestIntegrationImageCommand)
 }
 
 func (buildConfig *BuildConfig) PushDockerImage() error {
