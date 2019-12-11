@@ -16,6 +16,7 @@ var (
 				CleanGlob:             ".bin/godibs-linux-amd64",
 
 				BuildCommand:       "go build -o .bin/godibs-linux-amd64 main.go",
+				BuildCleanGlob:     ".bin/godibs-linux-amd64",
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
@@ -50,6 +51,7 @@ var (
 				CleanGlob:             ".bin/godibs-linux-arm64",
 
 				BuildCommand:       "go build -o .bin/godibs-linux-arm64 main.go",
+				BuildCleanGlob:     ".bin/godibs-linux-arm64",
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
