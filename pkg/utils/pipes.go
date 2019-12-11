@@ -20,10 +20,7 @@ type BuildConfig struct {
 	BuildDockerfile    string
 	BuildDockerContext string
 
-	BuildDockerTag           string
-	BuildDockerCommand       string
-	BuildDockerDockerContext string
-	BuildDockerDockerfile    string
+	BuildDockerCommand string
 
 	TestUnitCommand       string
 	TestUnitDockerfile    string
@@ -33,11 +30,8 @@ type BuildConfig struct {
 	TestIntegrationGoDockerContext string
 	TestIntegrationGoDockerfile    string
 
-	TestIntegrationDockerCommand       string
-	TestIntegrationDockerDockerContext string
-	TestIntegrationDockerDockerfile    string
+	TestIntegrationDockerCommand string
 
-	TestIntegrationDockerTag           string
 	TestIntegrationBinaryCommand       string
 	TestIntegrationBinaryDockerContext string
 	TestIntegrationBinaryDockerfile    string
@@ -84,14 +78,6 @@ func (buildConfig *BuildConfig) BuildDocker() error {
 	return buildConfig.execString(buildConfig.BuildDockerCommand)
 }
 
-func (buildConfig *BuildConfig) BuildDockerInDocker() error {
-	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.BuildDockerTag, "-f", buildConfig.BuildDockerDockerfile, buildConfig.BuildDockerDockerContext); err != nil {
-		return err
-	}
-
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.BuildDockerTag)
-}
-
 func (buildConfig *BuildConfig) TestUnit() error {
 	return buildConfig.execString(buildConfig.TestUnitCommand)
 }
@@ -118,18 +104,6 @@ func (buildConfig *BuildConfig) TestIntegrationBinaryInDocker() error {
 
 func (buildConfig *BuildConfig) TestIntegrationDocker() error {
 	return buildConfig.execString(buildConfig.TestIntegrationDockerCommand)
-}
-
-func (buildConfig *BuildConfig) TestIntegrationDockerInDocker() error {
-	if err := buildConfig.BuildDocker(); err != nil {
-		return nil
-	}
-
-	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationDockerTag, "-f", buildConfig.TestIntegrationDockerDockerfile, buildConfig.TestIntegrationDockerDockerContext); err != nil {
-		return err
-	}
-
-	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationDockerTag)
 }
 
 func (buildConfig *BuildConfig) PushDockerImage() error {
@@ -209,12 +183,6 @@ func (buildConfigCollection *BuildConfigCollection) BuildDocker(architecture str
 	return buildConfig.BuildDocker()
 }
 
-func (buildConfigCollection *BuildConfigCollection) BuildDockerInDocker(architecture string) error {
-	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
-
-	return buildConfig.BuildDockerInDocker()
-}
-
 func (buildConfigCollection *BuildConfigCollection) TestUnit(architecture string) error {
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
@@ -255,12 +223,6 @@ func (buildConfigCollection *BuildConfigCollection) TestIntegrationDocker(archit
 	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
 
 	return buildConfig.TestIntegrationDocker()
-}
-
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationDockerInDocker(architecture string) error {
-	buildConfig := buildConfigCollection.getBuildConfigForArchitecture(architecture)
-
-	return buildConfig.TestIntegrationDockerInDocker()
 }
 
 func (buildConfigCollection *BuildConfigCollection) PushDockerImage(architecture string) error {
@@ -318,16 +280,6 @@ func (buildConfigCollection *BuildConfigCollection) BuildInDockerAll() error {
 func (buildConfigCollection *BuildConfigCollection) BuildDockerAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.BuildDocker(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (buildConfigCollection *BuildConfigCollection) BuildDockerInDockerAll() error {
-	for _, buildConfig := range buildConfigCollection.BuildConfigs {
-		if err := buildConfig.BuildDockerInDocker(); err != nil {
 			return err
 		}
 	}
@@ -398,16 +350,6 @@ func (buildConfigCollection *BuildConfigCollection) TestIntegrationBinaryInDocke
 func (buildConfigCollection *BuildConfigCollection) TestIntegrationDockerAll() error {
 	for _, buildConfig := range buildConfigCollection.BuildConfigs {
 		if err := buildConfig.TestIntegrationDocker(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (buildConfigCollection *BuildConfigCollection) TestIntegrationDockerInDockerAll() error {
-	for _, buildConfig := range buildConfigCollection.BuildConfigs {
-		if err := buildConfig.TestIntegrationDockerInDocker(); err != nil {
 			return err
 		}
 	}

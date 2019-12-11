@@ -53,7 +53,7 @@ testIntegrationDockerInDockerAll:
         <<: *dindMageJob
         stage: test
         script:
-                - mage testIntegrationDockerInDockerAll
+                - mage testIntegrationDockerAll
 
 buildPushDockerAll:
         <<: *dindMageJob
