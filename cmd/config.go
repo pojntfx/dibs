@@ -19,10 +19,7 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildDockerTag:           "pojntfx/godibs-builddockerindocker:linux-amd64",
-				BuildDockerCommand:       "mage buildInDocker",
-				BuildDockerDockerContext: ".",
-				BuildDockerDockerfile:    "Dockerfile.docker",
+				BuildDockerCommand: "mage buildInDocker",
 
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
@@ -36,10 +33,7 @@ var (
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
-				TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:linux-amd64",
-				TestIntegrationDockerCommand:       "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
-				TestIntegrationDockerDockerContext: ".",
-				TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
+				TestIntegrationDockerCommand: "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
 			},
 			utils.BuildConfig{
 				Tag:      "pojntfx/godibs:linux-arm64",
@@ -53,10 +47,7 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildDockerTag:           "pojntfx/godibs-builddockerindocker:linux-arm64",
-				BuildDockerCommand:       "mage buildInDocker",
-				BuildDockerDockerContext: ".",
-				BuildDockerDockerfile:    "Dockerfile.docker",
+				BuildDockerCommand: "mage buildInDocker",
 
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
@@ -70,9 +61,6 @@ var (
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
-				TestIntegrationDockerTag:           "pojntfx/godibs-testintegrationdockerindocker:linux-arm64",
-				TestIntegrationDockerCommand:       "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
-				TestIntegrationDockerDockerContext: ".",
-				TestIntegrationDockerDockerfile:    "Dockerfile.testIntegrationDocker",
+				TestIntegrationDockerCommand: "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
 			}}}
 )
