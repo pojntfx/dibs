@@ -1,7 +1,7 @@
 package utils
 
 import (
-	fswatch "github.com/andreaskoch/go-fswatch"
+	"github.com/andreaskoch/go-fswatch"
 	"regexp"
 )
 

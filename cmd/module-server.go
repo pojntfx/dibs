@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	GIT_SERVER_REPOS_DIR string
-	GIT_SERVER_HTTP_PORT string
-	GIT_SERVER_HTTP_PATH string
+	GitServerReposDir string
+	GitServerHttpPort string
+	GitServerHttpPath string
 )
 
 // moduleServerCmd ist the command to start the server
@@ -20,14 +20,14 @@ var moduleServerCmd = &cobra.Command{
 	Short: "Start the module development server",
 	Run: func(cmd *cobra.Command, args []string) {
 		server := starters.Server{
-			ServerReposDir: GIT_SERVER_REPOS_DIR,
-			ServerHTTPPort: GIT_SERVER_HTTP_PORT,
-			ServerHTTPPath: GIT_SERVER_HTTP_PATH,
+			ServerReposDir: GitServerReposDir,
+			ServerHTTPPort: GitServerHttpPort,
+			ServerHTTPPath: GitServerHttpPath,
 
-			RedisUrl:                  REDIS_URL,
-			RedisPrefix:               REDIS_PREFIX,
-			RedisSuffixUpRegistered:   REDIS_SUFFIX_UP_REGISTERED,
-			RedisSuffixUpUnRegistered: REDIS_SUFFIX_UP_UNREGISTERED,
+			RedisUrl:                  RedisUrl,
+			RedisPrefix:               RedisPrefix,
+			RedisSuffixUpRegistered:   RedisSuffixUpRegistered,
+			RedisSuffixUpUnRegistered: RedisSuffixUpUnregistered,
 		}
 
 		server.Start()
@@ -38,9 +38,9 @@ var moduleServerCmd = &cobra.Command{
 func init() {
 	id := uuid.New().String()
 
-	moduleServerCmd.PersistentFlags().StringVar(&GIT_SERVER_REPOS_DIR, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos", id), "Directory in which the Git repos should be stored")
-	moduleServerCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PORT, "port", "25000", "Port on which the Git repos should be served")
-	moduleServerCmd.PersistentFlags().StringVar(&GIT_SERVER_HTTP_PATH, "path", "/repos", "HTTP path prefix for the served Git repos")
+	moduleServerCmd.PersistentFlags().StringVar(&GitServerReposDir, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos", id), "Directory in which the Git repos should be stored")
+	moduleServerCmd.PersistentFlags().StringVar(&GitServerHttpPort, "port", "25000", "Port on which the Git repos should be served")
+	moduleServerCmd.PersistentFlags().StringVar(&GitServerHttpPath, "path", "/repos", "HTTP path prefix for the served Git repos")
 
 	moduleCmd.AddCommand(moduleServerCmd)
 }
