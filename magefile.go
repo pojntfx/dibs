@@ -26,21 +26,21 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildDockerCommand: "mage buildInDocker",
+				BuildImageCommand: "mage buildInDocker",
 
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
 				TestUnitDockerfile:    "Dockerfile.testUnit",
 
-				TestIntegrationGoCommand:       "go run main.go --help",
-				TestIntegrationGoDockerContext: ".",
-				TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationLangCommand:       "go run main.go --help",
+				TestIntegrationLangDockerContext: ".",
+				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationGo",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-amd64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
-				TestIntegrationDockerCommand: "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
+				TestIntegrationImageCommand: "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
 			},
 			utils.BuildConfig{
 				Tag:      "pojntfx/godibs:linux-arm64",
@@ -54,21 +54,21 @@ var (
 				BuildDockerContext: ".",
 				BuildDockerfile:    "Dockerfile",
 
-				BuildDockerCommand: "mage buildInDocker",
+				BuildImageCommand: "mage buildInDocker",
 
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
 				TestUnitDockerfile:    "Dockerfile.testUnit",
 
-				TestIntegrationGoCommand:       "go run main.go --help",
-				TestIntegrationGoDockerContext: ".",
-				TestIntegrationGoDockerfile:    "Dockerfile.testIntegrationGo",
+				TestIntegrationLangCommand:       "go run main.go --help",
+				TestIntegrationLangDockerContext: ".",
+				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationGo",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-arm64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 
-				TestIntegrationDockerCommand: "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
+				TestIntegrationImageCommand: "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
 			}}}
 )
 
