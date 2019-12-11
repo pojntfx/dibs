@@ -63,13 +63,16 @@ var (
 				TestIntegrationLangCommand:       "go run main.go --help",
 				TestIntegrationLangDockerContext: ".",
 				TestIntegrationLangDockerfile:    "Dockerfile.testIntegrationLang",
-				TestIntegrationLangImageTag:      "pojntfx/godibs-integrationtest-go:linux-arm64",
+				TestIntegrationLangImageTag:      "pojntfx/godibs-integrationtest-lang:linux-arm64",
 
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-arm64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
 				TestIntegrationBinaryImageTag:      "pojntfx/godibs-integrationtest-binary:linux-arm64",
 
-				TestIntegrationImageCommand: "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
+				TestIntegrationImageCommand:       "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
+				TestIntegrationImageDockerContext: ".",
+				TestIntegrationImageDockerfile:    "Dockerfile.testIntegrationImage",
+				TestIntegrationImageImageTag:      "pojntfx/godibs-integrationtest-image:linux-arm64",
 			}}}
 )

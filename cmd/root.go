@@ -25,7 +25,8 @@ const (
 	ON_NATIVE = "native"
 	ON_DOCKER = "docker"
 
-	PLATFORM_DEFAULT = "linux/amd64"
+	PLATFORM_ALL     = "all"
+	PLATFORM_DEFAULT = PLATFORM_ALL
 )
 
 // rootCmd ist the main entry command
@@ -39,7 +40,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&REDIS_URL, "redis-url", "localhost:6379", "URL of the Redis instance to use")
 	rootCmd.PersistentFlags().StringVar(&REDIS_PREFIX, "redis-prefix", "godibs", "Redis channel prefix")
 	rootCmd.PersistentFlags().StringVar(&ON, "on", ON_NATIVE, "System to run on (native|docker)")
-	rootCmd.PersistentFlags().StringVar(&PLATFORM, "platform", PLATFORM_DEFAULT, "Platform specified in configuration to use")
+	rootCmd.PersistentFlags().StringVar(&PLATFORM, "platform", PLATFORM_DEFAULT, "Platform specified in configuration to use (\""+PLATFORM_ALL+"\" to run for every platform)")
 }
 
 // Execute starts the main entry command

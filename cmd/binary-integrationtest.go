@@ -6,11 +6,20 @@ var binaryIntegrationtestCmd = &cobra.Command{
 	Use:   "integrationtest",
 	Short: "Run the binary integration tests",
 	Run: func(cmd *cobra.Command, args []string) {
-		switch ON {
-		case ON_NATIVE:
-			buildConfigs.TestIntegrationBinary(PLATFORM)
-		case ON_DOCKER:
-			buildConfigs.TestIntegrationBinaryInDocker(PLATFORM)
+		if PLATFORM == PLATFORM_ALL {
+			switch ON {
+			case ON_NATIVE:
+				buildConfigs.TestIntegrationBinaryAll()
+			case ON_DOCKER:
+				buildConfigs.TestIntegrationBinaryInDockerAll()
+			}
+		} else {
+			switch ON {
+			case ON_NATIVE:
+				buildConfigs.TestIntegrationBinary(PLATFORM)
+			case ON_DOCKER:
+				buildConfigs.TestIntegrationBinaryInDocker(PLATFORM)
+			}
 		}
 	},
 }
