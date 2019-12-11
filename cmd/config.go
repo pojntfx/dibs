@@ -24,6 +24,7 @@ var (
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
 				TestUnitDockerfile:    "Dockerfile.testUnit",
+				TestUnitDockerTag:     "pojntfx/godibs-unittest-go:linux-amd64",
 
 				TestIntegrationGoCommand:       "go run main.go --help",
 				TestIntegrationGoDockerContext: ".",
@@ -54,6 +55,7 @@ var (
 				TestUnitCommand:       "go test ./...",
 				TestUnitDockerContext: ".",
 				TestUnitDockerfile:    "Dockerfile.testUnit",
+				TestUnitDockerTag:     "pojntfx/godibs-unittest-go:linux-arm64",
 
 				TestIntegrationGoCommand:       "go run main.go --help",
 				TestIntegrationGoDockerContext: ".",
