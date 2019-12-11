@@ -35,6 +35,7 @@ type BuildConfig struct {
 	TestIntegrationBinaryCommand       string
 	TestIntegrationBinaryDockerContext string
 	TestIntegrationBinaryDockerfile    string
+	TestIntegrationBinaryDockerTag     string
 }
 
 type BuildConfigCollection struct {
@@ -99,7 +100,11 @@ func (buildConfig *BuildConfig) TestIntegrationBinary() error {
 }
 
 func (buildConfig *BuildConfig) TestIntegrationBinaryInDocker() error {
-	return buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext)
+	if err := buildConfig.execDocker("buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", buildConfig.Platform, "-t", buildConfig.TestIntegrationBinaryDockerTag, "-f", buildConfig.TestIntegrationBinaryDockerfile, buildConfig.TestIntegrationBinaryDockerContext); err != nil {
+		return err
+	}
+
+	return buildConfig.execDocker("run", "--platform", buildConfig.Platform, "-e", "TARGETPLATFORM="+buildConfig.Platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", buildConfig.TestIntegrationBinaryDockerTag)
 }
 
 func (buildConfig *BuildConfig) TestIntegrationDocker() error {

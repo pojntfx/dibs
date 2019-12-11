@@ -32,6 +32,7 @@ var (
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-amd64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
+				TestIntegrationBinaryDockerTag:     "pojntfx/godibs-integrationtest-binary:linux-amd64",
 
 				TestIntegrationDockerCommand: "docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help",
 			},
@@ -60,6 +61,7 @@ var (
 				TestIntegrationBinaryCommand:       ".bin/godibs-linux-arm64 --help",
 				TestIntegrationBinaryDockerContext: ".",
 				TestIntegrationBinaryDockerfile:    "Dockerfile.testIntegrationBinary",
+				TestIntegrationBinaryDockerTag:     "pojntfx/godibs-integrationtest-binary:linux-arm64",
 
 				TestIntegrationDockerCommand: "docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help",
 			}}}
