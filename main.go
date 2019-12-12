@@ -1,7 +1,9 @@
 package main
 
-import "github.com/pojntfx/godibs/cmd/v2"
+import (
+	"github.com/pojntfx/godibs/cmd"
+)
 
 func main() {
-	v2.Execute()
+	cmd.Execute()
 }
