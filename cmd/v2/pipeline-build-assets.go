@@ -16,9 +16,6 @@ var PipelineBuildAssetsCmd = &cobra.Command{
 
 		for _, platform := range platforms {
 			if Executor == ExecutorDocker {
-				if output, err := platform.Assets.Build.BuildImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not build image", err, platform.Platform, output)
-				}
 				if output, err := platform.Assets.GetAssetsFromDockerImage(platform.Platform); err != nil {
 					utils.PipeLogErrorFatal("Could not get assets from Docker image", err, platform.Platform, output)
 				}
