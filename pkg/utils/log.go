@@ -11,8 +11,10 @@ func PipeLogErrorFatalNonPlatformSpecific(message string, err error, output stri
 	log.Fatal(message, rz.Err(err))
 }
 
-func PipeLogErrorFatal(message string, err error, platform, output string) {
-	fmt.Println(output)
+func PipeLogErrorFatal(message string, err error, platform string, output ...string) {
+	if output != nil {
+		fmt.Println(output)
+	}
 	log.Fatal(message, rz.String("platform", platform), rz.Err(err))
 }
 
