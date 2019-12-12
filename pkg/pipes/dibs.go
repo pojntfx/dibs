@@ -7,7 +7,7 @@ type Dibs struct {
 	Platforms []Platform
 }
 
-func (dibs *Dibs) BuildDockerManifest(imageTags []string) (string, error) {
+func (dibs *Dibs) BuildDockerManifest() (string, error) {
 	for _, platform := range dibs.Platforms {
 		if output, err := platform.Binary.Build.execDocker("manifest", "create", "--amend", platform.Binary.Build.Tag, dibs.Manifest.Tag); err != nil {
 			return output, err

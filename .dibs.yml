@@ -4,7 +4,7 @@ platforms:
   - platform: linux/amd64
     binary:
       build:
-        command: go build -o .bin/godibs-linux-amd64
+        command: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/godibs-linux-amd64
         tag: pojnfx/godibs:linux-amd64
         context: .
         file: Dockerfile
@@ -31,5 +31,37 @@ platforms:
         binary:
           command: .bin/godibs-linux-amd64 --help
           tag: pojntfx/godibs-integrationtest-binary:linux-amd64
+          context: .
+          file: Dockerfile.integrationTestBinary
+  - platform: linux/arm64
+    binary:
+      build:
+        command: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/godibs-linux-arm64
+        tag: pojnfx/godibs:linux-arm64
+        context: .
+        file: Dockerfile
+      pathInImage: /usr/local/bin/godibs
+      distPath: .bin/godibs-linux-arm64
+      cleanGlob: .bin/godibs-linux-arm64
+    tests:
+      unit:
+        command: go test ./...
+        tag: pojntfx/godibs-unittest:linux-arm64
+        context: .
+        file: Dockerfile.unitTest
+      integration:
+        lang:
+          command: go run main.go --help
+          tag: pojntfx/godibs-integrationtest-lang:linux-arm64
+          context: .
+          file: Dockerfile.integrationTestLang
+        image:
+          command: docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help
+          tag: pojntfx/godibs-integrationtest-image:linux-arm64
+          context: .
+          file: Dockerfile.integrationTestImage
+        binary:
+          command: .bin/godibs-linux-arm64 --help
+          tag: pojntfx/godibs-integrationtest-binary:linux-arm64
           context: .
           file: Dockerfile.integrationTestBinary

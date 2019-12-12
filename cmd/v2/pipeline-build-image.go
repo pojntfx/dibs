@@ -18,7 +18,6 @@ var PipelineBuildImageCmd = &cobra.Command{
 			if output, err := platform.Binary.Build.BuildImage(platform.Platform); err != nil {
 				utils.PipeLogError("Could not build image", err, platform.Platform, output)
 			}
-			return
 		}
 	},
 }
