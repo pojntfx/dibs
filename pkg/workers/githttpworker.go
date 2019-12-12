@@ -2,7 +2,7 @@ package workers
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/pojntfx/godibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"gopkg.in/mysticmode/gitviahttp.v1"
 	"net/http"
 	"strconv"

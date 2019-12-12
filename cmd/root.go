@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"errors"
-	"github.com/pojntfx/godibs/pkg/pipes"
+	"github.com/pojntfx/dibs/pkg/pipes"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/z0mbie42/rz-go/v2"

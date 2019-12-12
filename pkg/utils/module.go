@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+var (
+	HeaderReplaceStart = "// DIBS:TEMPREPLACE:START"
+	HeaderReplaceEnd   = "// DIBS:TEMPREPLACE:END"
+)
+
 // ParseModuleFromMessage gets the module name and event timestamp from a message
 func ParseModuleFromMessage(message string) (name, timestamp string) {
 	moduleParts := strings.Split(message, "@")
@@ -70,7 +75,7 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, dirToRepla
 		}
 	}
 
-	replaceBlock := "// GODIBS:TEMPREPLACE:START"
+	replaceBlock := HeaderReplaceStart
 
 	for index, replace := range replaces {
 		if requires != nil {
@@ -82,7 +87,7 @@ func GetModuleWithReplaces(content string, modulesToReplace []string, dirToRepla
 		}
 	}
 
-	replaceBlock = replaceBlock + "\n// GODIBS:TEMPREPLACE:END"
+	replaceBlock = replaceBlock + "\n" + HeaderReplaceEnd
 
 	return content + replaceBlock, nil
 }
@@ -93,12 +98,12 @@ func GetModuleWithoutReplaces(content string) string {
 	var isInReplacesBlock bool
 
 	for _, line := range strings.Split(content, "\n") {
-		if strings.Contains(line, "// GODIBS:TEMPREPLACE:START") {
+		if strings.Contains(line, HeaderReplaceStart) {
 			isInReplacesBlock = true
 			continue
 		}
 
-		if strings.Contains(line, "// GODIBS:TEMPREPLACE:END") {
+		if strings.Contains(line, HeaderReplaceEnd) {
 			isInReplacesBlock = false
 			continue
 		}

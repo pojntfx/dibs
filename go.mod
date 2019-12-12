@@ -1,4 +1,4 @@
-module github.com/pojntfx/godibs
+module github.com/pojntfx/dibs
 
 go 1.13
 

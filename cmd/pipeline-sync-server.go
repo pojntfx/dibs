@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/google/uuid"
-	"github.com/pojntfx/godibs/pkg/starters"
+	"github.com/pojntfx/dibs/pkg/starters"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -45,7 +45,7 @@ const (
 func init() {
 	id := uuid.New().String()
 
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerReposDir, "dir-repos", filepath.Join(os.TempDir(), "godibs", "gitrepos", id), "Directory in which the Git repos should be stored")
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerReposDir, "dir-repos", filepath.Join(os.TempDir(), "dibs", "gitrepos", id), "Directory in which the Git repos should be stored")
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPort, "port", "25000", "Port on which the Git repos should be served")
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPath, "path", "/repos", "HTTP path prefix for the served Git repos")
 

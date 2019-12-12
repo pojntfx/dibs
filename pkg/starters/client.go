@@ -1,8 +1,8 @@
 package starters
 
 import (
-	"github.com/pojntfx/godibs/pkg/utils"
-	"github.com/pojntfx/godibs/pkg/workers"
+	"github.com/pojntfx/dibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/workers"
 	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"io/ioutil"
@@ -12,7 +12,7 @@ import (
 	"syscall"
 )
 
-// Client is a client for godibs server
+// Client is a client for dibs server
 type Client struct {
 	PipelineUpFileMod      string // Go module file of the module to push
 	PipelineDownModules    string // Comma-seperated list of the names of the modules to pull

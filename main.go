@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pojntfx/godibs/cmd"
+	"github.com/pojntfx/dibs/cmd"
 )
 
 func main() {
