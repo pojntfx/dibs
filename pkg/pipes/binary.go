@@ -1,4 +1,4 @@
-package utils
+package pipes
 
 import (
 	"github.com/google/uuid"

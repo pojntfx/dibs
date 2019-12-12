@@ -1,4 +1,4 @@
-package utils
+package pipes
 
 type Dibs struct {
 	Manifest  Manifest
