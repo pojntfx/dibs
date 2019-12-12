@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/pojntfx/godibs/pkg/utils"
+	"github.com/pojntfx/godibs/pkg/pipes"
 	"github.com/spf13/viper"
 )
 
-var ConfigContent utils.Dibs
+var ConfigContent pipes.Dibs
 
 func ReadConfig(path, file string) error {
 	viper.AddConfigPath(path)

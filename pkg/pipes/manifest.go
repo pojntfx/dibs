@@ -1,4 +1,4 @@
-package utils
+package pipes
 
 type Manifest struct {
 	Tag string

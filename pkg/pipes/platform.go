@@ -1,4 +1,4 @@
-package utils
+package pipes
 
 type Platform struct {
 	Platform string

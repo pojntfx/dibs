@@ -1,7 +1,7 @@
 package v2
 
 import (
-	"github.com/pojntfx/godibs/pkg/utils"
+	"github.com/pojntfx/godibs/pkg/pipes"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/z0mbie42/rz-go/v2"
@@ -21,7 +21,7 @@ var (
 	RedisUrl    string
 	RedisPrefix string
 
-	Dibs utils.Dibs
+	Dibs pipes.Dibs
 )
 
 const (
