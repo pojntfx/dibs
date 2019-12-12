@@ -3,7 +3,6 @@ package pipes
 import (
 	"os"
 	"os/exec"
-	"strings"
 )
 
 type Build struct {
@@ -39,7 +38,7 @@ func (build *Build) execDocker(args ...string) (string, error) {
 }
 
 func (build *Build) execString(command string) (string, error) {
-	return build.exec(strings.Split(command, " ")...)
+	return build.exec("sh", "-c", command)
 }
 
 func (build *Build) Start() (string, error) {
