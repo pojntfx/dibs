@@ -3,7 +3,6 @@ package pipes
 import (
 	"github.com/google/uuid"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -16,34 +15,34 @@ type Binary struct {
 
 const EmptyRunCommand = "echo"
 
-func (binary *Binary) GetBinaryFromDockerImage(platform string) error {
+func (binary *Binary) GetBinaryFromDockerImage(platform string) (string, error) {
 	id := uuid.New().String()
 	distPath, _ := filepath.Split(binary.DistPath)
 	if err := os.MkdirAll(distPath, 0777); err != nil {
-		return err
+		return "", err
 	}
 
-	out, err := exec.Command("docker", "ps", "-aqf", "name="+id).Output()
+	output, err := binary.Build.execDocker("ps", "-aqf", "name="+id)
 	if err != nil {
-		return err
+		return output, err
 	}
-	if string(out) != "\n" {
-		if err := binary.Build.execDocker("run", "--platform", platform, "--name", id, binary.Build.Tag, EmptyRunCommand); err != nil {
-			return err
+	if output != "\n" {
+		if output, err := binary.Build.execDocker("run", "--platform", platform, "--name", id, binary.Build.Tag, EmptyRunCommand); err != nil {
+			return output, err
 		}
 
-		if err := binary.Build.execDocker("cp", id+":"+binary.PathInImage, binary.DistPath); err != nil {
-			return err
+		if output, err := binary.Build.execDocker("cp", id+":"+binary.PathInImage, binary.DistPath); err != nil {
+			return output, err
 		}
 
-		if err := binary.Build.execDocker("rm", "-f", id); err != nil {
-			return err
+		if output, err := binary.Build.execDocker("rm", "-f", id); err != nil {
+			return output, err
 		}
 	} else {
 		return binary.GetBinaryFromDockerImage(platform)
 	}
 
-	return nil
+	return "", nil
 }
 
 func (binary *Binary) Clean() error {
