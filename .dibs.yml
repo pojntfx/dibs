@@ -1,0 +1,36 @@
+manifest:
+  tag: pojntfx/godibs:latest
+platforms:
+  - platform: linux/amd64
+    image:
+      buildCommand: godibs build binary --platform linux/amd64
+      tag: pojnfx/godibs:linux-amd64
+      context: .
+      file: Dockerfile
+    binary:
+      buildCommand: go build -o .bin/godibs-linux-amd64
+      pathInImage: /usr/local/bin/godibs
+      distPath: .bin/godibs-linux-amd64
+      cleanGlob: .bin/godibs-linux-amd64
+    tests:
+      unit:
+        buildCommand: go test ./...
+        tag: pojntfx/godibs-unittest:linux-amd64
+        context: .
+        file: Dockerfile.unitTest
+      integration:
+        lang:
+          startCommand: go run main.go --help
+          tag: pojntfx/godibs-integrationtest-lang:linux-amd64
+          context: .
+          file: Dockerfile.integrationTestLang
+        image:
+          startCommand: docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help
+          tag: pojntfx/godibs-integrationtest-image:linux-amd64
+          context: .
+          file: Dockerfile.integrationTestImage
+        binary:
+          startCommand: .bin/godibs-linux-amd64 --help
+          tag: pojntfx/godibs-integrationtest-binary:linux-amd64
+          context: .
+          file: Dockerfile.integrationTestBinary
