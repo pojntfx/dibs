@@ -26,6 +26,9 @@ const (
 
 	PlatformAll     = "all"
 	PlatformDefault = PlatformAll
+
+	ConfigPath = "."
+	ConfigFile = ".dibs"
 )
 
 // rootCmd ist the main entry command
@@ -44,6 +47,10 @@ func init() {
 
 // Execute starts the main entry command
 func Execute() {
+	if err := ReadConfig(ConfigPath, ConfigFile); err != nil {
+		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
 	}
