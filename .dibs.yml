@@ -5,9 +5,9 @@ platforms:
     binary:
       build:
         command: go build -o .bin/godibs-linux-amd64
-          tag: pojnfx/godibs:linux-amd64
-          context: .
-          file: Dockerfile
+        tag: pojnfx/godibs:linux-amd64
+        context: .
+        file: Dockerfile
       pathInImage: /usr/local/bin/godibs
       distPath: .bin/godibs-linux-amd64
       cleanGlob: .bin/godibs-linux-amd64
