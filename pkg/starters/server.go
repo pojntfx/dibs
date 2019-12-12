@@ -1,15 +1,15 @@
 package starters
 
 import (
-	"github.com/pojntfx/godibs/pkg/utils"
-	"github.com/pojntfx/godibs/pkg/workers"
+	"github.com/pojntfx/dibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/workers"
 	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"path/filepath"
 	"strconv"
 )
 
-// Server is a server for godibs client
+// Server is a server for dibs client
 type Server struct {
 	ServerReposDir string // Directory in which the Git repos should be stored
 	ServerHTTPPort string // Port on which the Git repos should be served

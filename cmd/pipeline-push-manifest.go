@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/pojntfx/godibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

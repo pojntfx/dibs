@@ -2,7 +2,7 @@ package workers
 
 import (
 	"github.com/go-redis/redis/v7"
-	"github.com/pojntfx/godibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"sync"

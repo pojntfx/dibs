@@ -18,7 +18,7 @@ ARG TARGETPLATFORM
 
 COPY ./.dibs.yml ./.dibs.yml
 
-COPY --from=build /app/.bin/godibs-* /usr/local/bin/godibs
+COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 
 EXPOSE 25000
-CMD /usr/local/bin/godibs server
+CMD /usr/local/bin/dibs server
