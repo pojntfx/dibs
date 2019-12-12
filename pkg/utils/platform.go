@@ -2,7 +2,6 @@ package utils
 
 type Platform struct {
 	Platform string
-	Image    Build
 	Binary   Binary
 	Tests    struct {
 		Unit        Build
