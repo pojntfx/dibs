@@ -11,4 +11,6 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
+RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
+
 CMD go run main.go pipeline test unit lang --platform $TARGETPLATFORM

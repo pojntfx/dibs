@@ -2,7 +2,7 @@ manifest:
   tag: pojntfx/godibs:latest
 platforms:
   - platform: linux/amd64
-    binary:
+    assets:
       build:
         command: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/godibs-linux-amd64
         tag: pojntfx/godibs:linux-amd64
@@ -29,13 +29,13 @@ platforms:
           tag: pojntfx/godibs-integrationtest-image:linux-amd64
           context: .
           file: Dockerfile.integrationTestImage
-        binary:
+        assets:
           command: .bin/godibs-linux-amd64 --help
-          tag: pojntfx/godibs-integrationtest-binary:linux-amd64
+          tag: pojntfx/godibs-integrationtest-assets:linux-amd64
           context: .
-          file: Dockerfile.integrationTestBinary
+          file: Dockerfile.integrationTestAssets
   - platform: linux/arm64
-    binary:
+    assets:
       build:
         command: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/godibs-linux-arm64
         tag: pojntfx/godibs:linux-arm64
@@ -62,8 +62,8 @@ platforms:
           tag: pojntfx/godibs-integrationtest-image:linux-arm64
           context: .
           file: Dockerfile.integrationTestImage
-        binary:
+        assets:
           command: .bin/godibs-linux-arm64 --help
-          tag: pojntfx/godibs-integrationtest-binary:linux-arm64
+          tag: pojntfx/godibs-integrationtest-assets:linux-arm64
           context: .
-          file: Dockerfile.integrationTestBinary
+          file: Dockerfile.integrationTestAssets

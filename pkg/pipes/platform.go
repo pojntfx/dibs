@@ -2,7 +2,7 @@ package pipes
 
 type Platform struct {
 	Platform string
-	Binary   Binary
+	Assets   Assets
 	Tests    struct {
 		Unit struct {
 			Lang Build
@@ -10,7 +10,7 @@ type Platform struct {
 		Integration struct {
 			Lang   Build
 			Image  Build
-			Binary Build
+			Assets Build
 		}
 	}
 }
