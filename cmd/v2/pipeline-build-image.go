@@ -1,31 +1,25 @@
 package v2
 
 import (
+	"github.com/pojntfx/godibs/pkg/utils"
 	"github.com/spf13/cobra"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 )
 
 var PipelineBuildImageCmd = &cobra.Command{
 	Use:   "image",
 	Short: "Build image",
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, platform := range Dibs.Platforms {
-			if Platform == PlatformAll {
-				if output, err := platform.Binary.Build.BuildImage(platform.Platform); err != nil {
-					log.Fatal("Could not build image", rz.String("platform", platform.Platform), rz.String("output", output), rz.Err(err))
-				}
-				return
-			} else {
-				if platform.Platform == Platform {
-					if output, err := platform.Binary.Build.BuildImage(platform.Platform); err != nil {
-						log.Fatal("Could not build image", rz.String("platform", platform.Platform), rz.String("output", output), rz.Err(err))
-					}
-					return
-				}
-			}
+		platforms, err := Dibs.GetPlatforms(Platform, Platform == PlatformAll)
+		if err != nil {
+			utils.PipeLogErrorPlatformNotFound(platforms, err)
 		}
-		log.Fatal("Platform(s) not found in configuration file", rz.Any("platform", Platform))
+
+		for _, platform := range platforms {
+			if output, err := platform.Binary.Build.BuildImage(platform.Platform); err != nil {
+				utils.PipeLogError("Could not build image", err, platform.Platform, output)
+			}
+			return
+		}
 	},
 }
 
