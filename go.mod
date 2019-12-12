@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/otiai10/copy v1.0.2
 	github.com/spf13/cobra v0.0.5
-	github.com/spf13/viper v1.3.2
+	github.com/spf13/viper v1.6.1
 	gitlab.com/z0mbie42/rz-go/v2 v2.8.0
 	gopkg.in/mysticmode/gitviahttp.v1 v1.1.7
 	gopkg.in/src-d/go-git.v4 v4.13.1
