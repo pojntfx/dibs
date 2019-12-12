@@ -5,6 +5,10 @@ import (
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 )
 
+func PipeLogErrorNonPlatformSpecific(message string, err error, output string) {
+	log.Fatal(message, rz.String("output", output), rz.Err(err))
+}
+
 func PipeLogError(message string, err error, platform, output string) {
 	log.Fatal(message, rz.String("platform", platform), rz.String("output", output), rz.Err(err))
 }

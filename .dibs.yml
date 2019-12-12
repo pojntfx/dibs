@@ -5,7 +5,7 @@ platforms:
     binary:
       build:
         command: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/godibs-linux-amd64
-        tag: pojnfx/godibs:linux-amd64
+        tag: pojntfx/godibs:linux-amd64
         context: .
         file: Dockerfile
       pathInImage: /usr/local/bin/godibs
@@ -37,7 +37,7 @@ platforms:
     binary:
       build:
         command: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/godibs-linux-arm64
-        tag: pojnfx/godibs:linux-arm64
+        tag: pojntfx/godibs:linux-arm64
         context: .
         file: Dockerfile
       pathInImage: /usr/local/bin/godibs

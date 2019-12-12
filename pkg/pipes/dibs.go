@@ -8,10 +8,14 @@ type Dibs struct {
 }
 
 func (dibs *Dibs) BuildDockerManifest() (string, error) {
+	var manifestsToAdd []string
+
 	for _, platform := range dibs.Platforms {
-		if output, err := platform.Binary.Build.execDocker("manifest", "create", "--amend", platform.Binary.Build.Tag, dibs.Manifest.Tag); err != nil {
-			return output, err
-		}
+		manifestsToAdd = append(manifestsToAdd, platform.Binary.Build.Tag)
+	}
+
+	if output, err := dibs.Platforms[0].Binary.Build.execDocker(append([]string{"manifest", "create", "--amend", dibs.Manifest.Tag}, manifestsToAdd...)...); err != nil {
+		return output, err
 	}
 
 	return "", nil

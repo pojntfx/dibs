@@ -6,11 +6,12 @@ ARG TARGETPLATFORM
 COPY ./go.mod ./go.sum ./
 RUN go mod download
 
+COPY ./.dibs.yml ./.dibs.yml
 COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN go run main.go binary build --platform $TARGETPLATFORM
+RUN go run main.go pipeline build binary --platform $TARGETPLATFORM
 
 FROM --platform=$TARGETPLATFORM debian:buster-slim
 ARG TARGETPLATFORM
