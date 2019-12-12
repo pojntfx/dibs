@@ -14,4 +14,4 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-CMD go run main.go pipeline integrationtest image --platform $TARGETPLATFORM
+CMD go run main.go pipeline test integration image --platform $TARGETPLATFORM

@@ -22,20 +22,20 @@ func (binary *Binary) GetBinaryFromDockerImage(platform string) (string, error) 
 		return "", err
 	}
 
-	output, err := binary.Build.execDocker("ps", "-aqf", "name="+id)
+	output, err := binary.Build.execDocker(platform, "ps", "-aqf", "name="+id)
 	if err != nil {
 		return output, err
 	}
 	if output != "\n" {
-		if output, err := binary.Build.execDocker("run", "--platform", platform, "--name", id, binary.Build.Tag, EmptyRunCommand); err != nil {
+		if output, err := binary.Build.execDocker(platform, "run", "--platform", platform, "-e", "TARGETPLATFORM="+platform, "--name", id, binary.Build.Tag, EmptyRunCommand); err != nil {
 			return output, err
 		}
 
-		if output, err := binary.Build.execDocker("cp", id+":"+binary.PathInImage, binary.DistPath); err != nil {
+		if output, err := binary.Build.execDocker(platform, "cp", id+":"+binary.PathInImage, binary.DistPath); err != nil {
 			return output, err
 		}
 
-		if output, err := binary.Build.execDocker("rm", "-f", id); err != nil {
+		if output, err := binary.Build.execDocker(platform, "rm", "-f", id); err != nil {
 			return output, err
 		}
 	} else {
