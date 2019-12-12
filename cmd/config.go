@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var ConfigContent utils.Config
+var ConfigContent utils.Dibs
 
 func ReadConfig(path, file string) error {
 	viper.AddConfigPath(path)
