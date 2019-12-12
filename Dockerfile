@@ -16,6 +16,9 @@ RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
 FROM --platform=$TARGETPLATFORM debian:buster-slim
 ARG TARGETPLATFORM
 
+COPY ./.dibs.yml ./.dibs.yml
+
 COPY --from=build /app/.bin/godibs-* /usr/local/bin/godibs
+
 EXPOSE 25000
 CMD /usr/local/bin/godibs server
