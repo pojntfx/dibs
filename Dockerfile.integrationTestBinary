@@ -30,4 +30,4 @@ COPY ./pkg ./pkg
 
 COPY --from=build /app/.bin ./.bin
 
-CMD go run main.go pipeline integrationtest binary --platform $TARGETPLATFORM
+CMD go run main.go pipeline test integration binary --platform $TARGETPLATFORM

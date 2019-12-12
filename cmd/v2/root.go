@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"errors"
 	"github.com/pojntfx/godibs/pkg/pipes"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -11,6 +12,13 @@ import (
 var RootCmd = &cobra.Command{
 	Use:   "dibs",
 	Short: "System for distributed polyglot, multi-module and multi-architecture development",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if !(Executor == ExecutorDocker || Executor == ExecutorNative) {
+			return errors.New(`unsupported value "` + Executor + `" for --executor, must be either "` + ExecutorDocker + `" or "` + ExecutorNative + `"`)
+		}
+
+		return nil
+	},
 }
 
 var (
@@ -60,9 +68,5 @@ func Execute() {
 
 	if err := RootCmd.Execute(); err != nil {
 		log.Fatal("Could not start root command", rz.Err(err))
-	}
-
-	if !(Executor == ExecutorDocker || Executor == ExecutorNative) {
-		log.Fatal("Unsupported value for --executor, must be either \""+ExecutorDocker+"\" or \""+ExecutorNative+"\"", rz.String("--executor", Executor))
 	}
 }

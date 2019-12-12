@@ -11,12 +11,12 @@ var PipelineBuildImageCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		platforms, err := Dibs.GetPlatforms(Platform, Platform == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorPlatformNotFound(platforms, err)
+			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if output, err := platform.Binary.Build.BuildImage(platform.Platform); err != nil {
-				utils.PipeLogError("Could not build image", err, platform.Platform, output)
+				utils.PipeLogErrorFatal("Could not build image", err, platform.Platform, output)
 			}
 		}
 	},

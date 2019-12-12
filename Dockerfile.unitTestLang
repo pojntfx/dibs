@@ -11,4 +11,4 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-CMD go run main.go pipeline unittest lang --platform $TARGETPLATFORM
+CMD go run main.go pipeline test unit lang --platform $TARGETPLATFORM

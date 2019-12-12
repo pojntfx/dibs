@@ -4,7 +4,9 @@ type Platform struct {
 	Platform string
 	Binary   Binary
 	Tests    struct {
-		Unit        Build
+		Unit struct {
+			Lang Build
+		}
 		Integration struct {
 			Lang   Build
 			Image  Build

@@ -13,10 +13,11 @@ platforms:
       cleanGlob: .bin/godibs-linux-amd64
     tests:
       unit:
-        command: go test ./...
-        tag: pojntfx/godibs-unittest:linux-amd64
-        context: .
-        file: Dockerfile.unitTest
+        lang:
+          command: go test ./...
+          tag: pojntfx/godibs-unittest:linux-amd64
+          context: .
+          file: Dockerfile.unitTestLang
       integration:
         lang:
           command: go run main.go --help
@@ -24,7 +25,7 @@ platforms:
           context: .
           file: Dockerfile.integrationTestLang
         image:
-          command: docker run --platform linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help
+          command: docker run --platform linux/amd64 -e TARGETPLATFORM=linux/amd64 pojntfx/godibs:linux-amd64 /usr/local/bin/godibs --help
           tag: pojntfx/godibs-integrationtest-image:linux-amd64
           context: .
           file: Dockerfile.integrationTestImage
@@ -45,10 +46,11 @@ platforms:
       cleanGlob: .bin/godibs-linux-arm64
     tests:
       unit:
-        command: go test ./...
-        tag: pojntfx/godibs-unittest:linux-arm64
-        context: .
-        file: Dockerfile.unitTest
+        lang:
+          command: go test ./...
+          tag: pojntfx/godibs-unittest:linux-arm64
+          context: .
+          file: Dockerfile.unitTestLang
       integration:
         lang:
           command: go run main.go --help
@@ -56,7 +58,7 @@ platforms:
           context: .
           file: Dockerfile.integrationTestLang
         image:
-          command: docker run --platform linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help
+          command: docker run --platform linux/arm64 -e TARGETPLATFORM=linux/arm64 pojntfx/godibs:linux-arm64 /usr/local/bin/godibs --help
           tag: pojntfx/godibs-integrationtest-image:linux-arm64
           context: .
           file: Dockerfile.integrationTestImage
