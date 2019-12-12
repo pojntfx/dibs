@@ -16,6 +16,9 @@ var PipelineBuildBinaryCmd = &cobra.Command{
 
 		for _, platform := range platforms {
 			if Executor == ExecutorDocker {
+				if output, err := platform.Binary.Build.BuildImage(platform.Platform); err != nil {
+					utils.PipeLogErrorFatal("Could not build image", err, platform.Platform, output)
+				}
 				if output, err := platform.Binary.GetBinaryFromDockerImage(platform.Platform); err != nil {
 					utils.PipeLogErrorFatal("Could not get binary from Docker image", err, platform.Platform, output)
 				}

@@ -17,13 +17,13 @@ var PipelineTestUnitLangCmd = &cobra.Command{
 		for _, platform := range platforms {
 			if Executor == ExecutorDocker {
 				if output, err := platform.Tests.Unit.Lang.BuildImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could build unit test lang image", err, platform.Platform, output)
+					utils.PipeLogErrorFatal("Could not build lang unit test image", err, platform.Platform, output)
 				}
 				output, err := platform.Tests.Unit.Lang.StartImage(platform.Platform)
-				utils.PipeLogUnit("Unit tests ran in Docker", err, platform.Platform, output)
+				utils.PipeLogErrorInfo("Lang unit test ran in Docker", err, platform.Platform, output)
 			} else {
 				output, err := platform.Tests.Unit.Lang.Start(platform.Platform)
-				utils.PipeLogUnit("Unit tests ran", err, platform.Platform, output)
+				utils.PipeLogErrorInfo("Lang unit test ran", err, platform.Platform, output)
 			}
 		}
 	},
