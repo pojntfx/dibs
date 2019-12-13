@@ -1,5 +1,9 @@
 manifest:
   tag: pojntfx/dibs:latest
+chart:
+  dir: ./charts/dibs
+  distDir: .bin
+  cleanGlob: .bin/dibs-*.tar.gz
 platforms:
   - platform: linux/amd64
     assets:

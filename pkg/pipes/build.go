@@ -19,6 +19,7 @@ var DefaultEnvVariables = map[string]string{
 
 const (
 	DockerCommand        = "docker"
+	HelmCommand          = "helm"
 	TargetPlatformEnvKey = "TARGETPLATFORM"
 )
 
@@ -42,6 +43,10 @@ func (build *Build) exec(platform string, args ...string) (string, error) {
 
 func (build *Build) execDocker(platform string, args ...string) (string, error) {
 	return build.exec(platform, append([]string{DockerCommand}, args...)...)
+}
+
+func (build *Build) execHelm(platform string, args ...string) (string, error) {
+	return build.exec(platform, append([]string{HelmCommand}, args...)...)
 }
 
 func (build *Build) execString(platform string, command string) (string, error) {
