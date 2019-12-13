@@ -1,6 +1,10 @@
 package pipes
 
-import "errors"
+import (
+	"errors"
+	"os"
+	"path/filepath"
+)
 
 type Dibs struct {
 	Manifest  Manifest
@@ -28,6 +32,18 @@ func (dibs *Dibs) PushDockerManifest(platform string) (string, error) {
 
 func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
 	return dibs.Platforms[0].Assets.Build.execHelm(platform, "package", "-d", dibs.Chart.DistDir, dibs.Chart.SrcDir)
+}
+
+func (dibs *Dibs) CleanHelmChart() error {
+	filesToRemove, _ := filepath.Glob(dibs.Chart.CleanGlob)
+
+	for _, fileToRemove := range filesToRemove {
+		if err := os.Remove(fileToRemove); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (dibs *Dibs) GetPlatforms(wantedPlatform string, all bool) ([]Platform, error) {
