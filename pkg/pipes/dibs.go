@@ -4,6 +4,7 @@ import "errors"
 
 type Dibs struct {
 	Manifest  Manifest
+	Chart     Chart
 	Platforms []Platform
 }
 
@@ -23,6 +24,10 @@ func (dibs *Dibs) BuildDockerManifest(platform string) (string, error) {
 
 func (dibs *Dibs) PushDockerManifest(platform string) (string, error) {
 	return dibs.Platforms[0].Assets.Build.execDocker(platform, "manifest", "push", dibs.Manifest.Tag)
+}
+
+func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
+	return dibs.Platforms[0].Assets.Build.execHelm(platform, "package", "-d", dibs.Chart.DistDir, dibs.Chart.SrcDir)
 }
 
 func (dibs *Dibs) GetPlatforms(wantedPlatform string, all bool) ([]Platform, error) {
