@@ -6,8 +6,10 @@ import (
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 )
 
-func PipeLogErrorFatalNonPlatformSpecific(message string, err error, output string) {
-	fmt.Println(output)
+func PipeLogErrorFatalNonPlatformSpecific(message string, err error, output ...string) {
+	if output != nil {
+		fmt.Println(output)
+	}
 	log.Fatal(message, rz.Err(err))
 }
 
