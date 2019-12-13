@@ -3,6 +3,12 @@ package cmd
 import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
+	"net"
+)
+
+var (
+	KubernetesIp        net.IP
+	KubernetesIpDefault = net.IPv4(127, 0, 0, 1)
 )
 
 var PipelineTestIntegrationChartCmd = &cobra.Command{
@@ -24,7 +30,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 					Value string
 				}{
 					Key:   "IP",
-					Value: "192.168.178.53",
+					Value: KubernetesIp.String(),
 				})
 				utils.PipeLogErrorInfo("Chart integration test ran in Docker", err, platform.Platform, output)
 			} else {
@@ -36,5 +42,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 }
 
 func init() {
+	PipelineTestIntegrationChartCmd.PersistentFlags().IPVarP(&KubernetesIp, "kubernetes-ip", "i", KubernetesIpDefault, "IP of the Kubernetes cluster to create if running in Docker (mostly the host machine's IP)")
+
 	PipelineTestIntegrationCmd.AddCommand(PipelineTestIntegrationChartCmd)
 }
