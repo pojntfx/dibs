@@ -3,10 +3,6 @@ FROM --platform=$TARGETPLATFORM golang:1.13.5-buster AS build
 WORKDIR /app
 ARG TARGETPLATFORM
 
-RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >./helm
-RUN chmod +x ./helm
-RUN mv ./helm /usr/local/bin/helm
-
 COPY ./go.mod ./go.sum ./
 RUN go mod download
 
@@ -15,14 +11,28 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN mkdir -p .bin # go run main.go pipeline build chart --platform $TARGETPLATFORM
+RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
+
+FROM --platform=$TARGETPLATFORM debian:buster-slim
+WORKDIR /app
+ARG TARGETPLATFORM
+
+RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >./helm
+RUN chmod +x ./helm
+RUN mv ./helm /usr/local/bin/helm
+
+COPY ./.dibs.yml ./.dibs.yml
+
+COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
+
+CMD mkdir -p .bin # dibs pipeline build chart --platform $TARGETPLATFORM
 
 FROM --platform=$TARGETPLATFORM docker:stable
 WORKDIR /app
 ARG TARGETPLATFORM
 
 RUN apk update
-RUN apk add curl go git tar
+RUN apk add curl tar
 
 RUN curl -L https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl >./kubectl
 RUN chmod +x ./kubectl
@@ -36,15 +46,9 @@ RUN curl -L https://github.com/rancher/k3d/releases/download/v1.3.4/k3d-linux-am
 RUN chmod +x ./k3d
 RUN mv ./k3d /usr/local/bin/k3d
 
-COPY ./go.mod ./go.sum ./
-RUN go mod download
-
 COPY ./.dibs.yml ./.dibs.yml
-COPY ./main.go ./main.go
-COPY ./cmd ./cmd
-COPY ./pkg ./pkg
 
-COPY --from=build /app/.bin ./.bin
+COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 
 CMD k3d delete; k3d create --server-arg "--tls-san=$IP" &&\
     sleep 15 &&\
@@ -55,4 +59,4 @@ CMD k3d delete; k3d create --server-arg "--tls-san=$IP" &&\
     kubectl apply -f /tmp/helm-rbac.yaml &&\
     helm init --service-account tiller &&\
     sleep 25 &&\
-    go run main.go pipeline test integration image --platform $TARGETPLATFORM; k3d delete
+    dibs pipeline test integration image --platform $TARGETPLATFORM; k3d delete
