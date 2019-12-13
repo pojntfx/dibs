@@ -38,6 +38,11 @@ platforms:
           tag: pojntfx/dibs-integrationtest-assets:linux-amd64
           context: .
           file: Dockerfile.integrationTestAssets
+        chart:
+          command: helm install --name godibs .bin/dibs-*.tar.gz && helm delete godibs
+          tag: pojntfx/dibs-integrationtest-chart:linux-amd64
+          context: .
+          file: Dockerfile.integrationTestChart
   - platform: linux/arm64
     assets:
       build:
@@ -71,3 +76,8 @@ platforms:
           tag: pojntfx/dibs-integrationtest-assets:linux-arm64
           context: .
           file: Dockerfile.integrationTestAssets
+        chart:
+          command: helm install --name godibs .bin/dibs-*.tar.gz && helm delete godibs
+          tag: pojntfx/dibs-integrationtest-chart:linux-arm64
+          context: .
+          file: Dockerfile.integrationTestChart

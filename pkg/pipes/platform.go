@@ -11,6 +11,7 @@ type Platform struct {
 			Lang   Build
 			Image  Build
 			Assets Build
+			Chart  Build
 		}
 	}
 }
