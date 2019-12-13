@@ -61,8 +61,22 @@ func (build *Build) BuildImage(platform string) (string, error) {
 	return build.execDocker(platform, "buildx", "build", "--progress", "plain", "--pull", "--load", "--platform", platform, "-t", build.Tag, "-f", build.File, build.Context)
 }
 
-func (build *Build) StartImage(platform string) (string, error) {
-	return build.execDocker(platform, "run", "--platform", platform, "-e", "TARGETPLATFORM="+platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", build.Tag)
+func (build *Build) StartImage(platform string, envVariableKeyValues ...struct {
+	Key   string
+	Value string
+}) (string, error) {
+	if envVariableKeyValues != nil {
+		var envVariableFlags []string
+
+		envVariableFlags = append(envVariableFlags, "-e", TargetPlatformEnvKey+"="+platform)
+		for _, keyVal := range envVariableKeyValues {
+			envVariableFlags = append(envVariableFlags, "-e", keyVal.Key+"="+keyVal.Value)
+		}
+
+		return build.execDocker(platform, append(append([]string{"run", "--platform", platform}, envVariableFlags...), "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", build.Tag)...)
+	}
+
+	return build.execDocker(platform, "run", "--platform", platform, "-e", TargetPlatformEnvKey+"="+platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", build.Tag)
 }
 
 func (build *Build) PushImage(platform string) (string, error) {

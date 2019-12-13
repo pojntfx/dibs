@@ -58,5 +58,5 @@ CMD k3d delete; k3d create --server-arg "--tls-san=$IP" &&\
     printf "apiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: tiller\n  namespace: kube-system\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: ClusterRoleBinding\nmetadata:\n  name: tiller\nroleRef:\n  apiGroup: rbac.authorization.k8s.io\n  kind: ClusterRole\n  name: cluster-admin\nsubjects:\n  - kind: ServiceAccount\n    name: tiller\n    namespace: kube-system\n" > /tmp/helm-rbac.yaml &&\
     kubectl apply -f /tmp/helm-rbac.yaml &&\
     helm init --service-account tiller &&\
-    sleep 25 &&\
-    dibs pipeline test integration image --platform $TARGETPLATFORM; k3d delete
+    sleep 120 &&\
+    dibs pipeline test integration chart --platform $TARGETPLATFORM; k3d delete

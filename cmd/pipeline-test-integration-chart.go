@@ -19,7 +19,13 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 				if output, err := platform.Tests.Integration.Chart.BuildImage(platform.Platform); err != nil {
 					utils.PipeLogErrorFatal("Could not build chart integration test chart", err, platform.Platform, output)
 				}
-				output, err := platform.Tests.Integration.Chart.StartImage(platform.Platform)
+				output, err := platform.Tests.Integration.Chart.StartImage(platform.Platform, struct {
+					Key   string
+					Value string
+				}{
+					Key:   "IP",
+					Value: "192.168.178.53",
+				})
 				utils.PipeLogErrorInfo("Chart integration test ran in Docker", err, platform.Platform, output)
 			} else {
 				output, err := platform.Tests.Integration.Chart.Start(platform.Platform)
