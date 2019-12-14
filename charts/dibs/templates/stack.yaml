@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
+spec:
+  selector:
+    matchLabels:
+      app: dibs{{ if .Values.meta.dev }}-dev{{ end }}
+  template:
+    metadata:
+      labels:
+        app: dibs{{ if .Values.meta.dev }}-dev{{ end }}
+    spec:
+      containers:
+        - name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
+          image: {{ .Values.meta.image }}
+          command:
+            - /usr/local/bin/dibs
+          args:
+            - pipeline
+            - sync
+            - server
+            - --redis-prefix
+            - {{ .Values.redis.prefix }}
+            - --redis-url
+            - {{ .Values.redis.url }}
+          {{ if not .Values.meta.dev }}
+          resources:
+            limits:
+              memory: {{ .Values.resources.memory }}
+              cpu: {{ .Values.resources.cpu }}
+          {{ end }}
+          ports:
+            - containerPort: 35000
+  {{ if .Values.meta.dev }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dibs-dev
+spec:
+  selector:
+    app: dibs-dev
+  type: NodePort
+  ports:
+    - name: grpc
+      port: 35000
+      targetPort: 35000
+      nodePort: {{ .Values.ingress.nodePort }}
+  {{ else }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dibs
+spec:
+  selector:
+    app: dibs
+  ports:
+    - name: grpc
+      port: 35000
+      targetPort: 35000
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: dibs
+  annotations:
+    ingress.kubernetes.io/protocol: h2c
+spec:
+  rules:
+    - host: {{ .Values.ingress.domain }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            backend:
+              serviceName: dibs
+              servicePort: grpc
+  {{ end }}
