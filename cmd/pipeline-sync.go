@@ -27,7 +27,7 @@ const (
 )
 
 func init() {
-	PipelineCmd.PersistentFlags().StringVarP(&Lang, "lang", "l", LangDefault, `Language to develop the modules for (currently only "`+LangGo+`" is supported)`)
+	PipelineSyncCmd.PersistentFlags().StringVarP(&Lang, "lang", "l", LangDefault, `Language to develop the modules for (currently only "`+LangGo+`" is supported)`)
 
 	PipelineCmd.AddCommand(PipelineSyncCmd)
 }

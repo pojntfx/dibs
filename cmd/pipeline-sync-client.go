@@ -75,13 +75,20 @@ func init() {
 
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&GitUpBaseUrl, LangGo+"-git-base-url", "http://localhost:35000/repos", `(--lang "`+LangGo+`" only) Base URL of the sync remote`)
 
+	platformToUse := PlatformDefault
+	if Platform != PlatformDefault && Platform != "" {
+		platformToUse = Platform
+	} else if Platform == "" {
+		platformToUse = "[inherited]"
+	}
+
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpDirSrc, "dir-src", ".", "Directory in which the source code of the module to push resides")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpDirPush, "dir-push", filepath.Join(os.TempDir(), "dibs", "push", id), "Temporary directory to put the module into before pushing")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpDirWatch, "dir-watch", ".", "Directory to watch for changes")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpFileMod, LangGo+"-modules-file", "go.mod", `(--lang "`+LangGo+`" only) Go module file of the module to push`)
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpBuildCommand, "cmd-build", "go build ./...", "Command to run to build the module")
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpTestCommand, "cmd-test", "go test ./...", "Command to run to test the module")
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpStartCommand, "cmd-start", "go run main.go", "Command to run to start the module")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpBuildCommand, "cmd-build", os.Args[0]+" --platform "+platformToUse+" pipeline build assets", "Command to run to build the module")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpTestCommand, "cmd-test", os.Args[0]+" --platform "+platformToUse+" pipeline test unit lang", "Command to run to test the module")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpStartCommand, "cmd-start", os.Args[0]+" --platform "+platformToUse+" pipeline test integration assets", "Command to run to start the module")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpRegexIgnore, LangGo+"-regex-ignore", "*.pb.go", `(--lang "`+LangGo+`" only) Regular expression for files to ignore`)
 	PipelineSyncClientCmd.PersistentFlags().StringVarP(&PipelineDownModules, LangGo+"-modules-pull", "g", "", `(--lang "`+LangGo+`" only) Comma-separated list of the names of the modules to pull`)
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineDownDirModules, LangGo+"-dir-pull", filepath.Join(os.TempDir(), "dibs", "pull", id), `(--lang "`+LangGo+`" only) Directory to pull the modules to`)
