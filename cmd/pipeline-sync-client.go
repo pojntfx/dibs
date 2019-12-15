@@ -15,6 +15,9 @@ var PipelineSyncClientCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		switch Lang {
 		case LangGo:
+			// Ignore if there are errors here, platforms might not be set (there is no hard dependency on the config)
+			platforms, _ := Dibs.GetPlatforms(Platform, Platform == PlatformAll)
+
 			client := starters.Client{
 				PipelineUpFileMod:      PipelineUpFileMod,
 				PipelineDownModules:    PipelineDownModules,
@@ -25,7 +28,7 @@ var PipelineSyncClientCmd = &cobra.Command{
 				PipelineUpDirSrc:       PipelineUpDirSrc,
 				PipelineUpDirPush:      PipelineUpDirPush,
 				PipelineUpDirWatch:     PipelineUpDirWatch,
-				PipelineUpRegexIgnore:  PipelineUpRegexIgnore,
+				PipelineUpRegexIgnore:  strings.Replace(PipelineUpRegexIgnore, IgnoreRegexPlaceholder, platforms[0].Assets.CleanGlob, -1),
 
 				RedisUrl:                  RedisUrl,
 				RedisPrefix:               RedisPrefix,
@@ -70,7 +73,8 @@ const (
 	GitUpUserName      = "dibs-syncer"
 	GitUpUserEmail     = "dibs-syncer@pojtinger.space"
 
-	PlatformPlaceholder = "[inherited]"
+	PlatformPlaceholder    = "[dynamic-from-parent-command]"
+	IgnoreRegexPlaceholder = "[dynamic-from-clean-glob]"
 )
 
 func init() {
@@ -85,7 +89,7 @@ func init() {
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpBuildCommand, "cmd-build", os.Args[0]+" --platform "+PlatformPlaceholder+" pipeline build assets", "Command to run to build the module")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpTestCommand, "cmd-test", os.Args[0]+" --platform "+PlatformPlaceholder+" pipeline test unit lang", "Command to run to test the module")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpStartCommand, "cmd-start", os.Args[0]+" --platform "+PlatformPlaceholder+" pipeline test integration assets", "Command to run to start the module")
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpRegexIgnore, "regex-ignore", "*.pb.go", "Regular expression for files to ignore")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineUpRegexIgnore, "regex-ignore", IgnoreRegexPlaceholder, "Regular expression for files to ignore")
 	PipelineSyncClientCmd.PersistentFlags().StringVarP(&PipelineDownModules, LangGo+"-modules-pull", "g", "", `(--lang "`+LangGo+`" only) Comma-separated list of the names of the modules to pull`)
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&PipelineDownDirModules, LangGo+"-dir-pull", filepath.Join(os.TempDir(), "dibs", "pull", id), `(--lang "`+LangGo+`" only) Directory to pull the modules to`)
 
