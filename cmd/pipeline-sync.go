@@ -24,10 +24,16 @@ var (
 const (
 	LangDefault = LangGo
 	LangGo      = "go"
+
+	RedisUrlDefault    = "localhost:6379"
+	RedisPrefixDefault = "dibs"
 )
 
 func init() {
 	PipelineSyncCmd.PersistentFlags().StringVarP(&Lang, "lang", "l", LangDefault, `Language to develop the modules for (currently only "`+LangGo+`" is supported)`)
+
+	PipelineSyncCmd.PersistentFlags().StringVarP(&RedisUrl, "redis-url", "u", RedisUrlDefault, "URL of the Redis instance to use")
+	PipelineSyncCmd.PersistentFlags().StringVarP(&RedisPrefix, "redis-prefix", "c", RedisPrefixDefault, "Redis channel prefix to use")
 
 	PipelineCmd.AddCommand(PipelineSyncCmd)
 }
