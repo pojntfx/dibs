@@ -11,6 +11,5 @@ var PipelineTestCmd = &cobra.Command{
 }
 
 func init() {
-
 	PipelineCmd.AddCommand(PipelineTestCmd)
 }
