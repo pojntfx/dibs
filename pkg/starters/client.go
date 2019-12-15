@@ -15,7 +15,7 @@ import (
 // Client is a client for dibs server
 type Client struct {
 	PipelineUpFileMod      string // Go module file of the module to push
-	PipelineDownModules    string // Comma-seperated list of the names of the modules to pull
+	PipelineDownModules    string // Comma-separated list of the names of the modules to pull
 	PipelineDownDirModules string // Directory to pull the modules to
 	PipelineUpTestCommand  string // Command to run to test the module
 	PipelineUpBuildCommand string // Command to run to build the module
@@ -59,13 +59,15 @@ func (client *Client) Start() {
 	// Directory to clone the local modules to
 	downModulesDir := client.PipelineDownDirModules
 
-	// Replace the modules that are specified
-	moduleWithReplaces, err := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
-	if err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
-	}
-	if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithReplaces), 0777); err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+	// Replace the modules that are specified. Don't run if no pull modules have been specified.
+	if downModules[0] != "" {
+		moduleWithReplaces, err := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
+		if err != nil {
+			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+		}
+		if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithReplaces), 0777); err != nil {
+			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+		}
 	}
 
 	// Connect to Redis
@@ -89,14 +91,18 @@ func (client *Client) Start() {
 		redis.PublishWithTimestamp(client.RedisSuffixUpUnRegistered, module)
 
 		log.Info("Cleaning up ...", rz.String("Module", module), rz.String("ModuleFile", client.PipelineUpFileMod))
-		rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
-		if err != nil {
-			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
-		}
-		goModContent := string(rawGoModContent)
-		moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
-		if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777); err != nil {
-			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+
+		// Remove the added replace directives. Don't run if no pull modules have been specified.
+		if downModules[0] != "" {
+			rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
+			if err != nil {
+				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+			}
+			goModContent := string(rawGoModContent)
+			moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
+			if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777); err != nil {
+				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+			}
 		}
 
 		os.Exit(0)
@@ -142,7 +148,7 @@ func (client *Client) Start() {
 		Redis:                   redis,
 	}
 
-	// Run the pipeline once. If there are errors, don't exit
+	// Run the pipeline once. If there are errors, don't exit.
 	if err := pipeline.RunAll(); err != nil {
 		log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
 	}
@@ -161,8 +167,10 @@ func (client *Client) Start() {
 	pipelineUpdateWorkerErrors := make(chan error, 0)
 	pipelineUpdateWorkerEvents := make(chan utils.Event, 0)
 
-	// Start worker
-	go pipelineUpdateWorker.Start(pipelineUpdateWorkerErrors, pipelineUpdateWorkerEvents)
+	// Start worker. Don't run if no pull modules have been specified.
+	if downModules[0] != "" {
+		go pipelineUpdateWorker.Start(pipelineUpdateWorkerErrors, pipelineUpdateWorkerEvents)
+	}
 
 	// Create a new folder watcher
 	folderWatcher := utils.FolderWatcher{
@@ -190,11 +198,10 @@ func (client *Client) Start() {
 				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
 		case <-folderWatcher.FolderWatcher.ChangeDetails():
-			// Run the pipeline again on every file change. If there are errors, don't exit
+			// Run the pipeline again on every file change. If there are errors, don't exit.
 			if err := pipeline.RunAll(); err != nil {
 				log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
 			}
 		}
 	}
-
 }
