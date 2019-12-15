@@ -31,6 +31,10 @@ func (dibs *Dibs) PushDockerManifest(platform string) (string, error) {
 }
 
 func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
+	if err := os.MkdirAll(dibs.Chart.DistDir, 0777); err != nil {
+		return "", err
+	}
+
 	return dibs.Platforms[0].Assets.Build.execHelm(platform, "package", "-d", dibs.Chart.DistDir, dibs.Chart.SrcDir)
 }
 

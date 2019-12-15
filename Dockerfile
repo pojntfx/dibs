@@ -20,5 +20,5 @@ COPY ./.dibs.yml ./.dibs.yml
 
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 
-EXPOSE 25000
-CMD /usr/local/bin/dibs server
+EXPOSE 35000
+CMD /usr/local/bin/dibs pipeline sync server

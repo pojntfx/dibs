@@ -13,19 +13,25 @@ COPY ./pkg ./pkg
 
 RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
 
-FROM --platform=$TARGETPLATFORM debian:buster-slim
+FROM --platform=$TARGETPLATFORM debian:buster-slim AS build-chart
 WORKDIR /app
 ARG TARGETPLATFORM
+
+RUN apt update
+RUN apt install -y curl
 
 RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >./helm
 RUN chmod +x ./helm
 RUN mv ./helm /usr/local/bin/helm
 
+RUN helm init --client-only
+
 COPY ./.dibs.yml ./.dibs.yml
+COPY ./charts ./charts
 
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 
-CMD mkdir -p .bin # dibs pipeline build chart --platform $TARGETPLATFORM
+RUN dibs pipeline build chart --platform $TARGETPLATFORM
 
 FROM --platform=$TARGETPLATFORM docker:stable
 WORKDIR /app
@@ -46,9 +52,12 @@ RUN curl -L https://github.com/rancher/k3d/releases/download/v1.3.4/k3d-linux-am
 RUN chmod +x ./k3d
 RUN mv ./k3d /usr/local/bin/k3d
 
+RUN helm init --client-only
+
 COPY ./.dibs.yml ./.dibs.yml
 
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
+COPY --from=build-chart /app/.bin ./.bin
 
 CMD k3d delete; k3d create --server-arg "--tls-san=$IP" &&\
     sleep 15 &&\
