@@ -46,7 +46,7 @@ func init() {
 	id := uuid.New().String()
 
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerReposDir, "dir-repos", filepath.Join(os.TempDir(), "dibs", "gitrepos", id), "Directory in which the Git repos should be stored")
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPort, "port", "25000", "Port on which the Git repos should be served")
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPort, "port", "35000", "Port on which the Git repos should be served")
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPath, "path", "/repos", "HTTP path prefix for the served Git repos")
 
 	PipelineSyncCmd.AddCommand(PipelineSyncServerCmd)
