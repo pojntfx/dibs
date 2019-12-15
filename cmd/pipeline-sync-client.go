@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"github.com/google/uuid"
 	"github.com/pojntfx/dibs/pkg/starters"
 	"github.com/spf13/cobra"
@@ -46,13 +45,6 @@ var PipelineSyncClientCmd = &cobra.Command{
 			client.Start()
 		}
 	},
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if !(Lang == LangGo) {
-			return errors.New(`unsupported value "` + Lang + `" for --lang, must be "` + LangGo + `"`)
-		}
-
-		return nil
-	},
 }
 
 var (
@@ -69,17 +61,9 @@ var (
 
 	PipelineDownModules    string
 	PipelineDownDirModules string
-
-	Lang string
-)
-
-var (
-	LangDefault = LangGo
 )
 
 const (
-	LangGo = "go"
-
 	GitUpCommitMessage = "up_synced"
 	GitUpRemoteName    = "dibs-sync"
 	GitUpUserName      = "dibs-syncer"
@@ -88,8 +72,6 @@ const (
 
 func init() {
 	id := uuid.New().String()
-
-	PipelineSyncClientCmd.PersistentFlags().StringVarP(&Lang, "lang", "l", LangDefault, `Language to develop the modules for (currently only "`+LangGo+`" is supported)`)
 
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&GitUpBaseUrl, LangGo+"-git-base-url", "http://localhost:35000/repos", `(--lang "`+LangGo+`" only) Base URL of the sync remote`)
 

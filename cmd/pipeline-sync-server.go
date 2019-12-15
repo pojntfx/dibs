@@ -12,18 +12,21 @@ var PipelineSyncServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the module development server",
 	Run: func(cmd *cobra.Command, args []string) {
-		server := starters.Server{
-			ServerReposDir: GitServerReposDir,
-			ServerHTTPPort: GitServerHttpPort,
-			ServerHTTPPath: GitServerHttpPath,
+		switch Lang {
+		case LangGo:
+			server := starters.Server{
+				ServerReposDir: GitServerReposDir,
+				ServerHTTPPort: GitServerHttpPort,
+				ServerHTTPPath: GitServerHttpPath,
 
-			RedisUrl:                  RedisUrl,
-			RedisPrefix:               RedisPrefix,
-			RedisSuffixUpRegistered:   RedisSuffixUpRegistered,
-			RedisSuffixUpUnRegistered: RedisSuffixUpUnregistered,
+				RedisUrl:                  RedisUrl,
+				RedisPrefix:               RedisPrefix,
+				RedisSuffixUpRegistered:   RedisSuffixUpRegistered,
+				RedisSuffixUpUnRegistered: RedisSuffixUpUnregistered,
+			}
+
+			server.Start()
 		}
-
-		server.Start()
 	},
 }
 
@@ -45,9 +48,9 @@ const (
 func init() {
 	id := uuid.New().String()
 
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerReposDir, "dir-repos", filepath.Join(os.TempDir(), "dibs", "gitrepos", id), "Directory in which the Git repos should be stored")
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPort, "port", "35000", "Port on which the Git repos should be served")
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPath, "path", "/repos", "HTTP path prefix for the served Git repos")
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerReposDir, LangGo+"-dir-repos", filepath.Join(os.TempDir(), "dibs", "gitrepos", id), `(--lang "`+LangGo+`" only) Directory in which the Git repos should be stored`)
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPort, LangGo+"-port", "35000", `(--lang "`+LangGo+`" only) Port on which the Git repos should be served`)
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&GitServerHttpPath, LangGo+"-path", "/repos", `(--lang "`+LangGo+`" only) HTTP path prefix for the served Git repos`)
 
 	PipelineSyncCmd.AddCommand(PipelineSyncServerCmd)
 }
