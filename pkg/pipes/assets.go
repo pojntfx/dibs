@@ -10,7 +10,7 @@ type Assets struct {
 	Build       Build
 	PathInImage string
 	DistPath    string
-	CleanGlob   string
+	CleanGlobs  []string
 }
 
 const EmptyRunCommand = "echo"
@@ -46,11 +46,13 @@ func (assets *Assets) GetAssetsFromDockerImage(platform string) (string, error) 
 }
 
 func (assets *Assets) Clean() error {
-	filesToRemove, _ := filepath.Glob(assets.CleanGlob)
+	for _, glob := range assets.CleanGlobs {
+		filesToRemove, _ := filepath.Glob(glob)
 
-	for _, fileToRemove := range filesToRemove {
-		if err := os.Remove(fileToRemove); err != nil {
-			return err
+		for _, fileToRemove := range filesToRemove {
+			if err := os.RemoveAll(fileToRemove); err != nil {
+				return err
+			}
 		}
 	}
 
