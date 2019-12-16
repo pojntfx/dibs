@@ -19,8 +19,8 @@ const (
 	GitUpUserName      = "dibs-syncer"
 	GitUpUserEmail     = "dibs-syncer@pojtinger.space"
 
-	PlatformPlaceholder    = "[infer]"
-	IgnoreRegexPlaceholder = "[infer]"
+	PlatformPlaceholder    = "infer"
+	IgnoreRegexPlaceholder = "infer"
 
 	GoGitBaseUrlKey = LangGo + "_git_base_url"
 
