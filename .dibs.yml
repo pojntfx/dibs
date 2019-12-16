@@ -3,7 +3,9 @@ manifest:
 chart:
   srcDir: ./charts/dibs
   distDir: .bin
-  cleanGlob: .bin/dibs-*.tgz
+  cleanGlobs:
+    - .bin/dibs-*.tgz
+    - ./charts/dibs/charts
 platforms:
   - platform: linux/amd64
     assets:
@@ -14,7 +16,8 @@ platforms:
         file: Dockerfile
       pathInImage: /usr/local/bin/dibs
       distPath: .bin/dibs-linux-amd64
-      cleanGlob: .bin/dibs-linux-amd64
+      cleanGlobs:
+        - .bin/dibs-linux-amd64
     tests:
       unit:
         lang:
@@ -52,7 +55,8 @@ platforms:
         file: Dockerfile
       pathInImage: /usr/local/bin/dibs
       distPath: .bin/dibs-linux-arm64
-      cleanGlob: .bin/dibs-linux-arm64
+      cleanGlobs:
+        - .bin/dibs-linux-arm64
     tests:
       unit:
         lang:

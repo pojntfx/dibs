@@ -43,11 +43,13 @@ func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
 }
 
 func (dibs *Dibs) CleanHelmChart() error {
-	filesToRemove, _ := filepath.Glob(dibs.Chart.CleanGlob)
+	for _, glob := range dibs.Chart.CleanGlobs {
+		filesToRemove, _ := filepath.Glob(glob)
 
-	for _, fileToRemove := range filesToRemove {
-		if err := os.Remove(fileToRemove); err != nil {
-			return err
+		for _, fileToRemove := range filesToRemove {
+			if err := os.RemoveAll(fileToRemove); err != nil {
+				return err
+			}
 		}
 	}
 
