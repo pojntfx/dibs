@@ -19,8 +19,6 @@ profiles:
             chartPath: ./charts/dibs
             values:
               meta.image: pojntfx/dibs
-            setValueTemplates:
-              resources.platform: "{{ .TARGETPLATFORM }}"
   - name: dibs-dev
     build:
       artifacts:
