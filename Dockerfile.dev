@@ -24,6 +24,7 @@ COPY ./.dibs.yml ./.dibs.yml
 COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
+COPY ./.git ./.git
 
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 COPY --from=build /app/.bin ./.bin
