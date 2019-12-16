@@ -60,6 +60,10 @@ func init() {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 
+	if err := viper.BindEnv(PlatformKey, PlatformEnvDocker); err != nil {
+		log.Fatal("Could not bind key", rz.Err(err))
+	}
+
 	viper.AutomaticEnv()
 }
 

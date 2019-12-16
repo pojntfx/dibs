@@ -66,5 +66,7 @@ const (
 	PlatformKey = "platform"
 	ExecutorKey = "executor"
 
+	PlatformEnvDocker = "TARGETPLATFORM" // This is the env variable convention that Docker uses, so alias it
+
 	DibsFileKey = "config_file"
 )

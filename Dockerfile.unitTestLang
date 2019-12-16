@@ -11,7 +11,7 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
+RUN go run main.go pipeline build assets
 
 FROM --platform=$TARGETPLATFORM golang:1.13.5-buster
 WORKDIR /app
@@ -28,4 +28,4 @@ COPY ./pkg ./pkg
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 COPY --from=build /app/.bin ./.bin
 
-CMD dibs pipeline test unit lang --platform $TARGETPLATFORM
+CMD dibs pipeline test unit lang
