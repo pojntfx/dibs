@@ -26,9 +26,6 @@ var (
 
 	Executor string
 
-	RedisUrl    string
-	RedisPrefix string
-
 	DibsFile = DibsName + ".yml"
 	Dibs     pipes.Dibs
 )
@@ -44,6 +41,8 @@ const (
 	DibsPath        = "."
 	DibsName        = ".dibs"
 	DibsFileDefault = DibsName + ".yml"
+
+	EnvPrefix = "dibs"
 )
 
 func init() {
