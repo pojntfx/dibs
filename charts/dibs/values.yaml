@@ -7,7 +7,7 @@ resources:
   cpu: "512m"
 
 ingress:
-  nodePort: 35000
+  nodePort: 32000
   domain: dibs.felicitas.pojtinger.space
   path: /
 
