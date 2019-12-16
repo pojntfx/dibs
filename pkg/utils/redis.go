@@ -8,15 +8,17 @@ import (
 
 // Redis is a configured Redis instance holder
 type Redis struct {
-	client *redis.Client
-	Addr   string
-	Prefix string
+	client   *redis.Client
+	Addr     string
+	Password string
+	Prefix   string
 }
 
 // Connect creates a new Redis client
 func (r *Redis) Connect() {
 	r.client = redis.NewClient(&redis.Options{
-		Addr: r.Addr,
+		Addr:     r.Addr,
+		Password: r.Password,
 	})
 }
 

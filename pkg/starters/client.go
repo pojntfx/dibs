@@ -27,6 +27,7 @@ type Client struct {
 
 	RedisUrl                  string // URL of the Redis instance to use
 	RedisPrefix               string // Redis channel prefix
+	RedisPassword             string // Redis password
 	RedisSuffixUpRegistered   string // Redis channel suffix for "module registered" messages
 	RedisSuffixUpUnRegistered string // Redis channel suffix for "module unregistered" messages
 	RedisSuffixUpTested       string // Redis channel suffix for "module tested" messages
@@ -72,8 +73,9 @@ func (client *Client) Start() {
 
 	// Connect to Redis
 	redis := utils.Redis{
-		Addr:   client.RedisUrl,
-		Prefix: client.RedisPrefix,
+		Addr:     client.RedisUrl,
+		Prefix:   client.RedisPrefix,
+		Password: client.RedisPassword,
 	}
 	redis.Connect()
 

@@ -25,6 +25,7 @@ var PipelineSyncServerCmd = &cobra.Command{
 
 				RedisUrl:                  viper.GetString(RedisUrlKey),
 				RedisPrefix:               viper.GetString(RedisPrefixKey),
+				RedisPassword:             viper.GetString(RedisPasswordKey),
 				RedisSuffixUpRegistered:   RedisSuffixUpRegistered,
 				RedisSuffixUpUnRegistered: RedisSuffixUpUnregistered,
 			}

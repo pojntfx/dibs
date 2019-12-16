@@ -14,3 +14,4 @@ ingress:
 redis:
   prefix: dibs
   redisPort: 6379
+  password: dibsPass

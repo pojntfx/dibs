@@ -35,6 +35,10 @@ func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
 		return "", err
 	}
 
+	if output, err := dibs.Platforms[0].Assets.Build.execHelm(platform, "dep", "up", dibs.Chart.SrcDir); err != nil {
+		return output, err
+	}
+
 	return dibs.Platforms[0].Assets.Build.execHelm(platform, "package", "-d", dibs.Chart.DistDir, dibs.Chart.SrcDir)
 }
 
