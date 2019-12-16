@@ -7,14 +7,17 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
+	"strings"
 )
 
 var RootCmd = &cobra.Command{
 	Use:   "dibs",
 	Short: "System for distributed polyglot, multi-module and multi-architecture development",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if !(Executor == ExecutorDocker || Executor == ExecutorNative) {
-			return errors.New(`unsupported value "` + Executor + `" for --executor, must be either "` + ExecutorDocker + `" or "` + ExecutorNative + `"`)
+		executor := viper.GetString(ExecutorKey)
+
+		if !(executor == ExecutorDocker || executor == ExecutorNative) {
+			return errors.New(`unsupported value "` + executor + `" for --executor, must be either "` + ExecutorDocker + `" or "` + ExecutorNative + `"`)
 		}
 
 		return nil
@@ -22,12 +25,7 @@ var RootCmd = &cobra.Command{
 }
 
 var (
-	Platform string
-
-	Executor string
-
-	DibsFile = DibsName + ".yml"
-	Dibs     pipes.Dibs
+	Dibs pipes.Dibs
 )
 
 const (
@@ -43,13 +41,46 @@ const (
 	DibsFileDefault = DibsName + ".yml"
 
 	EnvPrefix = "dibs"
+
+	PlatformKey = "platform"
+	ExecutorKey = "executor"
+
+	DibsFileKey = "config_file"
 )
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&Platform, "platform", "p", PlatformDefault, `Platform to run on ("`+PlatformAll+`" runs on all platforms specified in configuration file)`)
-	RootCmd.PersistentFlags().StringVarP(&Executor, "executor", "e", ExecutorDefault, `Executor to run on `+`("`+ExecutorDocker+`"|"`+ExecutorNative+`")`)
+	var (
+		platform string
 
-	RootCmd.PersistentFlags().StringVarP(&DibsFile, "config-file", "f", DibsFileDefault, "Configuration file to use")
+		executor string
+
+		dibsFile = DibsName + ".yml"
+
+		platformFlag = strings.Replace(PlatformKey, "_", "-", -1)
+		executorFlag = strings.Replace(ExecutorKey, "_", "-", -1)
+
+		dibsFileFlag = strings.Replace(DibsFileKey, "_", "-", -1)
+	)
+
+	RootCmd.PersistentFlags().StringVarP(&platform, platformFlag, "p", PlatformDefault, `Platform to run on ("`+PlatformAll+`" runs on all platforms specified in configuration file)`)
+	RootCmd.PersistentFlags().StringVarP(&executor, executorFlag, "e", ExecutorDefault, `Executor to run on `+`("`+ExecutorDocker+`"|"`+ExecutorNative+`")`)
+
+	RootCmd.PersistentFlags().StringVarP(&dibsFile, dibsFileFlag, "f", DibsFileDefault, "Configuration file to use")
+
+	viper.SetEnvPrefix(EnvPrefix)
+
+	if err := viper.BindPFlag(PlatformKey, PipelineSyncClientCmd.PersistentFlags().Lookup(platformFlag)); err != nil {
+		log.Fatal("Could not bind flag", rz.Err(err))
+	}
+	if err := viper.BindPFlag(ExecutorKey, PipelineSyncClientCmd.PersistentFlags().Lookup(executorFlag)); err != nil {
+		log.Fatal("Could not bind flag", rz.Err(err))
+	}
+
+	if err := viper.BindPFlag(DibsFileKey, PipelineSyncClientCmd.PersistentFlags().Lookup(dibsFileFlag)); err != nil {
+		log.Fatal("Could not bind flag", rz.Err(err))
+	}
+
+	viper.AutomaticEnv()
 }
 
 func Execute() {
@@ -58,11 +89,11 @@ func Execute() {
 	}
 }
 
-func ReadConfig() error {
+func ReadConfig(dibsFile string) error {
 	viper.AddConfigPath(DibsPath)
 
-	if DibsFile != DibsFileDefault {
-		viper.SetConfigFile(DibsFile)
+	if dibsFile != DibsFileDefault {
+		viper.SetConfigFile(dibsFile)
 	} else {
 		viper.SetConfigName(DibsName)
 	}
