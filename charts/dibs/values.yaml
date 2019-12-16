@@ -6,11 +6,11 @@ resources:
   memory: "128Mi"
   cpu: "512m"
 
-redis:
-  url: redis:6379
-  prefix: dibs
-
 ingress:
   nodePort: 35000
   domain: dibs.felicitas.pojtinger.space
   path: /
+
+redis:
+  prefix: dibs
+  redisPort: 6379

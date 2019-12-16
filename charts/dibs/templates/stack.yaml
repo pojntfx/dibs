@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
 data:
-  DIBS_REDIS_URL: {{ .Values.redis.url }}
+  DIBS_REDIS_URL: {{ .Release.Name }}-redis-master:{{ .Values.redis.redisPort }}
   DIBS_REDIS_PREFIX: {{ .Values.redis.prefix }}
 
 ---
