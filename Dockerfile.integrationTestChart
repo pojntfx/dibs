@@ -11,7 +11,7 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
+RUN go run main.go pipeline build assets
 
 FROM --platform=$TARGETPLATFORM debian:buster-slim AS build-chart
 WORKDIR /app
@@ -31,7 +31,7 @@ COPY ./charts ./charts
 
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 
-RUN dibs pipeline build chart --platform $TARGETPLATFORM
+RUN dibs pipeline build chart
 
 FROM --platform=$TARGETPLATFORM docker:stable
 WORKDIR /app
@@ -68,4 +68,4 @@ CMD k3d delete; k3d create --server-arg "--tls-san=$IP" &&\
     kubectl apply -f /tmp/helm-rbac.yaml &&\
     helm init --service-account tiller &&\
     sleep 120 &&\
-    dibs pipeline test integration chart --platform $TARGETPLATFORM; k3d delete
+    dibs pipeline test integration chart; k3d delete

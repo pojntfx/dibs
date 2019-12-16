@@ -11,7 +11,7 @@ COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
 
-RUN go run main.go pipeline build assets --platform $TARGETPLATFORM
+RUN go run main.go pipeline build assets
 
 FROM --platform=$TARGETPLATFORM debian:buster-slim
 ARG TARGETPLATFORM
