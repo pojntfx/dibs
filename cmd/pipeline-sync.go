@@ -27,19 +27,22 @@ func init() {
 	var (
 		lang string
 
-		redisUrl    string
-		redisPrefix string
+		redisUrl      string
+		redisPrefix   string
+		redisPassword string
 
 		langFlag = strings.Replace(LangKey, "_", "-", -1)
 
-		redisUrlFlag    = strings.Replace(RedisUrlKey, "_", "-", -1)
-		redisPrefixFlag = strings.Replace(RedisPrefixKey, "_", "-", -1)
+		redisUrlFlag      = strings.Replace(RedisUrlKey, "_", "-", -1)
+		redisPrefixFlag   = strings.Replace(RedisPrefixKey, "_", "-", -1)
+		redisPasswordFlag = strings.Replace(RedisPasswordKey, "_", "-", -1)
 	)
 
 	PipelineSyncCmd.PersistentFlags().StringVarP(&lang, langFlag, "l", LangDefault, `Language to develop the modules for (currently only "`+LangGo+`" is supported)`)
 
 	PipelineSyncCmd.PersistentFlags().StringVarP(&redisUrl, redisUrlFlag, "u", RedisUrlDefault, "URL of the Redis instance to use")
 	PipelineSyncCmd.PersistentFlags().StringVarP(&redisPrefix, redisPrefixFlag, "c", RedisPrefixDefault, "Redis channel prefix to use")
+	PipelineSyncCmd.PersistentFlags().StringVarP(&redisPassword, redisPasswordFlag, "s", RedisPasswordDefault, "Redis password to use")
 
 	viper.SetEnvPrefix(EnvPrefix)
 
@@ -51,6 +54,9 @@ func init() {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 	if err := viper.BindPFlag(RedisPrefixKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPrefixFlag)); err != nil {
+		log.Fatal("Could not bind flag", rz.Err(err))
+	}
+	if err := viper.BindPFlag(RedisPasswordKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPasswordFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 

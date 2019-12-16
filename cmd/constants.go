@@ -4,13 +4,15 @@ const (
 	LangGo      = "go"
 	LangDefault = LangGo
 
-	RedisUrlDefault    = "localhost:6379"
-	RedisPrefixDefault = "dibs"
+	RedisUrlDefault      = "localhost:6379"
+	RedisPrefixDefault   = "dibs"
+	RedisPasswordDefault = ""
 
 	LangKey = "lang"
 
-	RedisUrlKey    = "redis_url"
-	RedisPrefixKey = "redis_prefix"
+	RedisUrlKey      = "redis_url"
+	RedisPrefixKey   = "redis_prefix"
+	RedisPasswordKey = "redis_password"
 
 	GitUpCommitMessage = "up_synced"
 	GitUpRemoteName    = "dibs-sync"
