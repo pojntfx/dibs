@@ -19,3 +19,24 @@ profiles:
             chartPath: ./charts/dibs
             values:
               meta.image: pojntfx/dibs
+  - name: dibs-dev
+    build:
+      artifacts:
+        - image: pojntfx/dibs-dev
+          context: .
+          docker:
+            dockerfile: Dockerfile.dev
+          sync:
+            infer:
+              - "**/*.go"
+      local:
+        useBuildkit: true
+    deploy:
+      helm:
+        releases:
+          - name: dibs-dev
+            chartPath: ./charts/dibs
+            values:
+              meta.image: pojntfx/dibs-dev
+            setValues:
+              meta.dev: true

@@ -49,7 +49,7 @@ func init() {
 	)
 
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerReposDir, gitServerReposDirFlag, filepath.Join(os.TempDir(), "dibs", "gitRepos", id), `(--lang "`+LangGo+`" only) Directory in which the Git repos should be stored`)
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerHttpPort, gitServerHttpPortFlag, "35000", `(--lang "`+LangGo+`" only) Port on which the Git repos should be served`)
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerHttpPort, gitServerHttpPortFlag, "32000", `(--lang "`+LangGo+`" only) Port on which the Git repos should be served`)
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerHttpPath, gitServerHttpPathFlag, "/repos", `(--lang "`+LangGo+`" only) HTTP path prefix for the served Git repos`)
 
 	viper.SetEnvPrefix(EnvPrefix)

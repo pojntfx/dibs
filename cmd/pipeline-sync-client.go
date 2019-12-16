@@ -98,7 +98,7 @@ func init() {
 		id = uuid.New().String()
 	)
 
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&goGitUpBaseUrl, goGitBaseUrlFlag, "http://localhost:35000/repos", `(--lang "`+LangGo+`" only) Base URL of the sync remote`)
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&goGitUpBaseUrl, goGitBaseUrlFlag, "http://localhost:32000/repos", `(--lang "`+LangGo+`" only) Base URL of the sync remote`)
 
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpDirSrc, pipelineUpDirSrcFlag, ".", "Directory in which the source code of the module to push resides")
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpDirPush, pipelineUpDirPushFlag, filepath.Join(os.TempDir(), "dibs", "push", id), "Temporary directory to put the module into before pushing")
