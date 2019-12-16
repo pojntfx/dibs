@@ -69,14 +69,14 @@ func init() {
 
 	viper.SetEnvPrefix(EnvPrefix)
 
-	if err := viper.BindPFlag(PlatformKey, PipelineSyncClientCmd.PersistentFlags().Lookup(platformFlag)); err != nil {
+	if err := viper.BindPFlag(PlatformKey, RootCmd.PersistentFlags().Lookup(platformFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
-	if err := viper.BindPFlag(ExecutorKey, PipelineSyncClientCmd.PersistentFlags().Lookup(executorFlag)); err != nil {
+	if err := viper.BindPFlag(ExecutorKey, RootCmd.PersistentFlags().Lookup(executorFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 
-	if err := viper.BindPFlag(DibsFileKey, PipelineSyncClientCmd.PersistentFlags().Lookup(dibsFileFlag)); err != nil {
+	if err := viper.BindPFlag(DibsFileKey, RootCmd.PersistentFlags().Lookup(dibsFileFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 

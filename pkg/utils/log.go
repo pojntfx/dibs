@@ -24,6 +24,10 @@ func PipeLogErrorFatalPlatformNotFound(platform interface{}, err error) {
 	log.Fatal("Platform(s) not found in configuration file", rz.Any("platforms", platform), rz.Err(err))
 }
 
+func PipeLogErrorFatalCouldNotParseIP(ip string) {
+	log.Fatal("Could not parse IP", rz.String("ip", ip))
+}
+
 func PipeLogErrorInfo(message string, err error, platform, output string) {
 	fmt.Println(output)
 	log.Info(message, rz.String("platform", platform), rz.Err(err))

@@ -56,14 +56,14 @@ func init() {
 
 	viper.SetEnvPrefix(EnvPrefix)
 
-	if err := viper.BindPFlag(LangKey, PipelineSyncClientCmd.PersistentFlags().Lookup(langFlag)); err != nil {
+	if err := viper.BindPFlag(LangKey, PipelineSyncCmd.PersistentFlags().Lookup(langFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 
-	if err := viper.BindPFlag(RedisUrlKey, PipelineSyncClientCmd.PersistentFlags().Lookup(redisUrlFlag)); err != nil {
+	if err := viper.BindPFlag(RedisUrlKey, PipelineSyncCmd.PersistentFlags().Lookup(redisUrlFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
-	if err := viper.BindPFlag(RedisPrefixKey, PipelineSyncClientCmd.PersistentFlags().Lookup(redisPrefixFlag)); err != nil {
+	if err := viper.BindPFlag(RedisPrefixKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPrefixFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 
