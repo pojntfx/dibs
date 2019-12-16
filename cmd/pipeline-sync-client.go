@@ -19,7 +19,9 @@ var PipelineSyncClientCmd = &cobra.Command{
 		switch viper.GetString(LangKey) {
 		case LangGo:
 			// Ignore if there are errors here, platforms might not be set (there is no hard dependency on the config)
-			platforms, _ := Dibs.GetPlatforms(Platform, Platform == PlatformAll)
+			platformFromConfig := viper.GetString(PlatformKey)
+
+			platforms, _ := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 			ignoreRegex := IgnoreRegexPlaceholder
 			if len(platforms) > 0 {
 				ignoreRegex = platforms[0].Assets.CleanGlob
@@ -29,9 +31,9 @@ var PipelineSyncClientCmd = &cobra.Command{
 				PipelineUpFileMod:      viper.GetString(GoPipelineUpFileModKey),
 				PipelineDownModules:    viper.GetString(GoPipelineDownModulesKey),
 				PipelineDownDirModules: viper.GetString(GoPipelineDownDirModulesKey),
-				PipelineUpBuildCommand: strings.Replace(viper.GetString(PipelineUpBuildCommandKey), PlatformPlaceholder, Platform, -1),
-				PipelineUpStartCommand: strings.Replace(viper.GetString(PipelineUpStartCommandKey), PlatformPlaceholder, Platform, -1),
-				PipelineUpTestCommand:  strings.Replace(viper.GetString(PipelineUpTestCommandKey), PlatformPlaceholder, Platform, -1),
+				PipelineUpBuildCommand: strings.Replace(viper.GetString(PipelineUpBuildCommandKey), PlatformPlaceholder, viper.GetString(PlatformKey), -1),
+				PipelineUpStartCommand: strings.Replace(viper.GetString(PipelineUpStartCommandKey), PlatformPlaceholder, viper.GetString(PlatformKey), -1),
+				PipelineUpTestCommand:  strings.Replace(viper.GetString(PipelineUpTestCommandKey), PlatformPlaceholder, viper.GetString(PlatformKey), -1),
 				PipelineUpDirSrc:       viper.GetString(PipelineUpDirSrcKey),
 				PipelineUpDirPush:      viper.GetString(PipelineUpDirPushKey),
 				PipelineUpDirWatch:     viper.GetString(PipelineUpDirWatchKey),

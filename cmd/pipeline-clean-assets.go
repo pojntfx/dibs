@@ -3,13 +3,16 @@ package cmd
 import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var PipelineCleanAssetsCmd = &cobra.Command{
 	Use:   "assets",
 	Short: "Clean assets",
 	Run: func(cmd *cobra.Command, args []string) {
-		platforms, err := Dibs.GetPlatforms(Platform, Platform == PlatformAll)
+		platformFromConfig := viper.GetString(PlatformKey)
+
+		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
 			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
 		}
