@@ -19,7 +19,7 @@ func (dibs *Dibs) BuildDockerManifest(platform string) (string, error) {
 		manifestsToAdd = append(manifestsToAdd, platform.Assets.Build.Tag)
 	}
 
-	if output, err := dibs.Platforms[0].Assets.Build.execDocker(platform, append([]string{"manifest", "create", "--amend", dibs.Manifest.Tag}, manifestsToAdd...)...); err != nil {
+	if output, err := dibs.Platforms[0].Assets.Build.execDocker(platform, append([]string{"manifest", "create", dibs.Manifest.Tag}, manifestsToAdd...)...); err != nil {
 		return output, err
 	}
 
@@ -27,7 +27,7 @@ func (dibs *Dibs) BuildDockerManifest(platform string) (string, error) {
 }
 
 func (dibs *Dibs) PushDockerManifest(platform string) (string, error) {
-	return dibs.Platforms[0].Assets.Build.execDocker(platform, "manifest", "push", dibs.Manifest.Tag)
+	return dibs.Platforms[0].Assets.Build.execDocker(platform, "manifest", "push", "--purge", dibs.Manifest.Tag)
 }
 
 func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
