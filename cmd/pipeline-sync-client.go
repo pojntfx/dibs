@@ -18,12 +18,14 @@ var PipelineSyncClientCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		switch viper.GetString(LangKey) {
 		case LangGo:
-			// Ignore if there are errors here, platforms might not be set (there is no hard dependency on the config)
 			platformFromConfig := viper.GetString(PlatformKey)
 
+			// Ignore if there are errors here, config and platforms might not be set (there is no hard dependency on the config)
+			_ = ReadConfig(viper.GetString(DibsFileKey))
 			platforms, _ := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
+
 			ignoreRegex := IgnoreRegexPlaceholder
-			if len(platforms) > 0 {
+			if len(platforms) > 0 && viper.GetString(PipelineUpRegexIgnoreKey) == IgnoreRegexPlaceholder {
 				ignoreRegex = platforms[0].Assets.CleanGlobs[0]
 			}
 

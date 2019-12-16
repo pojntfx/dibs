@@ -3,6 +3,7 @@ package starters
 import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/pojntfx/dibs/pkg/workers"
+	"github.com/radovskyb/watcher"
 	"gitlab.com/z0mbie42/rz-go/v2"
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"io/ioutil"
@@ -179,10 +180,21 @@ func (client *Client) Start() {
 		WatchDir:    client.PipelineUpDirWatch,
 		IgnoreRegex: client.PipelineUpRegexIgnore,
 	}
-	folderWatcher.Start()
+
+	// Register the folder watcher's event handlers
+	if err := folderWatcher.Start(func(err error) {
+		log.Fatal("Error", rz.Err(err))
+	}, func(event watcher.Event) {
+		// Run the pipeline again on every file change. If there are errors, don't exit.
+		if err := pipeline.RunAll(); err != nil {
+			log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
+		}
+	}); err != nil {
+		log.Fatal("Error", rz.Err(err))
+	}
 
 	// Start the main loop
-	for folderWatcher.FolderWatcher.IsRunning() {
+	for {
 		select {
 		// If there are errors, log the errors and exit
 		case err := <-pipelineUpdateWorkerErrors:
@@ -198,11 +210,6 @@ func (client *Client) Start() {
 				return
 			default:
 				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
-			}
-		case <-folderWatcher.FolderWatcher.ChangeDetails():
-			// Run the pipeline again on every file change. If there are errors, don't exit.
-			if err := pipeline.RunAll(); err != nil {
-				log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
 			}
 		}
 	}
