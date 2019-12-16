@@ -119,3 +119,7 @@ func (build *Build) PushImage(platform string) (string, error) {
 func (build *Build) CleanImage(platform string) (string, error) {
 	return build.execDocker(platform, "rmi", "-f", build.Tag)
 }
+
+func (build *Build) CleanStartedChart(platform, profile string) error {
+	return build.execSkaffold(platform, "delete", "--profile", profile)
+}

@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var StartCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start the project",
+var UninstallCmd = &cobra.Command{
+	Use:   "uninstall",
+	Short: "Stop and uninstall the project",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return ReadConfig(viper.GetString(DibsFileKey))
 	},
@@ -21,13 +21,13 @@ var StartCmd = &cobra.Command{
 		}
 
 		for _, platform := range platforms {
-			if err := platform.Assets.Build.StartChart(platform.Platform, platform.ChartProfiles.Production); err != nil {
-				utils.PipeLogErrorFatalWithProfile("Could not start profile", err, platform.Platform, platform.ChartProfiles.Production)
+			if err := platform.Assets.Build.CleanStartedChart(platform.Platform, platform.ChartProfiles.Production); err != nil {
+				utils.PipeLogErrorFatalWithProfile("Could not uninstall profile", err, platform.Platform, platform.ChartProfiles.Production)
 			}
 		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(StartCmd)
+	RootCmd.AddCommand(UninstallCmd)
 }
