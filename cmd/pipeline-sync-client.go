@@ -18,7 +18,7 @@ var PipelineSyncClientCmd = &cobra.Command{
 			// Ignore if there are errors here, platforms might not be set (there is no hard dependency on the config)
 			platforms, _ := Dibs.GetPlatforms(Platform, Platform == PlatformAll)
 			ignoreRegex := IgnoreRegexPlaceholder
-			if platforms != nil {
+			if len(platforms) > 0 {
 				ignoreRegex = platforms[0].Assets.CleanGlob
 			}
 
