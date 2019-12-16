@@ -1,3 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
+data:
+  DIBS_REDIS_URL: {{ .Values.redis.url }}
+  DIBS_REDIS_PREFIX: {{ .Values.redis.prefix }}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,16 +23,9 @@ spec:
       containers:
         - name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
           image: {{ .Values.meta.image }}
-          command:
-            - /usr/local/bin/dibs
-          args:
-            - pipeline
-            - sync
-            - server
-            - --redis-prefix
-            - {{ .Values.redis.prefix }}
-            - --redis-url
-            - {{ .Values.redis.url }}
+          envFrom:
+            - configMapRef:
+                name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
           {{ if not .Values.meta.dev }}
           resources:
             limits:
