@@ -8,6 +8,9 @@ chart:
     - ./charts/dibs/charts
 platforms:
   - platform: linux/amd64
+    chartProfiles:
+      production: dibs
+      development: dibs-dev
     assets:
       build:
         command: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/dibs-linux-amd64
@@ -47,6 +50,9 @@ platforms:
           context: .
           file: Dockerfile.integrationTestChart
   - platform: linux/arm64
+    chartProfiles:
+      production: dibs
+      development: dibs-dev
     assets:
       build:
         command: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/dibs-linux-arm64

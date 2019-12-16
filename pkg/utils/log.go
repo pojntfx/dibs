@@ -20,6 +20,13 @@ func PipeLogErrorFatal(message string, err error, platform string, output ...str
 	log.Fatal(message, rz.String("platform", platform), rz.Err(err))
 }
 
+func PipeLogErrorFatalWithProfile(message string, err error, platform, profile string, output ...string) {
+	if output != nil {
+		fmt.Println(output)
+	}
+	log.Fatal(message, rz.String("platform", platform), rz.String("profile", profile), rz.Err(err))
+}
+
 func PipeLogErrorFatalPlatformNotFound(platform interface{}, err error) {
 	log.Fatal("Platform(s) not found in configuration file", rz.Any("platforms", platform), rz.Err(err))
 }
