@@ -4,12 +4,10 @@ import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gitlab.com/z0mbie42/rz-go/v2"
+	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"net"
-)
-
-var (
-	KubernetesIp        net.IP
-	KubernetesIpDefault = net.IPv4(127, 0, 0, 1)
+	"strings"
 )
 
 var PipelineTestIntegrationChartCmd = &cobra.Command{
@@ -17,6 +15,13 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 	Short: "Integration test the chart",
 	Run: func(cmd *cobra.Command, args []string) {
 		platformFromConfig := viper.GetString(PlatformKey)
+		viperIP := viper.GetString(KubernetesIpKey)
+
+		rawIP := net.ParseIP(viperIP)
+		if rawIP == nil {
+			utils.PipeLogErrorFatalCouldNotParseIP(viperIP)
+		}
+		ip := rawIP.String()
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
@@ -33,7 +38,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 					Value string
 				}{
 					Key:   "IP",
-					Value: KubernetesIp.String(),
+					Value: ip,
 				})
 				utils.PipeLogErrorInfo("Chart integration test ran in Docker", err, platform.Platform, output)
 			} else {
@@ -44,8 +49,27 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 	},
 }
 
+const (
+	KubernetesIpKey     = "kubernetes_ip"
+	KubernetesIpDefault = "127.0.0.1"
+)
+
 func init() {
-	PipelineTestIntegrationChartCmd.PersistentFlags().IPVarP(&KubernetesIp, "kubernetes-ip", "i", KubernetesIpDefault, "IP of the Kubernetes cluster to create if running in Docker (mostly the host machine's IP)")
+	var (
+		kubernetesIp string
+
+		kubernetesIpFlag = strings.Replace(KubernetesIpKey, "_", "-", -1)
+	)
+
+	PipelineTestIntegrationChartCmd.PersistentFlags().StringVarP(&kubernetesIp, kubernetesIpFlag, "i", KubernetesIpDefault, "IP of the Kubernetes cluster to create if running in Docker (often the host machine's IP)")
+
+	viper.SetEnvPrefix(EnvPrefix)
+
+	if err := viper.BindPFlag(KubernetesIpKey, PipelineTestIntegrationChartCmd.PersistentFlags().Lookup(kubernetesIpFlag)); err != nil {
+		log.Fatal("Could not bind flag", rz.Err(err))
+	}
+
+	viper.AutomaticEnv()
 
 	PipelineTestIntegrationCmd.AddCommand(PipelineTestIntegrationChartCmd)
 }
