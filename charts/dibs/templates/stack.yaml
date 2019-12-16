@@ -6,6 +6,7 @@ data:
   DIBS_REDIS_URL: {{ .Release.Name }}-redis-master:{{ .Values.redis.redisPort }}
   DIBS_REDIS_PREFIX: {{ .Values.redis.prefix }}
   DIBS_REDIS_PASSWORD: {{ .Values.redis.password }}
+  TARGETPLATFORM: {{ .Values.resources.platform }}
 
 ---
 apiVersion: apps/v1
