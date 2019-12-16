@@ -20,6 +20,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 		rawIP := net.ParseIP(viperIP)
 		if rawIP == nil {
 			utils.PipeLogErrorFatalCouldNotParseIP(viperIP)
+			return
 		}
 		ip := rawIP.String()
 
@@ -48,11 +49,6 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 		}
 	},
 }
-
-const (
-	KubernetesIpKey     = "kubernetes_ip"
-	KubernetesIpDefault = "127.0.0.1"
-)
 
 func init() {
 	var (

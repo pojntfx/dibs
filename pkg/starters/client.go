@@ -119,17 +119,17 @@ func (client *Client) Start() {
 		CommitMessage: client.GitUpCommitMessage,
 	}
 
-	testCommand, buildCommand, startCommand := utils.EventedCommand{
+	testCommand, buildCommand, startCommand := utils.CommandWithEvent{
 		LogMessage:   "Running test command ...",
 		ExecLine:     client.PipelineUpTestCommand,
 		RedisSuffix:  client.RedisSuffixUpTested,
 		RedisMessage: module,
-	}, utils.EventedCommand{
+	}, utils.CommandWithEvent{
 		LogMessage:   "Running build command ...",
 		ExecLine:     client.PipelineUpBuildCommand,
 		RedisSuffix:  client.RedisSuffixUpBuilt,
 		RedisMessage: module,
-	}, utils.EventedCommand{
+	}, utils.CommandWithEvent{
 		LogMessage:   "Starting start command ...",
 		ExecLine:     client.PipelineUpStartCommand,
 		RedisSuffix:  client.RedisSuffixUpStarted,
@@ -141,7 +141,7 @@ func (client *Client) Start() {
 		ModulePushedRedisSuffix: client.RedisSuffixUpPushed,
 		SrcDir:                  client.PipelineUpDirSrc,
 		PushDir:                 client.PipelineUpDirPush,
-		RunCommands:             []utils.EventedCommand{testCommand, buildCommand},
+		RunCommands:             []utils.CommandWithEvent{testCommand, buildCommand},
 		StartCommand:            startCommand,
 		StartCommandState:       commandStartState,
 		Git:                     git,
@@ -182,7 +182,7 @@ func (client *Client) Start() {
 	// Start the main loop
 	for folderWatcher.FolderWatcher.IsRunning() {
 		select {
-		// If there are errors, log the erros and exit
+		// If there are errors, log the errors and exit
 		case err := <-pipelineUpdateWorkerErrors:
 			log.Fatal("Error", rz.String("System", "PipelineUpdateWorker"), rz.Err(err))
 		case event := <-pipelineUpdateWorkerEvents:

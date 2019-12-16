@@ -34,19 +34,6 @@ var PipelineSyncServerCmd = &cobra.Command{
 	},
 }
 
-const (
-	RedisSuffixUpBuilt        = "up_built"
-	RedisSuffixUpTested       = "up_tested"
-	RedisSuffixUpStarted      = "up_started"
-	RedisSuffixUpRegistered   = "up_registered"
-	RedisSuffixUpUnregistered = "up_unregistered"
-	RedisSuffixUpPushed       = "up_pushed"
-
-	GitServerReposDirKey = LangGo + "_dir_repos"
-	GitServerHttpPortKey = LangGo + "-port"
-	GitServerHttpPathKey = LangGo + "-path"
-)
-
 func init() {
 	var (
 		gitServerReposDir string
@@ -60,7 +47,7 @@ func init() {
 		id = uuid.New().String()
 	)
 
-	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerReposDir, gitServerReposDirFlag, filepath.Join(os.TempDir(), "dibs", "gitrepos", id), `(--lang "`+LangGo+`" only) Directory in which the Git repos should be stored`)
+	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerReposDir, gitServerReposDirFlag, filepath.Join(os.TempDir(), "dibs", "gitRepos", id), `(--lang "`+LangGo+`" only) Directory in which the Git repos should be stored`)
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerHttpPort, gitServerHttpPortFlag, "35000", `(--lang "`+LangGo+`" only) Port on which the Git repos should be served`)
 	PipelineSyncServerCmd.PersistentFlags().StringVar(&gitServerHttpPath, gitServerHttpPathFlag, "/repos", `(--lang "`+LangGo+`" only) HTTP path prefix for the served Git repos`)
 

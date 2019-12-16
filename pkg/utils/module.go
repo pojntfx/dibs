@@ -116,7 +116,7 @@ func GetModuleWithoutReplaces(content string) string {
 	return contentWithoutReplaces
 }
 
-// GetModulesFromRawInputString returns the modules for a comma-seperated list of modules
+// GetModulesFromRawInputString returns the modules for a comma-separated list of modules
 func GetModulesFromRawInputString(rawInput string) []string {
 	modules := strings.Split(rawInput, ",")
 

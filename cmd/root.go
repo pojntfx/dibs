@@ -28,26 +28,6 @@ var (
 	Dibs pipes.Dibs
 )
 
-const (
-	PlatformAll     = "all"
-	PlatformDefault = PlatformAll
-
-	ExecutorNative  = "native"
-	ExecutorDocker  = "docker"
-	ExecutorDefault = ExecutorNative
-
-	DibsPath        = "."
-	DibsName        = ".dibs"
-	DibsFileDefault = DibsName + ".yml"
-
-	EnvPrefix = "dibs"
-
-	PlatformKey = "platform"
-	ExecutorKey = "executor"
-
-	DibsFileKey = "config_file"
-)
-
 func init() {
 	var (
 		platform string

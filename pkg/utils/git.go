@@ -2,7 +2,7 @@ package utils
 
 import (
 	"gopkg.in/src-d/go-git.v4"
-	gitconf "gopkg.in/src-d/go-git.v4/config"
+	gitConfiguration "gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"path/filepath"
 	"time"
@@ -31,7 +31,7 @@ func (metadata *Git) PushModule(pushDir string) error {
 		return err
 	}
 
-	if _, err = g.CreateRemote(&gitconf.RemoteConfig{
+	if _, err = g.CreateRemote(&gitConfiguration.RemoteConfig{
 		Name: metadata.RemoteName,
 		URLs: []string{metadata.RemoteURL},
 	}); err != nil {
@@ -59,7 +59,7 @@ func (metadata *Git) PushModule(pushDir string) error {
 
 	if err = g.Push(&git.PushOptions{
 		RemoteName: metadata.RemoteName,
-		RefSpecs:   []gitconf.RefSpec{"+refs/heads/master:refs/heads/master"},
+		RefSpecs:   []gitConfiguration.RefSpec{"+refs/heads/master:refs/heads/master"},
 	}); err != nil {
 		return err
 	}
