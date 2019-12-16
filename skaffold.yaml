@@ -1,0 +1,21 @@
+apiVersion: skaffold/v1
+kind: Config
+metadata:
+  name: dibs
+profiles:
+  - name: dibs
+    build:
+      artifacts:
+        - image: pojntfx/dibs
+          context: .
+          docker:
+            dockerfile: Dockerfile
+      local:
+        useBuildkit: true
+    deploy:
+      helm:
+        releases:
+          - name: dibs
+            chartPath: ./charts/dibs
+            values:
+              meta.image: pojntfx/dibs
