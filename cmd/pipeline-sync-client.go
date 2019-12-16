@@ -60,32 +60,6 @@ var PipelineSyncClientCmd = &cobra.Command{
 	},
 }
 
-const (
-	GitUpCommitMessage = "up_synced"
-	GitUpRemoteName    = "dibs-sync"
-	GitUpUserName      = "dibs-syncer"
-	GitUpUserEmail     = "dibs-syncer@pojtinger.space"
-
-	PlatformPlaceholder    = "[infer]"
-	IgnoreRegexPlaceholder = "[infer]"
-
-	GoGitBaseUrlKey = LangGo + "_git_base_url"
-
-	PipelineUpDirSrcKey   = "dir_src"
-	PipelineUpDirPushKey  = "dir_push"
-	PipelineUpDirWatchKey = "dir_watch"
-
-	GoPipelineUpFileModKey = LangGo + "_modules_file"
-
-	PipelineUpBuildCommandKey = "cmd_build"
-	PipelineUpTestCommandKey  = "cmd_test"
-	PipelineUpStartCommandKey = "cmd_start"
-
-	PipelineUpRegexIgnoreKey    = "regex_ignore"
-	GoPipelineDownModulesKey    = LangGo + "_modules_pull"
-	GoPipelineDownDirModulesKey = LangGo + "_dir_pull"
-)
-
 func init() {
 	var (
 		goGitUpBaseUrl string

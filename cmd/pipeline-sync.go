@@ -23,19 +23,6 @@ var PipelineSyncCmd = &cobra.Command{
 	},
 }
 
-const (
-	LangDefault = LangGo
-	LangGo      = "go"
-
-	RedisUrlDefault    = "localhost:6379"
-	RedisPrefixDefault = "dibs"
-
-	LangKey = "lang"
-
-	RedisUrlKey    = "redis_url"
-	RedisPrefixKey = "redis_prefix"
-)
-
 func init() {
 	var (
 		lang string

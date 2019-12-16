@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-// EventedCommand is a command that also publishes an event
-type EventedCommand struct {
+// CommandWithEvent is a command that also publishes an event
+type CommandWithEvent struct {
 	LogMessage   string // The message to log to stdout
 	ExecLine     string // The command to run/start
 	RedisSuffix  string // The Redis channel suffix to use for the event
@@ -19,15 +19,15 @@ type EventedCommand struct {
 
 // Pipeline is a development configuration
 type Pipeline struct {
-	Module                  string           // The module that is being pushed
-	ModulePushedRedisSuffix string           // The Redis suffix channel suffix to use for the pushed event
-	SrcDir                  string           // The directory of the module's source
-	PushDir                 string           // The temporary directory to use for the modification of the Git repo
-	RunCommands             []EventedCommand // The commands to run
-	StartCommand            EventedCommand   // The command to start (will keep running, but can be killed)
-	StartCommandState       *exec.Cmd        // Stores the state of the start command (to make it possible to kill it)
-	Git                     Git              // Git instance to use to modify the Git repo in PushDir
-	Redis                   Redis            // Redis instance to use to publish the events
+	Module                  string             // The module that is being pushed
+	ModulePushedRedisSuffix string             // The Redis suffix channel suffix to use for the pushed event
+	SrcDir                  string             // The directory of the module's source
+	PushDir                 string             // The temporary directory to use for the modification of the Git repo
+	RunCommands             []CommandWithEvent // The commands to run
+	StartCommand            CommandWithEvent   // The command to start (will keep running, but can be killed)
+	StartCommandState       *exec.Cmd          // Stores the state of the start command (to make it possible to kill it)
+	Git                     Git                // Git instance to use to modify the Git repo in PushDir
+	Redis                   Redis              // Redis instance to use to publish the events
 }
 
 // RunCommandsOnly only runs the commands

@@ -70,7 +70,7 @@ func (server *Server) Start() {
 	// Start main loop
 	for {
 		select {
-		// If there are errors, log the erros and exit
+		// If there are errors, log the errors and exit
 		case err := <-httpWorkerErrors:
 			log.Fatal("Error", rz.String("System", "GitHTTPWorker"), rz.Err(err))
 		case err := <-repoWorkerUpdateErrors:
