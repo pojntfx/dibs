@@ -18,8 +18,10 @@ var DefaultEnvVariables = map[string]string{
 }
 
 const (
-	DockerCommand        = "docker"
-	HelmCommand          = "helm"
+	CommandDocker   = "docker"
+	CommandHelm     = "helm"
+	CommandSkaffold = "skaffold"
+
 	TargetPlatformEnvKey = "TARGETPLATFORM"
 )
 
@@ -41,12 +43,35 @@ func (build *Build) exec(platform string, args ...string) (string, error) {
 	return string(output), err
 }
 
+func (build *Build) execStdoutStderr(platform string, args ...string) error {
+	for key, value := range DefaultEnvVariables {
+		if err := os.Setenv(key, value); err != nil {
+			return err
+		}
+	}
+
+	if err := os.Setenv(TargetPlatformEnvKey, platform); err != nil {
+		return err
+	}
+
+	command := exec.Command(args[0], args[1:]...)
+
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+
+	return command.Run()
+}
+
 func (build *Build) execDocker(platform string, args ...string) (string, error) {
-	return build.exec(platform, append([]string{DockerCommand}, args...)...)
+	return build.exec(platform, append([]string{CommandDocker}, args...)...)
 }
 
 func (build *Build) execHelm(platform string, args ...string) (string, error) {
-	return build.exec(platform, append([]string{HelmCommand}, args...)...)
+	return build.exec(platform, append([]string{CommandHelm}, args...)...)
+}
+
+func (build *Build) execSkaffold(platform string, args ...string) error {
+	return build.execStdoutStderr(platform, append([]string{CommandSkaffold}, args...)...)
 }
 
 func (build *Build) execString(platform string, command string) (string, error) {
@@ -77,6 +102,14 @@ func (build *Build) StartImage(platform string, envVariableKeyValues ...struct {
 	}
 
 	return build.execDocker(platform, "run", "--platform", platform, "-e", TargetPlatformEnvKey+"="+platform, "--privileged", "-v", "/var/run/docker.sock:/var/run/docker.sock", build.Tag)
+}
+
+func (build *Build) StartChart(platform, profile string) error {
+	return build.execSkaffold(platform, "run", "--profile", profile)
+}
+
+func (build *Build) DevChart(platform, profile string) error {
+	return build.execSkaffold(platform, "dev", "--profile="+profile, "--port-forward="+"true", "--no-prune-children="+"true")
 }
 
 func (build *Build) PushImage(platform string) (string, error) {
