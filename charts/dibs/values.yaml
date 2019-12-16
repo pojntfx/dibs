@@ -5,6 +5,7 @@ meta:
 resources:
   memory: "128Mi"
   cpu: "512m"
+  platform: "all"
 
 ingress:
   nodePort: 32000
