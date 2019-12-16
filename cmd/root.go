@@ -29,7 +29,8 @@ var (
 	RedisUrl    string
 	RedisPrefix string
 
-	Dibs pipes.Dibs
+	DibsFile = DibsName + ".yml"
+	Dibs     pipes.Dibs
 )
 
 const (
@@ -40,13 +41,16 @@ const (
 	ExecutorDocker  = "docker"
 	ExecutorDefault = ExecutorNative
 
-	DibsPath = "."
-	DibsFile = ".dibs"
+	DibsPath        = "."
+	DibsName        = ".dibs"
+	DibsFileDefault = DibsName + ".yml"
 )
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&Platform, "platform", "p", PlatformDefault, `Platform to run on ("`+PlatformAll+`" runs on all platforms specified in configuration file)`)
 	RootCmd.PersistentFlags().StringVarP(&Executor, "executor", "e", ExecutorDefault, `Executor to run on `+`("`+ExecutorDocker+`"|"`+ExecutorNative+`")`)
+
+	RootCmd.PersistentFlags().StringVarP(&DibsFile, "config-file", "f", DibsFileDefault, "Configuration file to use")
 }
 
 func Execute() {
@@ -57,7 +61,12 @@ func Execute() {
 
 func ReadConfig() error {
 	viper.AddConfigPath(DibsPath)
-	viper.SetConfigName(DibsFile)
+
+	if DibsFile != DibsFileDefault {
+		viper.SetConfigFile(DibsFile)
+	} else {
+		viper.SetConfigName(DibsName)
+	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err
