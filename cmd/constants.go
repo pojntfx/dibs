@@ -72,6 +72,6 @@ const (
 
 	DibsFileKey = "config_file"
 
-	AssetsVersionKey = "assets_version"
-	AssetsTokenKey   = "assets_token"
+	AssetsVersionKey     = "assets_version"
+	AssetsGitHubTokenKey = "github_token"
 )
