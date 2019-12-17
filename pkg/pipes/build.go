@@ -21,6 +21,7 @@ const (
 	CommandDocker   = "docker"
 	CommandHelm     = "helm"
 	CommandSkaffold = "skaffold"
+	CommandGHR      = "ghr"
 
 	TargetPlatformEnvKey = "TARGETPLATFORM"
 )
@@ -72,6 +73,10 @@ func (build *Build) execHelm(platform string, args ...string) (string, error) {
 
 func (build *Build) execSkaffold(platform string, args ...string) error {
 	return build.execStdoutStderr(platform, append([]string{CommandSkaffold}, args...)...)
+}
+
+func (build *Build) execGHR(platform string, args ...string) error {
+	return build.execStdoutStderr(platform, append([]string{CommandGHR}, args...)...)
 }
 
 func (build *Build) execString(platform string, command string) (string, error) {
