@@ -58,3 +58,7 @@ func (assets *Assets) Clean() error {
 
 	return nil
 }
+
+func (assets *Assets) Push(platform string, version []string, token string) error {
+	return assets.Build.execGHR(platform, append([]string{"-replace", "-t", token}, append(version, assets.DistPath)...)...)
+}
