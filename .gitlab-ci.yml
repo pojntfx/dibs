@@ -11,10 +11,20 @@
   before_script:
     # Install curl
     - apk add curl
+    # Install buildx
+    - curl -Lo docker-buildx https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
+    - chmod +x docker-buildx
+    - mkdir -p ~/.docker/cli-plugins/
+    - cp docker-buildx ~/.docker/cli-plugins/
+    - docker buildx create --name dibs
+    - docker buildx use dibs
+    - docker buildx inspect --bootstrap
+    # Install qemu-user-static
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     # Install kubectl
     - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x kubectl
-    - sudo mv kubectl /usr/local/bin/kubectl
+    - mv kubectl /usr/local/bin/kubectl
     # Install Helm
     - curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >./helm
     - chmod +x helm
@@ -32,22 +42,12 @@
     - curl -L https://github.com/helm/chart-releaser/releases/download/v0.2.3/chart-releaser_0.2.3_darwin_amd64.tar.gz | tar -zvxf - chart-releaser_0.2.3_linux_amd64/cr
     - chmod +x chart-releaser_0.2.3_linux_amd64/cr
     - mv chart-releaser_0.2.3_linux_amd64/cr /usr/local/bin
-    # Install buildx
-    - curl -Lo docker-buildx https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
-    - chmod +x docker-buildx
-    - mkdir -p ~/.docker/cli-plugins/
-    - cp docker-buildx ~/.docker/cli-plugins/
-    - docker buildx create --name dibs
-    - docker buildx use dibs
-    - docker buildx inspect --bootstrap
-    # Install qemu-user-static
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # Login to Docker Hub
-    - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
     # Install dibs
     - curl -Lo dibs https://github.com/pojntfx/dibs/releases/latest/download/dibs-linux-amd64
     - chmod +x dibs
     - cp dibs /usr/local/dibs
+    # Login to Docker Hub
+    - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
   - test
