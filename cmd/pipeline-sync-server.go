@@ -41,9 +41,9 @@ func init() {
 		gitServerHttpPort string
 		gitServerHttpPath string
 
-		gitServerReposDirFlag = strings.Replace(SyncServerGitServerReposDirKey, "_", "-", -1)
-		gitServerHttpPortFlag = strings.Replace(SyncServerGitServerHttpPortKey, "_", "-", -1)
-		gitServerHttpPathFlag = strings.Replace(SyncServerGitServerHttpPathKey, "_", "-", -1)
+		gitServerReposDirFlag = strings.Replace(strings.Replace(SyncServerGitServerReposDirKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		gitServerHttpPortFlag = strings.Replace(strings.Replace(SyncServerGitServerHttpPortKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		gitServerHttpPathFlag = strings.Replace(strings.Replace(SyncServerGitServerHttpPathKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
 		id = uuid.New().String()
 	)

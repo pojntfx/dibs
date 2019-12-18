@@ -81,21 +81,21 @@ func init() {
 		goPipelineDownModules    string
 		goPipelineDownDirModules string
 
-		goGitBaseUrlFlag = strings.Replace(SyncClientGoGitBaseUrlKey, "_", "-", -1)
+		goGitBaseUrlFlag = strings.Replace(strings.Replace(SyncClientGoGitBaseUrlKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
-		pipelineUpDirSrcFlag   = strings.Replace(SyncClientPipelineUpDirSrcKey, "_", "-", -1)
-		pipelineUpDirPushFlag  = strings.Replace(SyncClientPipelineUpDirPushKey, "_", "-", -1)
-		pipelineUpDirWatchFlag = strings.Replace(SyncClientPipelineUpDirWatchKey, "_", "-", -1)
+		pipelineUpDirSrcFlag   = strings.Replace(strings.Replace(SyncClientPipelineUpDirSrcKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpDirPushFlag  = strings.Replace(strings.Replace(SyncClientPipelineUpDirPushKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpDirWatchFlag = strings.Replace(strings.Replace(SyncClientPipelineUpDirWatchKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
-		goPipelineUpFileModFlag = strings.Replace(SyncClientGoPipelineUpFileModKey, "_", "-", -1)
+		goPipelineUpFileModFlag = strings.Replace(strings.Replace(SyncClientGoPipelineUpFileModKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
-		pipelineUpBuildCommandFlag = strings.Replace(SyncClientPipelineUpBuildCommandKey, "_", "-", -1)
-		pipelineUpTestCommandFlag  = strings.Replace(SyncClientPipelineUpTestCommandKey, "_", "-", -1)
-		pipelineUpStartCommandFlag = strings.Replace(SyncClientPipelineUpStartCommandKey, "_", "-", -1)
+		pipelineUpBuildCommandFlag = strings.Replace(strings.Replace(SyncClientPipelineUpBuildCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpTestCommandFlag  = strings.Replace(strings.Replace(SyncClientPipelineUpTestCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpStartCommandFlag = strings.Replace(strings.Replace(SyncClientPipelineUpStartCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
-		pipelineUpRegexIgnoreFlag    = strings.Replace(SyncClientPipelineUpRegexIgnoreKey, "_", "-", -1)
-		goPipelineDownModulesFlag    = strings.Replace(SyncClientGoPipelineDownModulesKey, "_", "-", -1)
-		goPipelineDownDirModulesFlag = strings.Replace(SyncClientGoPipelineDownDirModulesKey, "_", "-", -1)
+		pipelineUpRegexIgnoreFlag    = strings.Replace(strings.Replace(SyncClientPipelineUpRegexIgnoreKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		goPipelineDownModulesFlag    = strings.Replace(strings.Replace(SyncClientGoPipelineDownModulesKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		goPipelineDownDirModulesFlag = strings.Replace(strings.Replace(SyncClientGoPipelineDownDirModulesKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
 		id = uuid.New().String()
 	)

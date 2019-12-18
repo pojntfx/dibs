@@ -33,9 +33,9 @@ func init() {
 
 		langFlag = strings.Replace(LangKey, "_", "-", -1)
 
-		redisUrlFlag      = strings.Replace(SyncRedisUrlKey, "_", "-", -1)
-		redisPrefixFlag   = strings.Replace(SyncRedisPrefixKey, "_", "-", -1)
-		redisPasswordFlag = strings.Replace(SyncRedisPasswordKey, "_", "-", -1)
+		redisUrlFlag      = strings.Replace(strings.Replace(SyncRedisUrlKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		redisPrefixFlag   = strings.Replace(strings.Replace(SyncRedisPrefixKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		redisPasswordFlag = strings.Replace(strings.Replace(SyncRedisPasswordKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 	)
 
 	PipelineSyncCmd.PersistentFlags().StringVarP(&lang, langFlag, "l", LangDefault, `Language to develop the modules for (currently only "`+LangGo+`" is supported)`)
