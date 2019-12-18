@@ -11,7 +11,7 @@ import (
 
 var PipelineSyncCmd = &cobra.Command{
 	Use:   "sync",
-	Short: "Sync with a pipeline building block",
+	Short: "Develop with multiple modules",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		lang := viper.GetString(LangKey)
 

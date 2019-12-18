@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// FolderWatcher watches a folder for changes and sends a message on every change
+// FolderWatcher watches a folder for changes and sends sends an event on every change
 type FolderWatcher struct {
 	FolderWatcher *watcher.Watcher // Base FolderWatcher
 	WatchDir      string           // Directory to watch for changes

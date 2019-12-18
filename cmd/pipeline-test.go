@@ -7,7 +7,7 @@ import (
 
 var PipelineTestCmd = &cobra.Command{
 	Use:   "test",
-	Short: "Test with a pipeline building block",
+	Short: "Test artifacts",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return ReadConfig(viper.GetString(DibsFileKey))
 	},

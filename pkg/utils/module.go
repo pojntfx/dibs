@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	HeaderReplaceStart = "// DIBS:TEMPREPLACE:START"
-	HeaderReplaceEnd   = "// DIBS:TEMPREPLACE:END"
+	HeaderReplaceStart = "// DIBS:TEMPREPLACE:START" // The comment that marks the start of a module replace directives block
+	HeaderReplaceEnd   = "// DIBS:TEMPREPLACE:END"   // The comment that marks the end of a module replace directives block
 )
 
 // ParseModuleFromMessage gets the module name and event timestamp from a message

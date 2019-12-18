@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-// Server is a server for dibs client
+// Server is a server for the sync client
 type Server struct {
 	ServerReposDir string // Directory in which the Git repos should be stored
 	ServerHTTPPort string // Port on which the Git repos should be served
@@ -22,7 +22,7 @@ type Server struct {
 	RedisSuffixUpUnRegistered string // Redis channel suffix for "module unregistered" messages
 }
 
-// Start starts the server
+// Start starts the sync server
 func (server *Server) Start() {
 	// Connect to Redis
 	redis := utils.Redis{

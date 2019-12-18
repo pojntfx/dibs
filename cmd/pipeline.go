@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 var PipelineCmd = &cobra.Command{
 	Use:   "pipeline",
-	Short: "Pipeline building blocks",
+	Short: "Individual pipeline building blocks",
 }
 
 func init() {

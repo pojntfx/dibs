@@ -7,7 +7,7 @@ import (
 
 var PipelinePushCmd = &cobra.Command{
 	Use:   "push",
-	Short: "Push with a pipeline building block",
+	Short: "Push artifacts",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return ReadConfig(viper.GetString(DibsFileKey))
 	},

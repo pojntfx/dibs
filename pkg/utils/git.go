@@ -81,7 +81,7 @@ func (metaGit Git) Clone(url string) error {
 	return err
 }
 
-// AddCommitAndPush stages all files in a git repository, commits them and pushes them
+// AddCommitAndPush stages all files in a git repository, then commits and pushes them
 func (metaGit Git) AddCommitAndPush() error {
 	g, err := git.PlainOpen(filepath.Join(metaGit.WorkDir))
 	if err != nil {

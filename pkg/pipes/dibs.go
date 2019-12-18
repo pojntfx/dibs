@@ -7,12 +7,14 @@ import (
 	"path/filepath"
 )
 
+// Dibs is a distributed build system
 type Dibs struct {
 	Manifest  Manifest
 	Chart     Chart
 	Platforms []Platform
 }
 
+// BuildDockerManifest builds the Docker manifest
 func (dibs *Dibs) BuildDockerManifest(platform string) (string, error) {
 	var manifestsToAdd []string
 
@@ -27,10 +29,12 @@ func (dibs *Dibs) BuildDockerManifest(platform string) (string, error) {
 	return "", nil
 }
 
+// PushDockerManifest pushes the Docker manifest
 func (dibs *Dibs) PushDockerManifest(platform string) (string, error) {
 	return dibs.Platforms[0].Assets.Build.execDocker(platform, "manifest", "push", "--purge", dibs.Manifest.Tag)
 }
 
+// BuildHelmChart builds the Helm chart
 func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
 	if err := os.MkdirAll(dibs.Chart.DistDir, 0777); err != nil {
 		return "", err
@@ -43,6 +47,7 @@ func (dibs *Dibs) BuildHelmChart(platform string) (string, error) {
 	return dibs.Platforms[0].Assets.Build.execHelm(platform, "package", "-d", dibs.Chart.DistDir, dibs.Chart.SrcDir)
 }
 
+// CleanHelmChart cleans the Helm chart
 func (dibs *Dibs) CleanHelmChart() error {
 	for _, glob := range dibs.Chart.CleanGlobs {
 		filesToRemove, _ := filepath.Glob(glob)
@@ -57,6 +62,7 @@ func (dibs *Dibs) CleanHelmChart() error {
 	return nil
 }
 
+// GetPlatforms returns the platforms for a platform search string or all platforms if specified
 func (dibs *Dibs) GetPlatforms(wantedPlatform string, all bool) ([]Platform, error) {
 	if all {
 		return dibs.Platforms, nil
@@ -71,8 +77,9 @@ func (dibs *Dibs) GetPlatforms(wantedPlatform string, all bool) ([]Platform, err
 	return []Platform{}, errors.New("platform not found")
 }
 
-func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMessage, githubUsername, githubToken, githubRepoName, githubRepoURL, githubPagesUrl string, pushDir []string) (string, error) {
-	if output, err := dibs.Platforms[0].Assets.Build.execCR(platform, "upload", "-o", githubUsername, "-t", githubToken, "-r", githubRepoName, "-p", dibs.Chart.DistDir); err != nil {
+// PushHelmChart pushes the Helm chart to GitHub releases and creates an index in a GitHub git repository for GitHub pages
+func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMessage, githubUsername, githubToken, githubRepositoryName, githubRepoURL, githubPagesUrl string, pushDir []string) (string, error) {
+	if output, err := dibs.Platforms[0].Assets.Build.execChartReleaser(platform, "upload", "-o", githubUsername, "-t", githubToken, "-r", githubRepositoryName, "-p", dibs.Chart.DistDir); err != nil {
 		return output, err
 	}
 
@@ -88,7 +95,7 @@ func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMe
 		return "", err
 	}
 
-	output, err := dibs.Platforms[0].Assets.Build.execCR(platform, "index", "-o", githubUsername, "-t", githubToken, "-r", githubRepoName, "-p", dibs.Chart.DistDir, "-i", filepath.Join(append(pushDir, "index.yaml")...), "-c", githubPagesUrl)
+	output, err := dibs.Platforms[0].Assets.Build.execChartReleaser(platform, "index", "-o", githubUsername, "-t", githubToken, "-r", githubRepositoryName, "-p", dibs.Chart.DistDir, "-i", filepath.Join(append(pushDir, "index.yaml")...), "-c", githubPagesUrl)
 	if err != nil {
 		return output, err
 	}
