@@ -12,6 +12,8 @@
     # Install curl and tar
     - apk update
     - apk add curl tar
+    # Install qemu-user-static
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     # Install buildx
     - curl -Lo docker-buildx https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
     - chmod +x docker-buildx
@@ -20,8 +22,6 @@
     - docker buildx create --name dibs
     - docker buildx use dibs
     - docker buildx inspect --bootstrap
-    # Install qemu-user-static
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     # Install kubectl
     - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x kubectl
@@ -65,3 +65,22 @@ integrationTestLang:
   stage: integrationTest
   script:
     - dibs pipeline test integration lang -e docker
+
+integrationTestImage:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs pipeline build image
+    - dibs pipeline test integration image -e docker
+
+integrationTestAssets:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs pipeline test integration assets -e docker
+
+integrationTestChart:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs pipeline test integration chart -e docker
