@@ -28,16 +28,15 @@ A Helm chart is available in [@pojntfx's Helm chart repository](https://pojntfx.
 % dibs
 System for distributed polyglot, multi-module, multi-architecture development and CI/CD
 
-For full functionality, it requires the following binaries to be in PATH:
+For full functionality, it requires the following software to be installed:
 
-- "docker":     https://www.docker.com/
-- "kubectl":    https://kubernetes.io/docs/reference/kubectl/
-- "helm"        https://helm.sh/
-- "skaffold"    https://skaffold.dev/
-- "ghr"         https://github.com/tcnksm/ghr
-- "cr"          https://github.com/helm/chart-releaser
-
-If you want to support Dockerized multi-architecture builds, you'll also have to setup "qemu-user-static": https://github.com/multiarch/qemu-user-static
+- Docker                (https://www.docker.com/)
+- qemu-user-static      (https://github.com/multiarch/qemu-user-static)
+- kubectl               (https://kubernetes.io/docs/reference/kubectl/)
+- Helm                  (https://helm.sh/)
+- Skaffold              (https://skaffold.dev/)
+- ghr                   (https://github.com/tcnksm/ghr)
+- Chart Releaser        (https://github.com/helm/chart-releaser)
 
 Usage:
   dibs [command]
