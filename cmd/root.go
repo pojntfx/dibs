@@ -16,12 +16,14 @@ var RootCmd = &cobra.Command{
 
 For full functionality, it requires the following binaries to be in PATH:
 
-- "docker"	(see https://www.docker.com/)
-- "kubectl"	(see https://kubernetes.io/docs/reference/kubectl/)
-- "helm"	(see https://helm.sh/)
-- "skaffold"	(see https://skaffold.dev/)
-- "ghr"		(see https://github.com/tcnksm/ghr)
-- "cr"		(see https://github.com/helm/chart-releaser)`,
+- "docker":	https://www.docker.com/
+- "kubectl":	https://kubernetes.io/docs/reference/kubectl/
+- "helm"	https://helm.sh/
+- "skaffold"	https://skaffold.dev/
+- "ghr"		https://github.com/tcnksm/ghr
+- "cr"		https://github.com/helm/chart-releaser
+
+If you want to support Dockerized multi-architecture builds, you'll also have to setup "qemu-user-static": https://github.com/multiarch/qemu-user-static`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		executor := viper.GetString(ExecutorKey)
 
