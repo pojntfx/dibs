@@ -14,10 +14,10 @@ const (
 	RedisPrefixKey   = "redis_prefix"
 	RedisPasswordKey = "redis_password"
 
-	GitUpCommitMessage = "up_synced"
-	GitUpRemoteName    = "dibs-sync"
-	GitUpUserName      = "dibs-syncer"
-	GitUpUserEmail     = "dibs-syncer@pojtinger.space"
+	GitUpCommitMessageUpSynced = "up_synced"
+	GitUpRemoteName            = "dibs-sync"
+	GitUpUserName              = "dibs-syncer"
+	GitUpUserEmail             = "dibs-syncer@pojtinger.space"
 
 	PlatformPlaceholder    = "infer"
 	IgnoreRegexPlaceholder = "infer"
@@ -74,4 +74,14 @@ const (
 
 	AssetsVersionKey     = "assets_version"
 	AssetsGitHubTokenKey = "github_token"
+
+	GitUserNameKey      = "git_user_name"
+	GitUserEmailKey     = "git_user_email"
+	GitCommitMessageKey = "git_commit_message"
+	GitRepoURLKey       = "git_repo_url"
+
+	GithubUserNameKey = "github_user_name"
+	GithubTokenKey    = "github_token"
+	GithubRepoNameKey = "github_repo_name"
+	GithubPagesURLKey = "github_pages_url"
 )
