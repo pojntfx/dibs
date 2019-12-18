@@ -10,7 +10,7 @@ var PipelineCleanChartCmd = &cobra.Command{
 	Short: "Clean chart",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := Dibs.CleanHelmChart(); err != nil {
-			utils.PipeLogErrorFatalNonPlatformSpecific("Could not clean chart", err)
+			utils.LogErrorFatal("Could not clean chart", err)
 		}
 	},
 }

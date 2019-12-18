@@ -14,17 +14,17 @@ var PipelineBuildAssetsCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if viper.GetString(ExecutorKey) == ExecutorDocker {
 				if output, err := platform.Assets.GetAssetsFromDockerImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not get assets from Docker image", err, platform.Platform, output)
+					utils.LogErrorFatalPlatformSpecific("Could not get assets from Docker image", err, platform.Platform, output)
 				}
 			} else {
 				if output, err := platform.Assets.Build.Start(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not build assets", err, platform.Platform, output)
+					utils.LogErrorFatalPlatformSpecific("Could not build assets", err, platform.Platform, output)
 				}
 			}
 		}

@@ -46,17 +46,17 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(LangKey, PipelineSyncCmd.PersistentFlags().Lookup(langFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncRedisUrlKey, PipelineSyncCmd.PersistentFlags().Lookup(redisUrlFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncRedisPrefixKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPrefixFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncRedisPasswordKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPasswordFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

@@ -14,12 +14,12 @@ var PipelineCleanImageCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if output, err := platform.Assets.Build.CleanImage(platform.Platform); err != nil {
-				utils.PipeLogErrorFatal("Could not clean image", err, platform.Platform, output)
+				utils.LogErrorFatalPlatformSpecific("Could not clean image", err, platform.Platform, output)
 			}
 		}
 	},

@@ -6,47 +6,70 @@ import (
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 )
 
-// PipeLogErrorFatalNonPlatformSpecific handles a non-platform-specific fatal error in a pipe
-func PipeLogErrorFatalNonPlatformSpecific(message string, err error, output ...string) {
+// LogError handles a non-platform-specific non-fatal error
+func LogError(message string, err error, output ...string) {
+	if output != nil {
+		fmt.Println(output)
+	}
+	log.Error(message, rz.Err(err))
+}
+
+// LogErrorFatal handles a non-platform-specific fatal error
+func LogErrorFatal(message string, err error, output ...string) {
 	if output != nil {
 		fmt.Println(output)
 	}
 	log.Fatal(message, rz.Err(err))
 }
 
-// PipeLogErrorFatal handles a fatal error in a pipe
-func PipeLogErrorFatal(message string, err error, platform string, output ...string) {
+// LogErrorFatalPlatformSpecific handles a fatal error
+func LogErrorFatalPlatformSpecific(message string, err error, platform string, output ...string) {
 	if output != nil {
 		fmt.Println(output)
 	}
 	log.Fatal(message, rz.String("platform", platform), rz.Err(err))
 }
 
-// PipeLogErrorFatalWithProfile handles a profile-specific fatal error in a pipe
-func PipeLogErrorFatalWithProfile(message string, err error, platform, profile string, output ...string) {
+// LogErrorFatalWithProfile handles a profile-specific fatal error
+func LogErrorFatalWithProfile(message string, err error, platform, profile string, output ...string) {
 	if output != nil {
 		fmt.Println(output)
 	}
 	log.Fatal(message, rz.String("platform", platform), rz.String("profile", profile), rz.Err(err))
 }
 
-// PipeLogErrorFatalPlatformNotFound handles a fatal error in a pipe if one or more platforms can't be found
-func PipeLogErrorFatalPlatformNotFound(platform interface{}, err error) {
+// LogErrorFatalPlatformNotFound handles a fatal error if one or more platforms can't be found
+func LogErrorFatalPlatformNotFound(platform interface{}, err error) {
 	log.Fatal("Platform(s) not found in configuration file", rz.Any("platforms", platform), rz.Err(err))
 }
 
-// PipeLogErrorFatalCouldNotParseIP handles a fatal error in a pipe if an IP can't be parsed
-func PipeLogErrorFatalCouldNotParseIP(ip string) {
+// LogErrorFatalCouldNotParseIP handles a fatal error if an IP can't be parsed
+func LogErrorFatalCouldNotParseIP(ip string) {
 	log.Fatal("Could not parse IP", rz.String("ip", ip))
 }
 
-// PipeLogErrorInfo handles a non-fatal error in a pipe
-func PipeLogErrorInfo(message string, err error, platform, output string) {
+// LogErrorInfo handles a non-fatal error
+func LogErrorInfo(message string, err error, platform, output string) {
 	fmt.Println(output)
 	log.Info(message, rz.String("platform", platform), rz.Err(err))
 }
 
-// CmdLogErrorCouldNotBindFlag handles flag binding errors
-func CmdLogErrorCouldNotBindFlag(err error) {
+// LogErrorCouldNotBindFlag handles flag binding errors
+func LogErrorCouldNotBindFlag(err error) {
 	log.Fatal("Could bind flag", rz.Err(err))
+}
+
+// LogForModule logs for a module
+func LogForModule(message, module string) {
+	log.Info(message, rz.String("module", module))
+}
+
+// LogErrorForModuleFatal handles fatal errors for a module
+func LogErrorForModuleFatal(message string, err error, module string) {
+	log.Fatal(message, rz.Err(err), rz.String("module", module))
+}
+
+// LogErrorForModule handles errors for a module
+func LogErrorForModule(message string, err error, module string) {
+	log.Error(message, rz.Err(err), rz.String("module", module))
 }

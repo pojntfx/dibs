@@ -35,7 +35,7 @@ func (server *Server) Start() {
 	// Build the configuration
 	httpPort, err := strconv.ParseInt(server.ServerHTTPPort, 0, 64)
 	if err != nil {
-		log.Fatal("Error", rz.String("System", "Server"), rz.Err(err))
+		utils.LogErrorFatal("Error", err)
 	}
 	reposDirWithHTTPPathPrefix := filepath.Join(server.ServerReposDir, server.ServerHTTPPath)
 
@@ -74,48 +74,48 @@ func (server *Server) Start() {
 		select {
 		// If there are errors, log the errors and exit
 		case err := <-httpWorkerErrors:
-			log.Fatal("Error", rz.String("System", "GitHTTPWorker"), rz.Err(err))
+			log.Fatal("Error", rz.String("system", "GitHTTPWorker"), rz.Err(err))
 		case err := <-repoWorkerUpdateErrors:
-			log.Fatal("Error", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Err(err))
+			log.Fatal("Error", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerUpdate.DeleteOnly), rz.Err(err))
 		case err := <-repoWorkerDeleteOnlyErrors:
-			log.Fatal("Error", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.Err(err))
+			log.Fatal("Error", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.Err(err))
 
 		// If there are events, log them
 		case event := <-httpWorkerEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", httpWorker.ReposDir), rz.String("HTTPPathPrefix", httpWorker.HTTPPathPrefix), rz.Int("Port", httpWorker.Port))
+				log.Info("Started", rz.String("system", "GitHTTPWorker"), rz.String("eventMessage", event.Message), rz.String("ReposDir", httpWorker.ReposDir), rz.String("HTTPPathPrefix", httpWorker.HTTPPathPrefix), rz.Int("Port", httpWorker.Port))
 			case 1:
-				log.Info("Request", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message))
+				log.Info("Request", rz.String("system", "GitHTTPWorker"), rz.String("eventMessage", event.Message))
 			case 2:
-				log.Info("Stopped", rz.String("System", "GitHTTPWorker"), rz.String("EventMessage", event.Message))
+				log.Info("Stopped", rz.String("system", "GitHTTPWorker"), rz.String("eventMessage", event.Message))
 				return
 			default:
-				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+				log.Fatal("Unknown event code", rz.String("system", "GitHTTPWorker"), rz.Int("eventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
 		case event := <-repoWorkerUpdateEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerUpdate.ReposDir), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("RedisSuffix", repoWorkerUpdate.RedisSuffix))
+				log.Info("Started", rz.String("system", "GitRepoWorker"), rz.String("eventMessage", event.Message), rz.String("ReposDir", repoWorkerUpdate.ReposDir), rz.Bool("deleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("RedisSuffix", repoWorkerUpdate.RedisSuffix))
 			case 1:
-				log.Info("Update", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("EventMessage", event.Message))
+				log.Info("Update", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("eventMessage", event.Message))
 			case 2:
-				log.Info("Stopped", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("EventMessage", event.Message))
+				log.Info("Stopped", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerUpdate.DeleteOnly), rz.String("eventMessage", event.Message))
 				return
 			default:
-				log.Fatal("Unknown event code", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+				log.Fatal("Unknown event code", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("eventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
 		case event := <-repoWorkerDeleteOnlyEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "GitRepoWorker"), rz.String("EventMessage", event.Message), rz.String("ReposDir", repoWorkerDeleteOnly.ReposDir), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("RedisSuffix", repoWorkerDeleteOnly.RedisSuffix))
+				log.Info("Started", rz.String("system", "GitRepoWorker"), rz.String("eventMessage", event.Message), rz.String("ReposDir", repoWorkerDeleteOnly.ReposDir), rz.Bool("deleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("RedisSuffix", repoWorkerDeleteOnly.RedisSuffix))
 			case 1:
-				log.Info("Deletion", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("EventMessage", event.Message))
+				log.Info("Deletion", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("eventMessage", event.Message))
 			case 2:
-				log.Info("Stopped", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("EventMessage", event.Message))
+				log.Info("Stopped", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerDeleteOnly.DeleteOnly), rz.String("eventMessage", event.Message))
 				return
 			default:
-				log.Fatal("Unknown event code", rz.String("System", "GitRepoWorker"), rz.Bool("DeleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+				log.Fatal("Unknown event code", rz.String("system", "GitRepoWorker"), rz.Bool("deleteOnly", repoWorkerUpdate.DeleteOnly), rz.Int("eventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
 		}
 	}

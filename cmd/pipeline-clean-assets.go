@@ -14,12 +14,12 @@ var PipelineCleanAssetsCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if err := platform.Assets.Clean(); err != nil {
-				utils.PipeLogErrorFatal("Could not clean assets", err, platform.Platform)
+				utils.LogErrorFatalPlatformSpecific("Could not clean assets", err, platform.Platform)
 			}
 		}
 	},

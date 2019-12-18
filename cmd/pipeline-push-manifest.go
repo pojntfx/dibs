@@ -11,7 +11,7 @@ var PipelinePushManifestCmd = &cobra.Command{
 	Short: "Push manifest",
 	Run: func(cmd *cobra.Command, args []string) {
 		if output, err := Dibs.PushDockerManifest(viper.GetString(PlatformKey)); err != nil {
-			utils.PipeLogErrorFatalNonPlatformSpecific("Could not push manifest", err, output)
+			utils.LogErrorFatal("Could not push manifest", err, output)
 		}
 	},
 }

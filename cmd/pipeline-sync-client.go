@@ -118,41 +118,41 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(SyncClientGoGitBaseUrlKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goGitBaseUrlFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientPipelineUpDirSrcKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpDirSrcFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpDirPushKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpDirPushFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpDirWatchKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpDirWatchFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientGoPipelineUpFileModKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goPipelineUpFileModFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientPipelineUpBuildCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpBuildCommandFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpTestCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpTestCommandFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpStartCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpStartCommandFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientPipelineUpRegexIgnoreKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpRegexIgnoreFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientGoPipelineDownModulesKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goPipelineDownModulesFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientGoPipelineDownDirModulesKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goPipelineDownDirModulesFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

@@ -14,19 +14,19 @@ var PipelineTestIntegrationAssetsCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if viper.GetString(ExecutorKey) == ExecutorDocker {
 				if output, err := platform.Tests.Integration.Assets.BuildImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not build assets integration test image", err, platform.Platform, output)
+					utils.LogErrorFatalPlatformSpecific("Could not build assets integration test image", err, platform.Platform, output)
 				}
 				output, err := platform.Tests.Integration.Assets.StartImage(platform.Platform)
-				utils.PipeLogErrorInfo("Assets integration test ran in Docker", err, platform.Platform, output)
+				utils.LogErrorInfo("Assets integration test ran in Docker", err, platform.Platform, output)
 			} else {
 				output, err := platform.Tests.Integration.Assets.Start(platform.Platform)
-				utils.PipeLogErrorInfo("Assets integration test ran", err, platform.Platform, output)
+				utils.LogErrorInfo("Assets integration test ran", err, platform.Platform, output)
 			}
 		}
 	},

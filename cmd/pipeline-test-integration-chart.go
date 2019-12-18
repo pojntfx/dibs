@@ -17,20 +17,20 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 
 		rawIP := net.ParseIP(viperIP)
 		if rawIP == nil {
-			utils.PipeLogErrorFatalCouldNotParseIP(viperIP)
+			utils.LogErrorFatalCouldNotParseIP(viperIP)
 			return
 		}
 		ip := rawIP.String()
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if viper.GetString(ExecutorKey) == ExecutorDocker {
 				if output, err := platform.Tests.Integration.Chart.BuildImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not build chart integration test chart", err, platform.Platform, output)
+					utils.LogErrorFatalPlatformSpecific("Could not build chart integration test chart", err, platform.Platform, output)
 				}
 				output, err := platform.Tests.Integration.Chart.StartImage(platform.Platform, struct {
 					Key   string
@@ -39,10 +39,10 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 					Key:   "IP",
 					Value: ip,
 				})
-				utils.PipeLogErrorInfo("Chart integration test ran in Docker", err, platform.Platform, output)
+				utils.LogErrorInfo("Chart integration test ran in Docker", err, platform.Platform, output)
 			} else {
 				output, err := platform.Tests.Integration.Chart.Start(platform.Platform)
-				utils.PipeLogErrorInfo("Chart integration test ran", err, platform.Platform, output)
+				utils.LogErrorInfo("Chart integration test ran", err, platform.Platform, output)
 			}
 		}
 	},
@@ -60,7 +60,7 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(TestIntegrationChartKubernetesIpKey, PipelineTestIntegrationChartCmd.PersistentFlags().Lookup(kubernetesIpFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

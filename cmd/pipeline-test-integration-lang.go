@@ -14,19 +14,19 @@ var PipelineTestIntegrationLangCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if viper.GetString(ExecutorKey) == ExecutorDocker {
 				if output, err := platform.Tests.Integration.Lang.BuildImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not build lang integration test image", err, platform.Platform, output)
+					utils.LogErrorFatalPlatformSpecific("Could not build lang integration test image", err, platform.Platform, output)
 				}
 				output, err := platform.Tests.Integration.Lang.StartImage(platform.Platform)
-				utils.PipeLogErrorInfo("Lang integration test ran in Docker", err, platform.Platform, output)
+				utils.LogErrorInfo("Lang integration test ran in Docker", err, platform.Platform, output)
 			} else {
 				output, err := platform.Tests.Integration.Lang.Start(platform.Platform)
-				utils.PipeLogErrorInfo("Lang integration test ran", err, platform.Platform, output)
+				utils.LogErrorInfo("Lang integration test ran", err, platform.Platform, output)
 			}
 		}
 	},
