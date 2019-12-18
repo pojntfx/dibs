@@ -81,7 +81,7 @@ func (client *Client) Start() {
 	redis.Connect()
 
 	// Register the module
-	log.Info("Registering module ...", rz.String("Module", module))
+	log.Info("Registering module", rz.String("Module", module))
 	redis.PublishWithTimestamp(client.RedisSuffixUpRegistered, module)
 
 	// Unregister the module on interrupt signal
@@ -90,10 +90,10 @@ func (client *Client) Start() {
 	go func() {
 		<-interrupt
 
-		log.Info("Unregistering module ...", rz.String("Module", module))
+		log.Info("Unregistering module", rz.String("Module", module))
 		redis.PublishWithTimestamp(client.RedisSuffixUpUnRegistered, module)
 
-		log.Info("Cleaning up ...", rz.String("Module", module), rz.String("ModuleFile", client.PipelineUpFileMod))
+		log.Info("Cleaning up", rz.String("Module", module), rz.String("ModuleFile", client.PipelineUpFileMod))
 
 		// Remove the added replace directives. Don't run if no pull modules have been specified.
 		if downModules[0] != "" {
@@ -123,17 +123,17 @@ func (client *Client) Start() {
 	}
 
 	testCommand, buildCommand, startCommand := utils.CommandWithEvent{
-		LogMessage:   "Running test command ...",
+		LogMessage:   "Running test command",
 		ExecLine:     client.PipelineUpTestCommand,
 		RedisSuffix:  client.RedisSuffixUpTested,
 		RedisMessage: module,
 	}, utils.CommandWithEvent{
-		LogMessage:   "Running build command ...",
+		LogMessage:   "Running build command",
 		ExecLine:     client.PipelineUpBuildCommand,
 		RedisSuffix:  client.RedisSuffixUpBuilt,
 		RedisMessage: module,
 	}, utils.CommandWithEvent{
-		LogMessage:   "Starting start command ...",
+		LogMessage:   "Starting start command",
 		ExecLine:     client.PipelineUpStartCommand,
 		RedisSuffix:  client.RedisSuffixUpStarted,
 		RedisMessage: module,

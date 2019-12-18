@@ -6,7 +6,7 @@ import (
 	"gitlab.com/z0mbie42/rz-go/v2/log"
 )
 
-// Handle a non-platform-specific fatal error in a pipe
+// PipeLogErrorFatalNonPlatformSpecific handles a non-platform-specific fatal error in a pipe
 func PipeLogErrorFatalNonPlatformSpecific(message string, err error, output ...string) {
 	if output != nil {
 		fmt.Println(output)
@@ -14,7 +14,7 @@ func PipeLogErrorFatalNonPlatformSpecific(message string, err error, output ...s
 	log.Fatal(message, rz.Err(err))
 }
 
-// Handle a fatal error in a pipe
+// PipeLogErrorFatal handles a fatal error in a pipe
 func PipeLogErrorFatal(message string, err error, platform string, output ...string) {
 	if output != nil {
 		fmt.Println(output)
@@ -22,7 +22,7 @@ func PipeLogErrorFatal(message string, err error, platform string, output ...str
 	log.Fatal(message, rz.String("platform", platform), rz.Err(err))
 }
 
-// Handle a profile-specific fatal error in a pipe
+// PipeLogErrorFatalWithProfile handles a profile-specific fatal error in a pipe
 func PipeLogErrorFatalWithProfile(message string, err error, platform, profile string, output ...string) {
 	if output != nil {
 		fmt.Println(output)
@@ -30,18 +30,23 @@ func PipeLogErrorFatalWithProfile(message string, err error, platform, profile s
 	log.Fatal(message, rz.String("platform", platform), rz.String("profile", profile), rz.Err(err))
 }
 
-// Handle a fatal error in a pipe if one or more platforms can't be found
+// PipeLogErrorFatalPlatformNotFound handles a fatal error in a pipe if one or more platforms can't be found
 func PipeLogErrorFatalPlatformNotFound(platform interface{}, err error) {
 	log.Fatal("Platform(s) not found in configuration file", rz.Any("platforms", platform), rz.Err(err))
 }
 
-// Handle a fatal error in a pipe if an IP can't be parsed
+// PipeLogErrorFatalCouldNotParseIP handles a fatal error in a pipe if an IP can't be parsed
 func PipeLogErrorFatalCouldNotParseIP(ip string) {
 	log.Fatal("Could not parse IP", rz.String("ip", ip))
 }
 
-// Handle a non-fatal error in a pipe
+// PipeLogErrorInfo handles a non-fatal error in a pipe
 func PipeLogErrorInfo(message string, err error, platform, output string) {
 	fmt.Println(output)
 	log.Info(message, rz.String("platform", platform), rz.Err(err))
+}
+
+// CmdLogErrorCouldNotBindFlag handles flag binding errors
+func CmdLogErrorCouldNotBindFlag(err error) {
+	log.Fatal("Could bind flag", rz.Err(err))
 }

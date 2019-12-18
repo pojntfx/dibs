@@ -3,10 +3,9 @@ package cmd
 import (
 	"github.com/google/uuid"
 	"github.com/pojntfx/dibs/pkg/starters"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -119,41 +118,41 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(SyncClientGoGitBaseUrlKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goGitBaseUrlFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientPipelineUpDirSrcKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpDirSrcFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpDirPushKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpDirPushFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpDirWatchKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpDirWatchFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientGoPipelineUpFileModKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goPipelineUpFileModFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientPipelineUpBuildCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpBuildCommandFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpTestCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpTestCommandFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpStartCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpStartCommandFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncClientPipelineUpRegexIgnoreKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpRegexIgnoreFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientGoPipelineDownModulesKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goPipelineDownModulesFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientGoPipelineDownDirModulesKey, PipelineSyncClientCmd.PersistentFlags().Lookup(goPipelineDownDirModulesFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

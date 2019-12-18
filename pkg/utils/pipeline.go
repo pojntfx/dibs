@@ -46,7 +46,7 @@ func (pipeline *Pipeline) RunCommandsOnly() error {
 // RunAll runs the entire pipeline
 func (pipeline *Pipeline) RunAll() error {
 	if pipeline.StartCommandState != nil {
-		log.Info("Stopping module ...", rz.String("Module", pipeline.Module))
+		log.Info("Stopping module", rz.String("Module", pipeline.Module))
 		if err := pipeline.StartCommandState.Process.Kill(); err != nil {
 			log.Error("Could not stop module", rz.Err(err))
 		}

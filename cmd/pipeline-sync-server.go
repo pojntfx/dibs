@@ -3,10 +3,9 @@ package cmd
 import (
 	"github.com/google/uuid"
 	"github.com/pojntfx/dibs/pkg/starters"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,13 +54,13 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(SyncServerGitServerReposDirKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerReposDirFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncServerGitServerHttpPortKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerHttpPortFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncServerGitServerHttpPathKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerHttpPathFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

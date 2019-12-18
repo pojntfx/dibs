@@ -5,8 +5,6 @@ import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"strings"
 )
@@ -60,29 +58,29 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(PushChartGitUserNameKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitUserNameFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGitUserEmailKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitUserEmailFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGitCommitMessageKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitCommitMessageFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGitRepoURLKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitRepoURLFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(PushChartGithubUserNameKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubUserNameFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGithubTokenKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubTokenFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGithubRepoNameKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubRepoNameFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGithubPagesURLKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubPagesURLFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()
