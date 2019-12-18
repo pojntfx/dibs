@@ -21,7 +21,7 @@ var PipelinePushAssetsCmd = &cobra.Command{
 		}
 
 		for _, platform := range platforms {
-			if output, err := platform.Assets.Push(platform.Platform, strings.Split(viper.GetString(AssetsVersionKey), " "), viper.GetString(AssetsGitHubTokenKey)); err != nil {
+			if output, err := platform.Assets.Push(platform.Platform, strings.Split(viper.GetString(PushAssetsVersionKey), " "), viper.GetString(PushAssetsGitHubTokenKey)); err != nil {
 				utils.PipeLogErrorFatal("Could not push assets", err, platform.Platform, output)
 			}
 		}
@@ -33,8 +33,8 @@ func init() {
 		version string
 		token   string
 
-		versionFlag     = strings.Replace(AssetsVersionKey, "assets_", "", -1)
-		githubTokenFlag = strings.Replace(AssetsGitHubTokenKey, "_", "-", -1)
+		versionFlag     = strings.Replace(strings.Replace(PushAssetsVersionKey, PushAssetsKeyPrefix, "", -1), "assets_", "", -1)
+		githubTokenFlag = strings.Replace(strings.Replace(PushAssetsGitHubTokenKey, PushAssetsKeyPrefix, "", -1), "_", "-", -1)
 	)
 
 	PipelinePushAssetsCmd.PersistentFlags().StringVarP(&version, versionFlag, "v", "0.0.1", `The version of the asset to deploy (use "-prerelease <version>" as the version to create a prerelease)`)
@@ -42,10 +42,10 @@ func init() {
 
 	viper.SetEnvPrefix(EnvPrefix)
 
-	if err := viper.BindPFlag(AssetsVersionKey, PipelinePushAssetsCmd.PersistentFlags().Lookup(versionFlag)); err != nil {
+	if err := viper.BindPFlag(PushAssetsVersionKey, PipelinePushAssetsCmd.PersistentFlags().Lookup(versionFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
-	if err := viper.BindPFlag(AssetsGitHubTokenKey, PipelinePushAssetsCmd.PersistentFlags().Lookup(githubTokenFlag)); err != nil {
+	if err := viper.BindPFlag(PushAssetsGitHubTokenKey, PipelinePushAssetsCmd.PersistentFlags().Lookup(githubTokenFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 

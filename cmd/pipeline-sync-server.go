@@ -19,15 +19,15 @@ var PipelineSyncServerCmd = &cobra.Command{
 		switch viper.GetString(LangKey) {
 		case LangGo:
 			server := starters.Server{
-				ServerReposDir: viper.GetString(GitServerReposDirKey),
-				ServerHTTPPort: viper.GetString(GitServerHttpPortKey),
-				ServerHTTPPath: viper.GetString(GitServerHttpPathKey),
+				ServerReposDir: viper.GetString(SyncServerGitServerReposDirKey),
+				ServerHTTPPort: viper.GetString(SyncServerGitServerHttpPortKey),
+				ServerHTTPPath: viper.GetString(SyncServerGitServerHttpPathKey),
 
-				RedisUrl:                  viper.GetString(RedisUrlKey),
-				RedisPrefix:               viper.GetString(RedisPrefixKey),
-				RedisPassword:             viper.GetString(RedisPasswordKey),
-				RedisSuffixUpRegistered:   RedisSuffixUpRegistered,
-				RedisSuffixUpUnRegistered: RedisSuffixUpUnregistered,
+				RedisUrl:                  viper.GetString(SyncRedisUrlKey),
+				RedisPrefix:               viper.GetString(SyncRedisPrefixKey),
+				RedisPassword:             viper.GetString(SyncRedisPasswordKey),
+				RedisSuffixUpRegistered:   SyncRedisSuffixUpRegistered,
+				RedisSuffixUpUnRegistered: SyncRedisSuffixUpUnregistered,
 			}
 
 			server.Start()
@@ -41,9 +41,9 @@ func init() {
 		gitServerHttpPort string
 		gitServerHttpPath string
 
-		gitServerReposDirFlag = strings.Replace(GitServerReposDirKey, "_", "-", -1)
-		gitServerHttpPortFlag = strings.Replace(GitServerHttpPortKey, "_", "-", -1)
-		gitServerHttpPathFlag = strings.Replace(GitServerHttpPathKey, "_", "-", -1)
+		gitServerReposDirFlag = strings.Replace(SyncServerGitServerReposDirKey, "_", "-", -1)
+		gitServerHttpPortFlag = strings.Replace(SyncServerGitServerHttpPortKey, "_", "-", -1)
+		gitServerHttpPathFlag = strings.Replace(SyncServerGitServerHttpPathKey, "_", "-", -1)
 
 		id = uuid.New().String()
 	)
@@ -54,13 +54,13 @@ func init() {
 
 	viper.SetEnvPrefix(EnvPrefix)
 
-	if err := viper.BindPFlag(GitServerReposDirKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerReposDirFlag)); err != nil {
+	if err := viper.BindPFlag(SyncServerGitServerReposDirKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerReposDirFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
-	if err := viper.BindPFlag(GitServerHttpPortKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerHttpPortFlag)); err != nil {
+	if err := viper.BindPFlag(SyncServerGitServerHttpPortKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerHttpPortFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
-	if err := viper.BindPFlag(GitServerHttpPathKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerHttpPathFlag)); err != nil {
+	if err := viper.BindPFlag(SyncServerGitServerHttpPathKey, PipelineSyncServerCmd.PersistentFlags().Lookup(gitServerHttpPathFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 

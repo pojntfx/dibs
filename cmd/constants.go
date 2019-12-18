@@ -4,53 +4,26 @@ const (
 	LangGo      = "go"
 	LangDefault = LangGo
 
-	RedisUrlDefault      = "localhost:6379"
-	RedisPrefixDefault   = "dibs"
-	RedisPasswordDefault = ""
+	SyncClientRedisUrlDefault      = "localhost:6379"
+	SyncClientRedisPrefixDefault   = "dibs"
+	SyncClientRedisPasswordDefault = ""
 
-	LangKey = "lang"
+	SyncClientGitUpCommitMessageUpSynced = "up_synced"
+	SyncClientGitUpRemoteName            = "dibs-sync"
+	SyncClientGitUpUserName              = "dibs-syncer"
+	SyncClientGitUpUserEmail             = "dibs-syncer@pojtinger.space"
 
-	RedisUrlKey      = "redis_url"
-	RedisPrefixKey   = "redis_prefix"
-	RedisPasswordKey = "redis_password"
+	SyncClientPlatformPlaceholder    = "infer"
+	SyncClientIgnoreRegexPlaceholder = "infer"
 
-	GitUpCommitMessageUpSynced = "up_synced"
-	GitUpRemoteName            = "dibs-sync"
-	GitUpUserName              = "dibs-syncer"
-	GitUpUserEmail             = "dibs-syncer@pojtinger.space"
+	SyncRedisSuffixUpBuilt        = "up_built"
+	SyncRedisSuffixUpTested       = "up_tested"
+	SyncRedisSuffixUpStarted      = "up_started"
+	SyncRedisSuffixUpRegistered   = "up_registered"
+	SyncRedisSuffixUpUnregistered = "up_unregistered"
+	SyncRedisSuffixUpPushed       = "up_pushed"
 
-	PlatformPlaceholder    = "infer"
-	IgnoreRegexPlaceholder = "infer"
-
-	GoGitBaseUrlKey = LangGo + "_git_base_url"
-
-	PipelineUpDirSrcKey   = "dir_src"
-	PipelineUpDirPushKey  = "dir_push"
-	PipelineUpDirWatchKey = "dir_watch"
-
-	GoPipelineUpFileModKey = LangGo + "_modules_file"
-
-	PipelineUpBuildCommandKey = "cmd_build"
-	PipelineUpTestCommandKey  = "cmd_test"
-	PipelineUpStartCommandKey = "cmd_start"
-
-	PipelineUpRegexIgnoreKey    = "regex_ignore"
-	GoPipelineDownModulesKey    = LangGo + "_modules_pull"
-	GoPipelineDownDirModulesKey = LangGo + "_dir_pull"
-
-	RedisSuffixUpBuilt        = "up_built"
-	RedisSuffixUpTested       = "up_tested"
-	RedisSuffixUpStarted      = "up_started"
-	RedisSuffixUpRegistered   = "up_registered"
-	RedisSuffixUpUnregistered = "up_unregistered"
-	RedisSuffixUpPushed       = "up_pushed"
-
-	GitServerReposDirKey = LangGo + "_dir_repos"
-	GitServerHttpPortKey = LangGo + "-port"
-	GitServerHttpPathKey = LangGo + "-path"
-
-	KubernetesIpKey     = "kubernetes_ip"
-	KubernetesIpDefault = "127.0.0.1"
+	TestIntegrationChartKubernetesIpDefault = "127.0.0.1"
 
 	PlatformAll     = "all"
 	PlatformDefault = PlatformAll
@@ -65,23 +38,57 @@ const (
 
 	EnvPrefix = "dibs"
 
+	PlatformEnvDocker = "TARGETPLATFORM" // This is the env variable convention that Docker uses, so alias it
+)
+
+const (
+	LangKey = "lang"
+
+	SyncRedisUrlKey      = "redis_url"
+	SyncRedisPrefixKey   = "redis_prefix"
+	SyncRedisPasswordKey = "redis_password"
+
+	SyncClientGoGitBaseUrlKey = LangGo + "_git_base_url"
+
+	SyncClientPipelineUpDirSrcKey   = "dir_src"
+	SyncClientPipelineUpDirPushKey  = "dir_push"
+	SyncClientPipelineUpDirWatchKey = "dir_watch"
+
+	SyncClientGoPipelineUpFileModKey = LangGo + "_modules_file"
+
+	SyncClientPipelineUpBuildCommandKey = "cmd_build"
+	SyncClientPipelineUpTestCommandKey  = "cmd_test"
+	SyncClientPipelineUpStartCommandKey = "cmd_start"
+
+	SyncClientPipelineUpRegexIgnoreKey    = "regex_ignore"
+	SyncClientGoPipelineDownModulesKey    = LangGo + "_modules_pull"
+	SyncClientGoPipelineDownDirModulesKey = LangGo + "_dir_pull"
+
+	SyncServerGitServerReposDirKey = LangGo + "_dir_repos"
+	SyncServerGitServerHttpPortKey = LangGo + "-port"
+	SyncServerGitServerHttpPathKey = LangGo + "-path"
+
+	TestIntegrationChartKubernetesIpKey = "kubernetes_ip"
+
 	PlatformKey = "platform"
 	ExecutorKey = "executor"
 
-	PlatformEnvDocker = "TARGETPLATFORM" // This is the env variable convention that Docker uses, so alias it
-
 	DibsFileKey = "config_file"
 
-	AssetsVersionKey     = "assets_version"
-	AssetsGitHubTokenKey = "github_token"
+	PushAssetsKeyPrefix = "push_assets_"
 
-	GitUserNameKey      = "git_user_name"
-	GitUserEmailKey     = "git_user_email"
-	GitCommitMessageKey = "git_commit_message"
-	GitRepoURLKey       = "git_repo_url"
+	PushAssetsVersionKey     = PushAssetsKeyPrefix + "version"
+	PushAssetsGitHubTokenKey = PushAssetsKeyPrefix + "github_token"
 
-	GithubUserNameKey = "github_user_name"
-	GithubTokenKey    = "github_token"
-	GithubRepoNameKey = "github_repo_name"
-	GithubPagesURLKey = "github_pages_url"
+	PushChartKeyPrefix = "push_chart_"
+
+	PushChartGitUserNameKey      = PushChartKeyPrefix + "git_user_name"
+	PushChartGitUserEmailKey     = PushChartKeyPrefix + "git_user_email"
+	PushChartGitCommitMessageKey = PushChartKeyPrefix + "git_commit_message"
+	PushChartGitRepoURLKey       = PushChartKeyPrefix + "git_repo_url"
+
+	PushChartGithubUserNameKey = PushChartKeyPrefix + "github_user_name"
+	PushChartGithubTokenKey    = PushChartKeyPrefix + "github_token"
+	PushChartGithubRepoNameKey = PushChartKeyPrefix + "github_repo_name"
+	PushChartGithubPagesURLKey = PushChartKeyPrefix + "github_pages_url"
 )
