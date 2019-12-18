@@ -21,8 +21,8 @@ var PipelinePushAssetsCmd = &cobra.Command{
 		}
 
 		for _, platform := range platforms {
-			if err := platform.Assets.Push(platform.Platform, strings.Split(viper.GetString(AssetsVersionKey), " "), viper.GetString(AssetsGitHubTokenKey)); err != nil {
-				utils.PipeLogErrorFatal("Could not push assets", err, platform.Platform)
+			if output, err := platform.Assets.Push(platform.Platform, strings.Split(viper.GetString(AssetsVersionKey), " "), viper.GetString(AssetsGitHubTokenKey)); err != nil {
+				utils.PipeLogErrorFatal("Could not push assets", err, platform.Platform, output)
 			}
 		}
 	},

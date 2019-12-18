@@ -75,8 +75,8 @@ func (build *Build) execSkaffold(platform string, args ...string) error {
 	return build.execStdoutStderr(platform, append([]string{CommandSkaffold}, args...)...)
 }
 
-func (build *Build) execGHR(platform string, args ...string) error {
-	return build.execStdoutStderr(platform, append([]string{CommandGHR}, args...)...)
+func (build *Build) execGHR(platform string, args ...string) (string, error) {
+	return build.exec(platform, append([]string{CommandGHR}, args...)...)
 }
 
 func (build *Build) execString(platform string, command string) (string, error) {
