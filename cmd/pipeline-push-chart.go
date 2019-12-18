@@ -17,7 +17,7 @@ var PipelinePushChartCmd = &cobra.Command{
 		pushDir := append([]string{os.TempDir()}, "dibs", "pushHelm", id)
 
 		if output, err := Dibs.PushHelmChart(viper.GetString(PlatformKey), viper.GetString(PushChartGitUserNameKey), viper.GetString(PushChartGitUserEmailKey), viper.GetString(PushChartGitCommitMessageKey), viper.GetString(PushChartGithubUserNameKey), viper.GetString(PushChartGithubTokenKey), viper.GetString(PushChartGithubRepoNameKey), viper.GetString(PushChartGitRepoURLKey), viper.GetString(PushChartGithubPagesURLKey), pushDir); err != nil {
-			utils.PipeLogErrorFatalNonPlatformSpecific("Could not Push chart", err, output)
+			utils.LogErrorFatal("Could not Push chart", err, output)
 		}
 	},
 }
@@ -58,29 +58,29 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(PushChartGitUserNameKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitUserNameFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGitUserEmailKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitUserEmailFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGitCommitMessageKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitCommitMessageFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGitRepoURLKey, PipelinePushChartCmd.PersistentFlags().Lookup(gitRepoURLFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(PushChartGithubUserNameKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubUserNameFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGithubTokenKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubTokenFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGithubRepoNameKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubRepoNameFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushChartGithubPagesURLKey, PipelinePushChartCmd.PersistentFlags().Lookup(githubPagesURLFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

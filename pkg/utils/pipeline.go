@@ -2,8 +2,6 @@ package utils
 
 import (
 	"github.com/otiai10/copy"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"os"
 	"os/exec"
 	"strings"
@@ -33,7 +31,7 @@ type Pipeline struct {
 // RunCommandsOnly only runs the commands
 func (pipeline *Pipeline) RunCommandsOnly() error {
 	for _, runCommand := range pipeline.RunCommands {
-		log.Info(runCommand.LogMessage, rz.String("Module", pipeline.Module))
+		LogForModule(runCommand.LogMessage, pipeline.Module)
 		if err := RunCommand(runCommand.ExecLine, false); err != nil {
 			return err
 		}
@@ -46,9 +44,9 @@ func (pipeline *Pipeline) RunCommandsOnly() error {
 // RunAll runs the entire pipeline
 func (pipeline *Pipeline) RunAll() error {
 	if pipeline.StartCommandState != nil {
-		log.Info("Stopping module", rz.String("Module", pipeline.Module))
+		LogForModule("Stopping module", pipeline.Module)
 		if err := pipeline.StartCommandState.Process.Kill(); err != nil {
-			log.Error("Could not stop module", rz.Err(err))
+			LogError("Could not stop module", err)
 		}
 	}
 
@@ -62,10 +60,10 @@ func (pipeline *Pipeline) RunAll() error {
 	pipeline.Redis.PublishWithTimestamp(pipeline.ModulePushedRedisSuffix, pipeline.Module)
 
 	if err := pipeline.RunCommandsOnly(); err != nil {
-		log.Error("Could not run pipeline's command", rz.Err(err))
+		LogError("Could not run pipeline's command", err)
 	}
 
-	log.Info(pipeline.StartCommand.LogMessage, rz.String("Module", pipeline.Module))
+	LogForModule(pipeline.StartCommand.LogMessage, pipeline.Module)
 	if err := RunCommand(pipeline.StartCommand.ExecLine, true); err != nil {
 		return exec.ErrNotFound
 	}

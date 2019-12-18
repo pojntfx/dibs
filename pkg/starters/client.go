@@ -48,13 +48,13 @@ func (client *Client) Start() {
 	// Get the name of the module that is to be pushed
 	rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
 	if err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+		utils.LogErrorFatal("Error", err)
 	}
 	// Get the content of the Go module file
 	goModContent := string(rawGoModContent)
 	err, module := utils.GetModuleName(goModContent)
 	if err != nil {
-		log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+		utils.LogErrorForModuleFatal("Error", err, module)
 	}
 	// Get the modules that are to be downloaded
 	downModules := utils.GetModulesFromRawInputString(client.PipelineDownModules)
@@ -65,10 +65,10 @@ func (client *Client) Start() {
 	if downModules[0] != "" {
 		moduleWithReplaces, err := utils.GetModuleWithReplaces(goModContent, downModules, downModulesDir)
 		if err != nil {
-			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+			utils.LogErrorForModuleFatal("Error", err, module)
 		}
 		if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithReplaces), 0777); err != nil {
-			log.Fatal("Error", rz.String("System", "Client"), rz.Err(err), rz.String("Module", module))
+			utils.LogErrorForModuleFatal("Error", err, module)
 		}
 	}
 
@@ -81,7 +81,7 @@ func (client *Client) Start() {
 	redis.Connect()
 
 	// Register the module
-	log.Info("Registering module", rz.String("Module", module))
+	utils.LogForModule("Registering module", module)
 	redis.PublishWithTimestamp(client.RedisSuffixUpRegistered, module)
 
 	// Unregister the module on interrupt signal
@@ -90,21 +90,21 @@ func (client *Client) Start() {
 	go func() {
 		<-interrupt
 
-		log.Info("Unregistering module", rz.String("Module", module))
+		utils.LogForModule("Unregistering module", module)
 		redis.PublishWithTimestamp(client.RedisSuffixUpUnRegistered, module)
 
-		log.Info("Cleaning up", rz.String("Module", module), rz.String("ModuleFile", client.PipelineUpFileMod))
+		utils.LogForModule("Cleaning up", module)
 
 		// Remove the added replace directives. Don't run if no pull modules have been specified.
 		if downModules[0] != "" {
 			rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
 			if err != nil {
-				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+				utils.LogErrorFatal("Error", err)
 			}
 			goModContent := string(rawGoModContent)
 			moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
 			if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777); err != nil {
-				log.Fatal("Error", rz.String("System", "Client"), rz.Err(err))
+				utils.LogErrorFatal("Error", err)
 			}
 		}
 
@@ -153,7 +153,7 @@ func (client *Client) Start() {
 
 	// Run the pipeline once. If there are errors, don't exit.
 	if err := pipeline.RunAll(); err != nil {
-		log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
+		utils.LogErrorForModuleFatal("Error", err, module)
 	}
 
 	// Setup worker
@@ -183,14 +183,14 @@ func (client *Client) Start() {
 
 	// Register the folder watcher's event handlers
 	if err := folderWatcher.Start(func(err error) {
-		log.Fatal("Error", rz.Err(err))
+		utils.LogErrorFatal("Error", err)
 	}, func(event watcher.Event) {
 		// Run the pipeline again on every file change. If there are errors, don't exit.
 		if err := pipeline.RunAll(); err != nil {
-			log.Error("Error", rz.String("System", "Client"), rz.String("Module", module), rz.Err(err))
+			utils.LogErrorForModule("Error", err, module)
 		}
 	}); err != nil {
-		log.Fatal("Error", rz.Err(err))
+		utils.LogErrorFatal("Error", err)
 	}
 
 	// Start the main loop
@@ -198,18 +198,18 @@ func (client *Client) Start() {
 		select {
 		// If there are errors, log the errors and exit
 		case err := <-pipelineUpdateWorkerErrors:
-			log.Fatal("Error", rz.String("System", "PipelineUpdateWorker"), rz.Err(err))
+			log.Fatal("Error", rz.String("system", "PipelineUpdateWorker"), rz.Err(err))
 		case event := <-pipelineUpdateWorkerEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("System", "PipelineUpdateWorker"), rz.String("EventMessage", event.Message))
+				log.Info("Started", rz.String("system", "PipelineUpdateWorker"), rz.String("eventMessage", event.Message))
 			case 1:
-				log.Info("Request", rz.String("System", "PipelineUpdateWorker"), rz.String("EventMessage", event.Message))
+				log.Info("Request", rz.String("system", "PipelineUpdateWorker"), rz.String("eventMessage", event.Message))
 			case 2:
-				log.Info("Stopped", rz.String("System", "PipelineUpdateWorker"), rz.String("EventMessage", event.Message))
+				log.Info("Stopped", rz.String("system", "PipelineUpdateWorker"), rz.String("eventMessage", event.Message))
 				return
 			default:
-				log.Fatal("Unknown event code", rz.String("System", "GitHTTPWorker"), rz.Int("EventCode", event.Code), rz.String("StatusMessage", event.Message))
+				log.Fatal("Unknown event code", rz.String("system", "GitHTTPWorker"), rz.Int("eventCode", event.Code), rz.String("StatusMessage", event.Message))
 			}
 		}
 	}

@@ -17,12 +17,12 @@ var InstallCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if err := platform.Assets.Build.StartChart(platform.Platform, platform.ChartProfiles.Production); err != nil {
-				utils.PipeLogErrorFatalWithProfile("Could not install profile", err, platform.Platform, platform.ChartProfiles.Production)
+				utils.LogErrorFatalWithProfile("Could not install profile", err, platform.Platform, platform.ChartProfiles.Production)
 			}
 		}
 	},

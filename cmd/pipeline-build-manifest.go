@@ -11,7 +11,7 @@ var PipelineBuildManifestCmd = &cobra.Command{
 	Short: "Build manifest",
 	Run: func(cmd *cobra.Command, args []string) {
 		if output, err := Dibs.BuildDockerManifest(viper.GetString(PlatformKey)); err != nil {
-			utils.PipeLogErrorFatalNonPlatformSpecific("Could not build manifest", err, output)
+			utils.LogErrorFatal("Could not build manifest", err, output)
 		}
 	},
 }

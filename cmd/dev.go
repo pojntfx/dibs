@@ -17,12 +17,12 @@ var DevCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if err := platform.Assets.Build.DevChart(platform.Platform, platform.ChartProfiles.Development); err != nil {
-				utils.PipeLogErrorFatalWithProfile("Could not dev on profile", err, platform.Platform, platform.ChartProfiles.Development)
+				utils.LogErrorFatalWithProfile("Could not dev on profile", err, platform.Platform, platform.ChartProfiles.Development)
 			}
 		}
 	},

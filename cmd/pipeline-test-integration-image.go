@@ -14,19 +14,19 @@ var PipelineTestIntegrationImageCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if viper.GetString(ExecutorKey) == ExecutorDocker {
 				if output, err := platform.Tests.Integration.Image.BuildImage(platform.Platform); err != nil {
-					utils.PipeLogErrorFatal("Could not build image integration test image", err, platform.Platform, output)
+					utils.LogErrorFatalPlatformSpecific("Could not build image integration test image", err, platform.Platform, output)
 				}
 				output, err := platform.Tests.Integration.Image.StartImage(platform.Platform)
-				utils.PipeLogErrorInfo("Image integration test ran in Docker", err, platform.Platform, output)
+				utils.LogErrorInfo("Image integration test ran in Docker", err, platform.Platform, output)
 			} else {
 				output, err := platform.Tests.Integration.Image.Start(platform.Platform)
-				utils.PipeLogErrorInfo("Image integration test ran", err, platform.Platform, output)
+				utils.LogErrorInfo("Image integration test ran", err, platform.Platform, output)
 			}
 		}
 	},

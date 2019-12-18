@@ -6,8 +6,6 @@ import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"strings"
 )
 
@@ -61,18 +59,18 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(PlatformKey, RootCmd.PersistentFlags().Lookup(platformFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(ExecutorKey, RootCmd.PersistentFlags().Lookup(executorFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(DibsFileKey, RootCmd.PersistentFlags().Lookup(dibsFileFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindEnv(PlatformKey, PlatformEnvDocker); err != nil {
-		log.Fatal("Could not bind key", rz.Err(err))
+		utils.LogError("Could not bind key", err)
 	}
 
 	viper.AutomaticEnv()
@@ -80,7 +78,7 @@ func init() {
 
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		log.Fatal("Could not start root command", rz.Err(err))
+		utils.LogErrorFatal("Could not start root command", err)
 	}
 }
 

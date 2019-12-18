@@ -17,12 +17,12 @@ var UninstallCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if err := platform.Assets.Build.CleanStartedChart(platform.Platform, platform.ChartProfiles.Production); err != nil {
-				utils.PipeLogErrorFatalWithProfile("Could not uninstall profile", err, platform.Platform, platform.ChartProfiles.Production)
+				utils.LogErrorFatalWithProfile("Could not uninstall profile", err, platform.Platform, platform.ChartProfiles.Production)
 			}
 		}
 	},

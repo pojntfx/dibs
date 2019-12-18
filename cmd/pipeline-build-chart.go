@@ -11,7 +11,7 @@ var PipelineBuildChartCmd = &cobra.Command{
 	Short: "Build chart",
 	Run: func(cmd *cobra.Command, args []string) {
 		if output, err := Dibs.BuildHelmChart(viper.GetString(PlatformKey)); err != nil {
-			utils.PipeLogErrorFatalNonPlatformSpecific("Could not build chart", err, output)
+			utils.LogErrorFatal("Could not build chart", err, output)
 		}
 	},
 }

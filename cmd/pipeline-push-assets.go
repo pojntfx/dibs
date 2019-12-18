@@ -15,12 +15,12 @@ var PipelinePushAssetsCmd = &cobra.Command{
 
 		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
 		if err != nil {
-			utils.PipeLogErrorFatalPlatformNotFound(platforms, err)
+			utils.LogErrorFatalPlatformNotFound(platforms, err)
 		}
 
 		for _, platform := range platforms {
 			if output, err := platform.Assets.Push(platform.Platform, strings.Split(viper.GetString(PushAssetsVersionKey), " "), viper.GetString(PushAssetsGitHubTokenKey)); err != nil {
-				utils.PipeLogErrorFatal("Could not push assets", err, platform.Platform, output)
+				utils.LogErrorFatalPlatformSpecific("Could not push assets", err, platform.Platform, output)
 			}
 		}
 	},
@@ -41,10 +41,10 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(PushAssetsVersionKey, PipelinePushAssetsCmd.PersistentFlags().Lookup(versionFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(PushAssetsGitHubTokenKey, PipelinePushAssetsCmd.PersistentFlags().Lookup(githubTokenFlag)); err != nil {
-		utils.CmdLogErrorCouldNotBindFlag(err)
+		utils.LogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()
