@@ -8,10 +8,10 @@ import (
 
 // Redis is a configured Redis instance holder
 type Redis struct {
-	client   *redis.Client
-	Addr     string
-	Password string
-	Prefix   string
+	client   *redis.Client // Internal Redis client
+	Addr     string        // Address of the Redis server to use
+	Password string        // Password to use to connect to the Redis server; "" means no password
+	Prefix   string        // Redis channel prefix
 }
 
 // Connect creates a new Redis client

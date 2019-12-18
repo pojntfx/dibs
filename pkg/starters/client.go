@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-// Client is a client for dibs server
+// Client is a client for the sync server
 type Client struct {
 	PipelineUpFileMod      string // Go module file of the module to push
 	PipelineDownModules    string // Comma-separated list of the names of the modules to pull
@@ -43,7 +43,7 @@ type Client struct {
 	GitUpCommitMessage string // Message for Git commits
 }
 
-// Start starts the client
+// Start starts the sync client
 func (client *Client) Start() {
 	// Get the name of the module that is to be pushed
 	rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)

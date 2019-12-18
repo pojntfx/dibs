@@ -44,7 +44,7 @@ Available Commands:
   dev         Develop the project
   help        Help about any command
   install     Install and start the project
-  pipeline    Pipeline building blocks
+  pipeline    Individual pipeline building blocks
   uninstall   Stop and uninstall the project
 
 Flags:
