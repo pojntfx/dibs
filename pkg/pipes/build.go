@@ -22,6 +22,7 @@ const (
 	CommandHelm     = "helm"
 	CommandSkaffold = "skaffold"
 	CommandGHR      = "ghr"
+	CommandCR       = "cr"
 
 	TargetPlatformEnvKey = "TARGETPLATFORM"
 )
@@ -77,6 +78,10 @@ func (build *Build) execSkaffold(platform string, args ...string) error {
 
 func (build *Build) execGHR(platform string, args ...string) (string, error) {
 	return build.exec(platform, append([]string{CommandGHR}, args...)...)
+}
+
+func (build *Build) execCR(platform string, args ...string) (string, error) {
+	return build.exec(platform, append([]string{CommandCR}, args...)...)
 }
 
 func (build *Build) execString(platform string, command string) (string, error) {

@@ -47,7 +47,7 @@ func (metadata *Git) PushModule(pushDir string) error {
 		return err
 	}
 
-	if _, err = wt.Commit(WithTimestamp(metadata.CommitMessage), &git.CommitOptions{
+	if _, err = wt.Commit(metadata.CommitMessage, &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  metadata.UserName,
 			Email: metadata.UserEmail,

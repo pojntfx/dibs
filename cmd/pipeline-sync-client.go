@@ -55,7 +55,7 @@ var PipelineSyncClientCmd = &cobra.Command{
 				GitUpBaseURL:       viper.GetString(GoGitBaseUrlKey),
 				GitUpUserName:      GitUpUserName,
 				GitUpUserEmail:     GitUpUserEmail,
-				GitUpCommitMessage: GitUpCommitMessage,
+				GitUpCommitMessage: GitUpCommitMessageUpSynced,
 			}
 
 			client.Start()

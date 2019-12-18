@@ -2,9 +2,9 @@ manifest:
   tag: pojntfx/dibs:latest
 chart:
   srcDir: ./charts/dibs
-  distDir: .bin
+  distDir: .bin/chart
   cleanGlobs:
-    - .bin/dibs-*.tgz
+    - .bin/chart/dibs-*.tgz
     - ./charts/dibs/charts
 platforms:
   - platform: linux/amd64

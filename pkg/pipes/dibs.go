@@ -2,6 +2,7 @@ package pipes
 
 import (
 	"errors"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"os"
 	"path/filepath"
 )
@@ -68,4 +69,27 @@ func (dibs *Dibs) GetPlatforms(wantedPlatform string, all bool) ([]Platform, err
 	}
 
 	return []Platform{}, errors.New("platform not found")
+}
+
+func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMessage, githubUsername, githubToken, githubRepoName, githubRepoURL, githubPagesUrl string, pushDir []string) (string, error) {
+	if output, err := dibs.Platforms[0].Assets.Build.execCR(platform, "upload", "-o", githubUsername, "-t", githubToken, "-r", githubRepoName, "-p", dibs.Chart.DistDir); err != nil {
+		return output, err
+	}
+
+	git := utils.GitAdvanced{
+		UserName: gitUserName,
+		WorkDir:  filepath.Join(pushDir...),
+		Token:    githubToken,
+	}
+
+	if err := git.Clone(githubRepoURL); err != nil {
+		return "", err
+	}
+
+	output, err := dibs.Platforms[0].Assets.Build.execCR(platform, "index", "-o", githubUsername, "-t", githubToken, "-r", githubRepoName, "-p", dibs.Chart.DistDir, "-i", filepath.Join(append(pushDir, "index.yaml")...), "-c", githubPagesUrl)
+	if err != nil {
+		return output, err
+	}
+
+	return output, git.AddCommitAndPush(gitUserEmail, gitCommitMessage)
 }
