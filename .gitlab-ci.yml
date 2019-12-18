@@ -53,6 +53,9 @@
 stages:
   - unitTest
   - integrationTest
+  - buildAndPushImage
+  - buildAndPushManifestAndAssets
+#  - buildAndPushChart
 
 unitTestLang:
   <<: *dibsJob
@@ -84,3 +87,41 @@ integrationTestChart:
   stage: integrationTest
   script:
     - dibs pipeline test integration chart -e docker
+
+buildAndPushImage:
+  <<: *dibsJob
+  stage: buildAndPushImage
+  script:
+    - dibs pipeline build image
+    - dibs pipeline push image
+
+buildAndPushManifest:
+  <<: *dibsJob
+  stage: buildAndPushManifestAndAssets
+  script:
+    - dibs pipeline build manifest
+    - dibs pipeline push manifest
+
+buildAndPushAssets:
+  <<: *dibsJob
+  stage: buildAndPushManifestAndAssets
+  script:
+    - dibs pipeline build assets -e docker
+    - dibs pipeline push assets
+  artifacts:
+    name: prebuiltBinaries
+    paths:
+      - .bin
+    expire_in: 1 month
+
+#buildAndPushChart:
+#  <<: *dibsJob
+#  stage: buildAndPushChart
+#  script:
+#    - dibs pipeline build chart
+#    - dibs pipeline push chart
+#  artifacts:
+#    name: helmChart
+#    paths:
+#      - .bin/chart
+#    expire_in: 1 month
