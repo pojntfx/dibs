@@ -44,29 +44,31 @@ const (
 const (
 	LangKey = "lang"
 
-	SyncRedisUrlKey      = "redis_url"
-	SyncRedisPrefixKey   = "redis_prefix"
-	SyncRedisPasswordKey = "redis_password"
+	SyncKeyPrefix = "sync_"
 
-	SyncClientGoGitBaseUrlKey = LangGo + "_git_base_url"
+	SyncRedisUrlKey      = SyncKeyPrefix + "redis_url"
+	SyncRedisPrefixKey   = SyncKeyPrefix + "redis_prefix"
+	SyncRedisPasswordKey = SyncKeyPrefix + "redis_password"
 
-	SyncClientPipelineUpDirSrcKey   = "dir_src"
-	SyncClientPipelineUpDirPushKey  = "dir_push"
-	SyncClientPipelineUpDirWatchKey = "dir_watch"
+	SyncClientGoGitBaseUrlKey = SyncKeyPrefix + LangGo + "_git_base_url"
 
-	SyncClientGoPipelineUpFileModKey = LangGo + "_modules_file"
+	SyncClientPipelineUpDirSrcKey   = SyncKeyPrefix + "dir_src"
+	SyncClientPipelineUpDirPushKey  = SyncKeyPrefix + "dir_push"
+	SyncClientPipelineUpDirWatchKey = SyncKeyPrefix + "dir_watch"
 
-	SyncClientPipelineUpBuildCommandKey = "cmd_build"
-	SyncClientPipelineUpTestCommandKey  = "cmd_test"
-	SyncClientPipelineUpStartCommandKey = "cmd_start"
+	SyncClientGoPipelineUpFileModKey = SyncKeyPrefix + LangGo + "_modules_file"
 
-	SyncClientPipelineUpRegexIgnoreKey    = "regex_ignore"
-	SyncClientGoPipelineDownModulesKey    = LangGo + "_modules_pull"
-	SyncClientGoPipelineDownDirModulesKey = LangGo + "_dir_pull"
+	SyncClientPipelineUpBuildCommandKey = SyncKeyPrefix + "cmd_build"
+	SyncClientPipelineUpTestCommandKey  = SyncKeyPrefix + "cmd_test"
+	SyncClientPipelineUpStartCommandKey = SyncKeyPrefix + "cmd_start"
 
-	SyncServerGitServerReposDirKey = LangGo + "_dir_repos"
-	SyncServerGitServerHttpPortKey = LangGo + "-port"
-	SyncServerGitServerHttpPathKey = LangGo + "-path"
+	SyncClientPipelineUpRegexIgnoreKey    = SyncKeyPrefix + "regex_ignore"
+	SyncClientGoPipelineDownModulesKey    = SyncKeyPrefix + LangGo + "_modules_pull"
+	SyncClientGoPipelineDownDirModulesKey = SyncKeyPrefix + LangGo + "_dir_pull"
+
+	SyncServerGitServerReposDirKey = SyncKeyPrefix + LangGo + "_dir_repos"
+	SyncServerGitServerHttpPortKey = SyncKeyPrefix + LangGo + "-port"
+	SyncServerGitServerHttpPathKey = SyncKeyPrefix + LangGo + "-path"
 
 	TestIntegrationChartKubernetesIpKey = "kubernetes_ip"
 
