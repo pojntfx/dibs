@@ -56,7 +56,7 @@ func (pipeline *Pipeline) RunAll() error {
 		return err
 	}
 
-	if err := pipeline.Git.PushModule(pipeline.PushDir); err != nil {
+	if err := pipeline.Git.PushToRemote(pipeline.PushDir); err != nil {
 		return err
 	}
 	pipeline.Redis.PublishWithTimestamp(pipeline.ModulePushedRedisSuffix, pipeline.Module)
