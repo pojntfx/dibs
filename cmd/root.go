@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"github.com/pojntfx/dibs/pkg/pipes"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/z0mbie42/rz-go/v2"
@@ -60,14 +61,14 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(PlatformKey, RootCmd.PersistentFlags().Lookup(platformFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(ExecutorKey, RootCmd.PersistentFlags().Lookup(executorFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(DibsFileKey, RootCmd.PersistentFlags().Lookup(dibsFileFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindEnv(PlatformKey, PlatformEnvDocker); err != nil {

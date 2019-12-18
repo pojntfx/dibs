@@ -4,8 +4,6 @@ import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"net"
 	"strings"
 )
@@ -62,7 +60,7 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(TestIntegrationChartKubernetesIpKey, PipelineTestIntegrationChartCmd.PersistentFlags().Lookup(kubernetesIpFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()

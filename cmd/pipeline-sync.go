@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"errors"
+	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"strings"
 )
 
@@ -47,17 +46,17 @@ func init() {
 	viper.SetEnvPrefix(EnvPrefix)
 
 	if err := viper.BindPFlag(LangKey, PipelineSyncCmd.PersistentFlags().Lookup(langFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	if err := viper.BindPFlag(SyncRedisUrlKey, PipelineSyncCmd.PersistentFlags().Lookup(redisUrlFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncRedisPrefixKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPrefixFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncRedisPasswordKey, PipelineSyncCmd.PersistentFlags().Lookup(redisPasswordFlag)); err != nil {
-		log.Fatal("Could not bind flag", rz.Err(err))
+		utils.CmdLogErrorCouldNotBindFlag(err)
 	}
 
 	viper.AutomaticEnv()
