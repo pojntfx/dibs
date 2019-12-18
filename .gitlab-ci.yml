@@ -1,80 +1,59 @@
-.dindMageJob: &dindMageJob
-        image: docker:stable
-        services:
-                - name: docker:dind
-                  command:
-                          - "--experimental"
-        variables:
-                DOCKER_HOST: tcp://docker:2375/
-                DOCKER_BUILDKIT: 1
-                DOCKER_CLI_EXPERIMENTAL: enabled
-        before_script:
-                - apk add curl go git musl-dev
-                - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-                - curl -L https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64 -o docker-buildx
-                - chmod +x docker-buildx
-                - mkdir -p ~/.docker/cli-plugins/
-                - cp docker-buildx ~/.docker/cli-plugins/
-                - docker buildx create --name dibs
-                - docker buildx use dibs
-                - docker buildx inspect --bootstrap
-                - curl -L https://github.com/magefile/mage/releases/download/v1.9.0/mage_1.9.0_Linux-64bit.tar.gz | tar -zvxf - mage
-                - chmod +x mage
-                - mv mage /usr/local/bin
-                - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
-                - chmod +x ghr_v0.13.0_linux_amd64/ghr
-                - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
-                - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
+.dibsJob: &dibsJob
+  image: docker:stable
+  services:
+    - name: docker:dind
+      command:
+        - "--experimental"
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_BUILDKIT: 1
+    DOCKER_CLI_EXPERIMENTAL: enabled
+  before_script:
+    # Install curl
+    - apk add curl
+    # Install kubectl
+    - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x kubectl
+    - sudo mv kubectl /usr/local/bin/kubectl
+    # Install Helm
+    - curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >./helm
+    - chmod +x helm
+    - mv helm /usr/local/bin/helm
+    - helm init --client-only
+    # Install Skaffold
+    - curl -L https://storage.googleapis.com/skaffold/builds/latest/skaffold-linux-amd64 >skaffold
+    - chmod +x skaffold
+    - mv skaffold /usr/local/bin/skaffold
+    # Install ghr
+    - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
+    - chmod +x ghr_v0.13.0_linux_amd64/ghr
+    - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
+    # Install Chart Releaser
+    - curl -L https://github.com/helm/chart-releaser/releases/download/v0.2.3/chart-releaser_0.2.3_darwin_amd64.tar.gz | tar -zvxf - chart-releaser_0.2.3_linux_amd64/cr
+    - chmod +x chart-releaser_0.2.3_linux_amd64/cr
+    - mv chart-releaser_0.2.3_linux_amd64/cr /usr/local/bin
+    # Install buildx
+    - curl -Lo docker-buildx https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
+    - chmod +x docker-buildx
+    - mkdir -p ~/.docker/cli-plugins/
+    - cp docker-buildx ~/.docker/cli-plugins/
+    - docker buildx create --name dibs
+    - docker buildx use dibs
+    - docker buildx inspect --bootstrap
+    # Install qemu-user-static
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # Login to Docker Hub
+    - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
+    # Install dibs
+    - curl -Lo dibs https://github.com/pojntfx/dibs/releases/latest/download/dibs-linux-amd64
+    - chmod +x dibs
+    - cp dibs /usr/local/dibs
 
 stages:
-        - test
-        - dockerBuildPushAll
-        - dockerManifestBinaryBuildPushAll
+  - test
 
-testUnitInDockerAll:
-        <<: *dindMageJob
-        stage: test
-        script:
-                - mage testUnitInDockerAll
-
-testIntegrationGoInDockerAll:
-        <<: *dindMageJob
-        stage: test
-        script:
-                - mage testIntegrationGoInDockerAll
-
-testIntegrationBinaryInDockerAll:
-        <<: *dindMageJob
-        stage: test
-        script:
-                - mage testIntegrationBinaryInDockerAll
-
-testIntegrationDockerInDockerAll:
-        <<: *dindMageJob
-        stage: test
-        script:
-                - mage testIntegrationDockerAll
-
-buildPushDockerAll:
-        <<: *dindMageJob
-        stage: dockerBuildPushAll
-        script:
-                - mage buildDockerAll pushDockerImageAll
-
-getPushBinaryFromDockerImageAll:
-        <<: *dindMageJob
-        stage: dockerManifestBinaryBuildPushAll
-        script:
-                - mage getBinaryFromDockerImageAll
-                - ghr -replace -t ${GITHUB_RELEASES_TOKEN} ${GITHUB_RELEASES_VERSION} .bin
-        artifacts:
-                name: binaries
-                paths:
-                        - .bin
-                expire_in: 120 day
-
-buildPushDockerManifest:
-        <<: *dindMageJob
-        stage: dockerManifestBinaryBuildPushAll
-        script:
-                - mage buildDockerManifest pushDockerManifest
+unitTestLang:
+  <<: *dibsJob
+  stage: test
+  script:
+    - dibs pipeline test unit lang -e docker
