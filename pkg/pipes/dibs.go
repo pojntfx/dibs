@@ -76,10 +76,12 @@ func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMe
 		return output, err
 	}
 
-	git := utils.GitAdvanced{
-		UserName: gitUserName,
-		WorkDir:  filepath.Join(pushDir...),
-		Token:    githubToken,
+	git := utils.Git{
+		UserName:      gitUserName,
+		UserEmail:     gitUserEmail,
+		CommitMessage: gitCommitMessage,
+		WorkDir:       filepath.Join(pushDir...),
+		Token:         githubToken,
 	}
 
 	if err := git.Clone(githubRepoURL); err != nil {
@@ -91,5 +93,5 @@ func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMe
 		return output, err
 	}
 
-	return output, git.AddCommitAndPush(gitUserEmail, gitCommitMessage)
+	return output, git.AddCommitAndPush()
 }
