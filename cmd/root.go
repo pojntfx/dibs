@@ -12,7 +12,17 @@ import (
 
 var RootCmd = &cobra.Command{
 	Use:   "dibs",
-	Short: "System for distributed polyglot, multi-module and multi-architecture development",
+	Short: "System for distributed polyglot, multi-module, multi-architecture development and CI/CD",
+	Long: `System for distributed polyglot, multi-module, multi-architecture development and CI/CD
+
+For full functionality, it requires the following binaries to be in PATH:
+
+- "docker"	(see https://www.docker.com/)
+- "kubectl"	(see https://kubernetes.io/docs/reference/kubectl/)
+- "helm"	(see https://helm.sh/)
+- "skaffold"	(see https://skaffold.dev/)
+- "ghr"		(see https://github.com/tcnksm/ghr)
+- "cr"		(see https://github.com/helm/chart-releaser)`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		executor := viper.GetString(ExecutorKey)
 
