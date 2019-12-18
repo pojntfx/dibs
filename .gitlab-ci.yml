@@ -16,7 +16,7 @@
     - curl -Lo docker-buildx https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
     - chmod +x docker-buildx
     - mkdir -p ~/.docker/cli-plugins/
-    - cp docker-buildx ~/.docker/cli-plugins/
+    - mv docker-buildx ~/.docker/cli-plugins/
     - docker buildx create --name dibs
     - docker buildx use dibs
     - docker buildx inspect --bootstrap
@@ -38,23 +38,30 @@
     # Install ghr
     - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
     - chmod +x ghr_v0.13.0_linux_amd64/ghr
-    - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
+    - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin/ghr
     # Install Chart Releaser
     - curl -L https://github.com/helm/chart-releaser/releases/download/v0.2.3/chart-releaser_0.2.3_linux_amd64.tar.gz | tar -zvxf - cr
     - chmod +x cr
-    - mv cr /usr/local/bin
+    - mv cr /usr/local/bin/cr
     # Install dibs
     - curl -Lo dibs https://github.com/pojntfx/dibs/releases/latest/download/dibs-linux-amd64
     - chmod +x dibs
-    - cp dibs /usr/local/dibs
+    - mv dibs /usr/local/bin/dibs
     # Login to Docker Hub
     - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
-  - test
+  - unitTest
+  - integrationTest
 
 unitTestLang:
   <<: *dibsJob
-  stage: test
+  stage: unitTest
   script:
     - dibs pipeline test unit lang -e docker
+
+integrationTestLang:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs pipeline test integration lang -e docker
