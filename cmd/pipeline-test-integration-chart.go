@@ -15,7 +15,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 	Short: "Integration test the chart",
 	Run: func(cmd *cobra.Command, args []string) {
 		platformFromConfig := viper.GetString(PlatformKey)
-		viperIP := viper.GetString(KubernetesIpKey)
+		viperIP := viper.GetString(TestIntegrationChartKubernetesIpKey)
 
 		rawIP := net.ParseIP(viperIP)
 		if rawIP == nil {
@@ -54,14 +54,14 @@ func init() {
 	var (
 		kubernetesIp string
 
-		kubernetesIpFlag = strings.Replace(KubernetesIpKey, "_", "-", -1)
+		kubernetesIpFlag = strings.Replace(TestIntegrationChartKubernetesIpKey, "_", "-", -1)
 	)
 
-	PipelineTestIntegrationChartCmd.PersistentFlags().StringVarP(&kubernetesIp, kubernetesIpFlag, "i", KubernetesIpDefault, "IP of the Kubernetes cluster to create if running in Docker (often the host machine's IP)")
+	PipelineTestIntegrationChartCmd.PersistentFlags().StringVarP(&kubernetesIp, kubernetesIpFlag, "i", TestIntegrationChartKubernetesIpDefault, "IP of the Kubernetes cluster to create if running in Docker (often the host machine's IP)")
 
 	viper.SetEnvPrefix(EnvPrefix)
 
-	if err := viper.BindPFlag(KubernetesIpKey, PipelineTestIntegrationChartCmd.PersistentFlags().Lookup(kubernetesIpFlag)); err != nil {
+	if err := viper.BindPFlag(TestIntegrationChartKubernetesIpKey, PipelineTestIntegrationChartCmd.PersistentFlags().Lookup(kubernetesIpFlag)); err != nil {
 		log.Fatal("Could not bind flag", rz.Err(err))
 	}
 
