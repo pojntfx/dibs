@@ -64,6 +64,6 @@ func (assets *Assets) Clean() error {
 }
 
 // Push pushes the assets to GitHub releases
-func (assets *Assets) Push(platform string, version []string, token string) (string, error) {
-	return assets.Build.execGHR(platform, append([]string{"-replace", "-t", token}, append(version, assets.DistPath)...)...)
+func (assets *Assets) Push(platform string, version []string, githubToken, githubUserName, githubRepository string) (string, error) {
+	return assets.Build.execGHR(platform, append([]string{"-replace", "-t", githubToken, "-u", githubUserName, "-r", githubRepository}, append(version, assets.DistPath)...)...)
 }
