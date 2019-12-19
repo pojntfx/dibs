@@ -209,7 +209,7 @@ func (client *Client) Start() {
 				log.Info("Stopped", rz.String("system", "PipelineUpdateWorker"), rz.String("eventMessage", event.Message))
 				return
 			default:
-				log.Fatal("Unknown event code", rz.String("system", "GitHTTPWorker"), rz.Int("eventCode", event.Code), rz.String("StatusMessage", event.Message))
+				log.Fatal("Unknown event code", rz.String("system", "GitHTTPWorker"), rz.Int("eventCode", event.Code), rz.String("statusMessage", event.Message))
 			}
 		}
 	}
