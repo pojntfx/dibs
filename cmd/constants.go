@@ -80,8 +80,10 @@ const (
 
 	PushAssetsKeyPrefix = "push_assets_"
 
-	PushAssetsVersionKey     = PushAssetsKeyPrefix + "version"
-	PushAssetsGitHubTokenKey = PushAssetsKeyPrefix + "github_token"
+	PushAssetsVersionKey        = PushAssetsKeyPrefix + "version"
+	PushAssetsGitHubTokenKey    = PushAssetsKeyPrefix + "github_token"
+	PushAssetsGithubUserNameKey = PushAssetsKeyPrefix + "github_user_name"
+	PushAssetsGithubRepoNameKey = PushAssetsKeyPrefix + "github_repo_name"
 
 	PushChartKeyPrefix = "push_chart_"
 
