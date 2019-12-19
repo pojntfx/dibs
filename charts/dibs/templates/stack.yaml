@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   name: dibs{{ if .Values.meta.dev }}-dev{{ end }}
 data:
-  DIBS_REDIS_URL: {{ .Release.Name }}-redis-master:{{ .Values.redis.redisPort }}
-  DIBS_REDIS_PREFIX: {{ .Values.redis.prefix }}
-  DIBS_REDIS_PASSWORD: {{ .Values.redis.password }}
+  DIBS_SYNC_REDIS_URL: {{ .Release.Name }}-redis-master:{{ .Values.redis.redisPort }}
+  DIBS_SYNC_REDIS_PREFIX: {{ .Values.redis.prefix }}
+  DIBS_SYNC_REDIS_PASSWORD: {{ .Values.redis.password }}
   TARGETPLATFORM: {{ .Values.resources.platform }}
 
 ---
