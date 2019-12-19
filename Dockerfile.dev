@@ -29,4 +29,6 @@ COPY ./.git ./.git
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 COPY --from=build /app/.bin ./.bin
 
+EXPOSE 32000
+
 CMD dibs pipeline sync server & dibs pipeline sync client

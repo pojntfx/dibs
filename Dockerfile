@@ -21,4 +21,5 @@ COPY ./.dibs.yml ./.dibs.yml
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 
 EXPOSE 32000
+
 CMD dibs pipeline sync server
