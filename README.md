@@ -4,6 +4,8 @@ System for distributed polyglot, multi-module, multi-architecture development an
 
 [![pipeline status](https://gitlab.com/pojntfx/dibs/badges/master/pipeline.svg)](https://gitlab.com/pojntfx/dibs/commits/master)
 
+[![introduction video](https://img.youtube.com/vi/fUfW-z6fWZs/maxresdefault.jpg)](https://youtu.be/fUfW-z6fWZs)
+
 ## Installation
 
 ### Prebuilt Binaries
