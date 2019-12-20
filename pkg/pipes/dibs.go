@@ -5,6 +5,7 @@ import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 // Dibs is a distributed build system
@@ -101,4 +102,25 @@ func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMe
 	}
 
 	return output, git.AddCommitAndPush()
+}
+
+// RunForPlatforms runs a function for specified platforms
+func (dibs *Dibs) RunForPlatforms(platformToRunFor string, all bool, funcToRun func(platform Platform)) {
+	platforms, err := dibs.GetPlatforms(platformToRunFor, all)
+	if err != nil {
+		utils.LogErrorFatalPlatformNotFound(platforms, err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(platforms))
+
+	for _, platform := range platforms {
+		go func(platform2 Platform) {
+			funcToRun(platform2)
+
+			wg.Done()
+		}(platform)
+	}
+
+	wg.Wait()
 }
