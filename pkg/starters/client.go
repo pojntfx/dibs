@@ -136,14 +136,16 @@ func (client *Client) Start() {
 	go func() {
 		<-interrupt
 
-		utils.LogForModule("Stopping module", module)
-		processGroupId, err := syscall.Getpgid(pipeline.StartCommandState.Process.Pid)
-		if err != nil {
-			utils.LogErrorFatalCouldStopModule(err)
-		}
+		if pipeline.StartCommandState != nil {
+			utils.LogForModule("Stopping module", module)
+			processGroupId, err := syscall.Getpgid(pipeline.StartCommandState.Process.Pid)
+			if err != nil {
+				utils.LogErrorFatalCouldStopModule(err)
+			}
 
-		if err := syscall.Kill(-processGroupId, syscall.SIGKILL); err != nil {
-			utils.LogErrorFatalCouldStopModule(err)
+			if err := syscall.Kill(-processGroupId, syscall.SIGKILL); err != nil {
+				utils.LogErrorFatalCouldStopModule(err)
+			}
 		}
 
 		utils.LogForModule("Unregistering module", module)

@@ -16,3 +16,7 @@ redis:
   prefix: dibs
   redisPort: 6379
   password: dibsPass
+  master:
+    service:
+      type: NodePort
+      nodePort: 32002
