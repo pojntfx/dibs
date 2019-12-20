@@ -59,9 +59,10 @@ const (
 
 	SyncClientGoPipelineUpFileModKey = SyncKeyPrefix + LangGo + "_modules_file"
 
-	SyncClientPipelineUpBuildCommandKey = SyncKeyPrefix + "cmd_build"
-	SyncClientPipelineUpTestCommandKey  = SyncKeyPrefix + "cmd_test"
-	SyncClientPipelineUpStartCommandKey = SyncKeyPrefix + "cmd_start"
+	SyncClientPipelineUpBuildCommandKey           = SyncKeyPrefix + "cmd_build"
+	SyncClientPipelineUpUnitTestCommandKey        = SyncKeyPrefix + "cmd_unit_test"
+	SyncClientPipelineUpIntegrationTestCommandKey = SyncKeyPrefix + "cmd_integration_test"
+	SyncClientPipelineUpStartCommandKey           = SyncKeyPrefix + "cmd_start"
 
 	SyncClientPipelineUpRegexIgnoreKey    = SyncKeyPrefix + "regex_ignore"
 	SyncClientGoPipelineDownModulesKey    = SyncKeyPrefix + LangGo + "_modules_pull"

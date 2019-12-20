@@ -5,7 +5,10 @@ type Platform struct {
 	Platform      string // The Docker platform string (i.e. linux/amd64)
 	ChartProfiles ChartProfiles
 	Assets        Assets
-	Tests         struct { // Tests are the tests for the specific platform
+	Starters      struct {
+		Lang Build
+	}
+	Tests struct { // Tests are the tests for the specific platform
 		Unit struct { // Unit tests for the platform
 			Lang Build // Unit test using the toolchain
 		}

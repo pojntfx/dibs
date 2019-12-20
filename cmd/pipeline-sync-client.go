@@ -29,16 +29,17 @@ var PipelineSyncClientCmd = &cobra.Command{
 			}
 
 			client := starters.Client{
-				PipelineUpFileMod:      viper.GetString(SyncClientGoPipelineUpFileModKey),
-				PipelineDownModules:    viper.GetString(SyncClientGoPipelineDownModulesKey),
-				PipelineDownDirModules: viper.GetString(SyncClientGoPipelineDownDirModulesKey),
-				PipelineUpBuildCommand: strings.Replace(viper.GetString(SyncClientPipelineUpBuildCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
-				PipelineUpStartCommand: strings.Replace(viper.GetString(SyncClientPipelineUpStartCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
-				PipelineUpTestCommand:  strings.Replace(viper.GetString(SyncClientPipelineUpTestCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
-				PipelineUpDirSrc:       viper.GetString(SyncClientPipelineUpDirSrcKey),
-				PipelineUpDirPush:      viper.GetString(SyncClientPipelineUpDirPushKey),
-				PipelineUpDirWatch:     viper.GetString(SyncClientPipelineUpDirWatchKey),
-				PipelineUpRegexIgnore:  strings.Replace(viper.GetString(SyncClientPipelineUpRegexIgnoreKey), SyncClientIgnoreRegexPlaceholder, ignoreRegex, -1),
+				PipelineUpFileMod:                viper.GetString(SyncClientGoPipelineUpFileModKey),
+				PipelineDownModules:              viper.GetString(SyncClientGoPipelineDownModulesKey),
+				PipelineDownDirModules:           viper.GetString(SyncClientGoPipelineDownDirModulesKey),
+				PipelineUpBuildCommand:           strings.Replace(viper.GetString(SyncClientPipelineUpBuildCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
+				PipelineUpStartCommand:           strings.Replace(viper.GetString(SyncClientPipelineUpStartCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
+				PipelineUpUnitTestCommand:        strings.Replace(viper.GetString(SyncClientPipelineUpUnitTestCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
+				PipelineUpIntegrationTestCommand: strings.Replace(viper.GetString(SyncClientPipelineUpIntegrationTestCommandKey), SyncClientPlatformPlaceholder, viper.GetString(PlatformKey), -1),
+				PipelineUpDirSrc:                 viper.GetString(SyncClientPipelineUpDirSrcKey),
+				PipelineUpDirPush:                viper.GetString(SyncClientPipelineUpDirPushKey),
+				PipelineUpDirWatch:               viper.GetString(SyncClientPipelineUpDirWatchKey),
+				PipelineUpRegexIgnore:            strings.Replace(viper.GetString(SyncClientPipelineUpRegexIgnoreKey), SyncClientIgnoreRegexPlaceholder, ignoreRegex, -1),
 
 				RedisUrl:                  viper.GetString(SyncRedisUrlKey),
 				RedisPrefix:               viper.GetString(SyncRedisPrefixKey),
@@ -72,9 +73,10 @@ func init() {
 
 		goPipelineUpFileMod string
 
-		pipelineUpBuildCommand string
-		pipelineUpTestCommand  string
-		pipelineUpStartCommand string
+		pipelineUpBuildCommand           string
+		pipelineUpUnitTestCommand        string
+		pipelineUpIntegrationTestCommand string
+		pipelineUpStartCommand           string
 
 		pipelineUpRegexIgnore    string
 		goPipelineDownModules    string
@@ -88,9 +90,10 @@ func init() {
 
 		goPipelineUpFileModFlag = strings.Replace(strings.Replace(SyncClientGoPipelineUpFileModKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
-		pipelineUpBuildCommandFlag = strings.Replace(strings.Replace(SyncClientPipelineUpBuildCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
-		pipelineUpTestCommandFlag  = strings.Replace(strings.Replace(SyncClientPipelineUpTestCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
-		pipelineUpStartCommandFlag = strings.Replace(strings.Replace(SyncClientPipelineUpStartCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpBuildCommandFlag           = strings.Replace(strings.Replace(SyncClientPipelineUpBuildCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpUnitTestCommandFlag        = strings.Replace(strings.Replace(SyncClientPipelineUpUnitTestCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpIntegrationTestCommandFlag = strings.Replace(strings.Replace(SyncClientPipelineUpIntegrationTestCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
+		pipelineUpStartCommandFlag           = strings.Replace(strings.Replace(SyncClientPipelineUpStartCommandKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 
 		pipelineUpRegexIgnoreFlag    = strings.Replace(strings.Replace(SyncClientPipelineUpRegexIgnoreKey, SyncKeyPrefix, "", -1), "_", "-", -1)
 		goPipelineDownModulesFlag    = strings.Replace(strings.Replace(SyncClientGoPipelineDownModulesKey, SyncKeyPrefix, "", -1), "_", "-", -1)
@@ -108,8 +111,9 @@ func init() {
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&goPipelineUpFileMod, goPipelineUpFileModFlag, "go.mod", `(--lang "`+LangGo+`" only) Go module file of the module to push`)
 
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpBuildCommand, pipelineUpBuildCommandFlag, os.Args[0]+" --platform "+SyncClientPlatformPlaceholder+" pipeline build assets", "Command to run to build the module. Infers the platform from the parent command by default")
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpTestCommand, pipelineUpTestCommandFlag, os.Args[0]+" --platform "+SyncClientPlatformPlaceholder+" pipeline test unit lang", "Command to run to test the module. Infers the platform from the parent command by default")
-	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpStartCommand, pipelineUpStartCommandFlag, os.Args[0]+" --platform "+SyncClientPlatformPlaceholder+" pipeline test integration assets", "Command to run to start the module. Infers the platform from the parent command by default")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpUnitTestCommand, pipelineUpUnitTestCommandFlag, os.Args[0]+" --platform "+SyncClientPlatformPlaceholder+" pipeline test unit lang", "Command to run to unit test the module. Infers the platform from the parent command by default")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpIntegrationTestCommand, pipelineUpIntegrationTestCommandFlag, os.Args[0]+" --platform "+SyncClientPlatformPlaceholder+" pipeline test integration lang", "Command to run to integration test the module. Infers the platform from the parent command by default")
+	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpStartCommand, pipelineUpStartCommandFlag, os.Args[0]+" --platform "+SyncClientPlatformPlaceholder+" pipeline start lang", "Command to run to start the module. Infers the platform from the parent command by default")
 
 	PipelineSyncClientCmd.PersistentFlags().StringVar(&pipelineUpRegexIgnore, pipelineUpRegexIgnoreFlag, SyncClientIgnoreRegexPlaceholder, "Regular expression for files to ignore. If a dibs configuration file exists, it will infer it from assets.cleanGlob")
 	PipelineSyncClientCmd.PersistentFlags().StringVarP(&goPipelineDownModules, goPipelineDownModulesFlag, "g", "", `(--lang "`+LangGo+`" only) Comma-separated list of the names of the modules to pull`)
@@ -138,7 +142,10 @@ func init() {
 	if err := viper.BindPFlag(SyncClientPipelineUpBuildCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpBuildCommandFlag)); err != nil {
 		utils.LogErrorCouldNotBindFlag(err)
 	}
-	if err := viper.BindPFlag(SyncClientPipelineUpTestCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpTestCommandFlag)); err != nil {
+	if err := viper.BindPFlag(SyncClientPipelineUpUnitTestCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpUnitTestCommandFlag)); err != nil {
+		utils.LogErrorCouldNotBindFlag(err)
+	}
+	if err := viper.BindPFlag(SyncClientPipelineUpIntegrationTestCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpIntegrationTestCommandFlag)); err != nil {
 		utils.LogErrorCouldNotBindFlag(err)
 	}
 	if err := viper.BindPFlag(SyncClientPipelineUpStartCommandKey, PipelineSyncClientCmd.PersistentFlags().Lookup(pipelineUpStartCommandFlag)); err != nil {
