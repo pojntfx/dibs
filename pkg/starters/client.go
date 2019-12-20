@@ -15,16 +15,17 @@ import (
 
 // Client is a client for the sync server
 type Client struct {
-	PipelineUpFileMod      string // Go module file of the module to push
-	PipelineDownModules    string // Comma-separated list of the names of the modules to pull
-	PipelineDownDirModules string // Directory to pull the modules to
-	PipelineUpTestCommand  string // Command to run to test the module
-	PipelineUpBuildCommand string // Command to run to build the module
-	PipelineUpStartCommand string // Command to run to start the module
-	PipelineUpDirSrc       string // Directory in which the source code of the module to push resides
-	PipelineUpDirPush      string // Temporary directory to put the module into before pushing
-	PipelineUpDirWatch     string // Directory to watch for changes
-	PipelineUpRegexIgnore  string // Regular expression for files to ignore
+	PipelineUpFileMod                string // Go module file of the module to push
+	PipelineDownModules              string // Comma-separated list of the names of the modules to pull
+	PipelineDownDirModules           string // Directory to pull the modules to
+	PipelineUpUnitTestCommand        string // Command to run to unit test the module
+	PipelineUpIntegrationTestCommand string // Command to run to integration test the module
+	PipelineUpBuildCommand           string // Command to run to build the module
+	PipelineUpStartCommand           string // Command to run to start the module
+	PipelineUpDirSrc                 string // Directory in which the source code of the module to push resides
+	PipelineUpDirPush                string // Temporary directory to put the module into before pushing
+	PipelineUpDirWatch               string // Directory to watch for changes
+	PipelineUpRegexIgnore            string // Regular expression for files to ignore
 
 	RedisUrl                  string // URL of the Redis instance to use
 	RedisPrefix               string // Redis channel prefix
@@ -122,18 +123,23 @@ func (client *Client) Start() {
 		CommitMessage: client.GitUpCommitMessage,
 	}
 
-	testCommand, buildCommand, startCommand := utils.CommandWithEvent{
-		LogMessage:   "Running test command",
-		ExecLine:     client.PipelineUpTestCommand,
+	unitTestCommand, integrationTestCommand, buildCommand, startCommand := utils.CommandWithEvent{
+		LogMessage:   "Unit testing module",
+		ExecLine:     client.PipelineUpUnitTestCommand,
 		RedisSuffix:  client.RedisSuffixUpTested,
 		RedisMessage: module,
 	}, utils.CommandWithEvent{
-		LogMessage:   "Running build command",
+		LogMessage:   "Integration testing module",
+		ExecLine:     client.PipelineUpIntegrationTestCommand,
+		RedisSuffix:  client.RedisSuffixUpTested,
+		RedisMessage: module,
+	}, utils.CommandWithEvent{
+		LogMessage:   "Building module",
 		ExecLine:     client.PipelineUpBuildCommand,
 		RedisSuffix:  client.RedisSuffixUpBuilt,
 		RedisMessage: module,
 	}, utils.CommandWithEvent{
-		LogMessage:   "Starting start command",
+		LogMessage:   "Starting module",
 		ExecLine:     client.PipelineUpStartCommand,
 		RedisSuffix:  client.RedisSuffixUpStarted,
 		RedisMessage: module,
@@ -144,7 +150,7 @@ func (client *Client) Start() {
 		ModulePushedRedisSuffix: client.RedisSuffixUpPushed,
 		SrcDir:                  client.PipelineUpDirSrc,
 		PushDir:                 client.PipelineUpDirPush,
-		RunCommands:             []utils.CommandWithEvent{testCommand, buildCommand},
+		RunCommands:             []utils.CommandWithEvent{unitTestCommand, integrationTestCommand, buildCommand},
 		StartCommand:            startCommand,
 		StartCommandState:       commandStartState,
 		Git:                     git,

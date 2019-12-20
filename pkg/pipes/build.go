@@ -98,9 +98,19 @@ func (build *Build) execString(platform string, command string) (string, error) 
 	return build.exec(platform, "sh", "-c", command)
 }
 
+// execStringStdoutStderr runs a command with `sh` and prints the output to stdout
+func (build *Build) execStringStdoutStderr(platform string, command string) error {
+	return build.execStdoutStderr(platform, "sh", "-c", command)
+}
+
 // Start starts the build
 func (build *Build) Start(platform string) (string, error) {
 	return build.execString(platform, build.Command)
+}
+
+// StartStdoutStderr starts the build and prints the output to stdout
+func (build *Build) StartStdoutStderr(platform string) error {
+	return build.execStringStdoutStderr(platform, build.Command)
 }
 
 // BuildImage builds the Docker image

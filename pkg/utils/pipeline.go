@@ -32,7 +32,7 @@ type Pipeline struct {
 func (pipeline *Pipeline) RunCommandsOnly() error {
 	for _, runCommand := range pipeline.RunCommands {
 		LogForModule(runCommand.LogMessage, pipeline.Module)
-		if err := RunCommand(runCommand.ExecLine, false); err != nil {
+		if err := pipeline.runCommand(runCommand.ExecLine, false); err != nil {
 			return err
 		}
 		pipeline.Redis.PublishWithTimestamp(runCommand.RedisSuffix, runCommand.RedisMessage)
@@ -43,12 +43,22 @@ func (pipeline *Pipeline) RunCommandsOnly() error {
 
 // RunAll runs the entire pipeline
 func (pipeline *Pipeline) RunAll() error {
+
 	if pipeline.StartCommandState != nil {
-		LogForModule("Stopping module", pipeline.Module)
-		if err := pipeline.StartCommandState.Process.Kill(); err != nil {
-			LogError("Could not stop module", err)
+		if pipeline.StartCommandState.Process != nil {
+			LogForModule("Restarting pipeline", pipeline.Module)
+
+			LogForModule("Stopping module", pipeline.Module)
+
+			if err := pipeline.StartCommandState.Process.Kill(); err != nil {
+				LogError("Could not stop module", err)
+			}
 		}
+	} else {
+		LogForModule("Starting pipeline", pipeline.Module)
 	}
+
+	LogForModule("Pushing module", pipeline.Module)
 
 	if err := setupPushDir(pipeline.SrcDir, pipeline.PushDir); err != nil {
 		return err
@@ -64,7 +74,7 @@ func (pipeline *Pipeline) RunAll() error {
 	}
 
 	LogForModule(pipeline.StartCommand.LogMessage, pipeline.Module)
-	if err := RunCommand(pipeline.StartCommand.ExecLine, true); err != nil {
+	if err := pipeline.runCommand(pipeline.StartCommand.ExecLine, true); err != nil {
 		return exec.ErrNotFound
 	}
 	pipeline.Redis.PublishWithTimestamp(pipeline.StartCommand.RedisSuffix, pipeline.StartCommand.RedisMessage)
@@ -72,8 +82,8 @@ func (pipeline *Pipeline) RunAll() error {
 	return nil
 }
 
-// RunCommand runs or starts a command
-func RunCommand(command string, start bool) error {
+// runCommand runs or starts a command
+func (pipeline *Pipeline) runCommand(command string, start bool) error {
 	c := exec.Command(strings.Split(command, " ")[0], strings.Split(command, " ")[1:]...)
 
 	// Log the output of the command to the console
@@ -81,13 +91,11 @@ func RunCommand(command string, start bool) error {
 	c.Stderr = os.Stderr
 
 	if start {
-		if err := c.Start(); err != nil {
-			return err
-		}
+		pipeline.StartCommandState = c
+
+		return c.Start()
 	} else {
-		if err := c.Run(); err != nil {
-			return err
-		}
+		return c.Run()
 	}
 
 	return nil

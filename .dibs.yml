@@ -21,6 +21,9 @@ platforms:
       distPath: .bin/dibs-linux-amd64
       cleanGlobs:
         - .bin/dibs-linux-amd64
+    starters:
+      lang:
+        command: go run main.go pipeline sync server --go-port 32400
     tests:
       unit:
         lang:
@@ -63,6 +66,9 @@ platforms:
       distPath: .bin/dibs-linux-arm64
       cleanGlobs:
         - .bin/dibs-linux-arm64
+    starters:
+      lang:
+        command: go run main.go pipeline sync server --go-port 32401
     tests:
       unit:
         lang:
