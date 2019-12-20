@@ -87,41 +87,45 @@ func (metaGit Git) GetLatestTag() (string, error) {
 	// Based on https://github.com/src-d/go-git/issues/1030#issuecomment-443679681
 	repository, err := git.PlainOpen(filepath.Join(metaGit.WorkDir))
 
-	tagRefs, err := repository.Tags()
-	if err != nil {
-		return "", err
+	if repository != nil {
+		tagRefs, err := repository.Tags()
+		if err != nil {
+			return "", err
+		}
+
+		var latestTagCommit *object.Commit
+		var latestTagName string
+		if err := tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
+			revision := plumbing.Revision(tagRef.Name().String())
+			tagCommitHash, err := repository.ResolveRevision(revision)
+			if err != nil {
+				return err
+			}
+
+			commit, err := repository.CommitObject(*tagCommitHash)
+			if err != nil {
+				return err
+			}
+
+			if latestTagCommit == nil {
+				latestTagCommit = commit
+				latestTagName = tagRef.Name().Short()
+			}
+
+			if commit.Committer.When.After(latestTagCommit.Committer.When) {
+				latestTagCommit = commit
+				latestTagName = tagRef.Name().Short()
+			}
+
+			return nil
+		}); err != nil {
+			return "", err
+		}
+
+		return latestTagName, nil
 	}
 
-	var latestTagCommit *object.Commit
-	var latestTagName string
-	if err := tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
-		revision := plumbing.Revision(tagRef.Name().String())
-		tagCommitHash, err := repository.ResolveRevision(revision)
-		if err != nil {
-			return err
-		}
-
-		commit, err := repository.CommitObject(*tagCommitHash)
-		if err != nil {
-			return err
-		}
-
-		if latestTagCommit == nil {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
-		}
-
-		if commit.Committer.When.After(latestTagCommit.Committer.When) {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
-		}
-
-		return nil
-	}); err != nil {
-		return "", err
-	}
-
-	return latestTagName, nil
+	return "", err
 }
 
 // AddCommitAndPush stages all files in a git repository, then commits and pushes them
