@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // CommandWithEvent is a command that also publishes an event
@@ -50,8 +51,13 @@ func (pipeline *Pipeline) RunAll() error {
 
 			LogForModule("Stopping module", pipeline.Module)
 
-			if err := pipeline.StartCommandState.Process.Kill(); err != nil {
-				LogError("Could not stop module", err)
+			processGroupId, err := syscall.Getpgid(pipeline.StartCommandState.Process.Pid)
+			if err != nil {
+				LogErrorFatalCouldStopModule(err)
+			}
+
+			if err := syscall.Kill(-processGroupId, syscall.SIGKILL); err != nil {
+				LogErrorFatalCouldStopModule(err)
 			}
 		}
 	} else {
@@ -91,6 +97,8 @@ func (pipeline *Pipeline) runCommand(command string, start bool) error {
 	c.Stderr = os.Stderr
 
 	if start {
+		c.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 		pipeline.StartCommandState = c
 
 		return c.Start()
