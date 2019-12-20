@@ -36,6 +36,9 @@ spec:
           {{ end }}
           ports:
             - containerPort: 32000
+          {{ if .Values.meta.dev }}
+            - containerPort: 32001
+          {{ end }}
   {{ if .Values.meta.dev }}
 
 ---
@@ -52,6 +55,21 @@ spec:
       port: 32000
       targetPort: 32000
       nodePort: {{ .Values.ingress.nodePort }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dibs-dev-ttyd
+spec:
+  selector:
+    app: dibs-dev
+  type: NodePort
+  ports:
+    - name: http
+      port: 32001
+      targetPort: 32001
+      nodePort: 32001
   {{ else }}
 
 ---

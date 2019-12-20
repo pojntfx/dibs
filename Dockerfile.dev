@@ -10,12 +10,17 @@ COPY ./.dibs.yml ./.dibs.yml
 COPY ./main.go ./main.go
 COPY ./cmd ./cmd
 COPY ./pkg ./pkg
+COPY ./.git ./.git
 
 RUN go run main.go pipeline build assets
 
 FROM --platform=$TARGETPLATFORM golang:1.13.5-buster
 WORKDIR /app
 ARG TARGETPLATFORM
+
+RUN curl -Lo ttyd https://github.com/tsl0922/ttyd/releases/download/1.5.2/ttyd_linux.x86_64
+RUN chmod +x ./ttyd
+RUN mv ./ttyd /usr/local/bin/ttyd
 
 COPY ./go.mod ./go.sum ./
 RUN go mod download
@@ -30,5 +35,6 @@ COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
 COPY --from=build /app/.bin ./.bin
 
 EXPOSE 32000
+EXPOSE 32001
 
-CMD dibs pipeline sync server & dibs pipeline sync client
+CMD dibs pipeline sync server & ttyd -p 32001 /bin/bash
