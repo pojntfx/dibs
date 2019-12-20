@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/pojntfx/dibs/pkg/pipes"
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,12 +23,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 		}
 		ip := rawIP.String()
 
-		platforms, err := Dibs.GetPlatforms(platformFromConfig, platformFromConfig == PlatformAll)
-		if err != nil {
-			utils.LogErrorFatalPlatformNotFound(platforms, err)
-		}
-
-		for _, platform := range platforms {
+		Dibs.RunForPlatforms(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
 			if viper.GetString(ExecutorKey) == ExecutorDocker {
 				if output, err := platform.Tests.Integration.Chart.BuildImage(platform.Platform); err != nil {
 					utils.LogErrorFatalPlatformSpecific("Could not build chart integration test chart", err, platform.Platform, output)
@@ -44,7 +40,7 @@ var PipelineTestIntegrationChartCmd = &cobra.Command{
 				output, err := platform.Tests.Integration.Chart.Start(platform.Platform)
 				utils.LogErrorInfo("Chart integration test ran", err, platform.Platform, output)
 			}
-		}
+		})
 	},
 }
 
