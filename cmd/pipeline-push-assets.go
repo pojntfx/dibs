@@ -5,6 +5,7 @@ import (
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"strings"
 )
 
@@ -37,7 +38,12 @@ func init() {
 		githubUserNameFlag = strings.Replace(strings.Replace(PushAssetsGithubUserNameKey, PushAssetsKeyPrefix, "", -1), "_", "-", -1)
 	)
 
-	PipelinePushAssetsCmd.PersistentFlags().StringVarP(&version, versionFlag, "v", "0.0.1", `The version of the asset to deploy (use "-prerelease <version>" as the version to create a prerelease)`)
+	// If we are in a Git repo, get the latest tag and use it as the default version. Ignore errors if we aren't in a Git repo
+	pwd, _ := os.Getwd()
+	currentGitRepo := &utils.Git{WorkDir: pwd}
+	latestGitTag, _ := currentGitRepo.GetLatestTag()
+
+	PipelinePushAssetsCmd.PersistentFlags().StringVarP(&version, versionFlag, "v", latestGitTag, `The version of the asset to deploy (newest Git tag by default) (use "-prerelease <version>" as the version to create a prerelease)`)
 
 	PipelinePushAssetsCmd.PersistentFlags().StringVarP(&githubToken, githubTokenFlag, "t", "1234", "GitHub personal access token")
 	PipelinePushAssetsCmd.PersistentFlags().StringVar(&githubRepoName, githubRepoNameFlag, "releases", "Slug of the GitHub repo to push the assets to (don't include the username!)")
