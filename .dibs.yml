@@ -24,6 +24,8 @@ platforms:
     starters:
       lang:
         command: go run main.go pipeline sync server --go-port 32001
+      assets:
+        command: .bin/dibs-linux-amd64 pipeline sync server --go-port 32002
     tests:
       unit:
         lang:
@@ -68,7 +70,9 @@ platforms:
         - .bin/dibs-linux-arm64
     starters:
       lang:
-        command: go run main.go pipeline sync server --go-port 32002
+        command: go run main.go pipeline sync server --go-port 32003
+      assets:
+        command: .bin/dibs-linux-arm64 pipeline sync server --go-port 32004
     tests:
       unit:
         lang:

@@ -6,7 +6,8 @@ type Platform struct {
 	ChartProfiles ChartProfiles
 	Assets        Assets
 	Starters      struct {
-		Lang Build
+		Lang   Build
+		Assets Build
 	}
 	Tests struct { // Tests are the tests for the specific platform
 		Unit struct { // Unit tests for the platform
