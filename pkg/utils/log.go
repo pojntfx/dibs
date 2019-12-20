@@ -48,6 +48,11 @@ func LogErrorFatalCouldNotParseIP(ip string) {
 	log.Fatal("Could not parse IP", rz.String("ip", ip))
 }
 
+// LogErrorFatalCouldNotStopModule handles a fatal error a module can't be stopped
+func LogErrorFatalCouldStopModule(err error) {
+	log.Fatal("Could not stop module", rz.Err(err))
+}
+
 // LogErrorInfo handles a non-fatal error
 func LogErrorInfo(message string, err error, platform, output string) {
 	fmt.Println(output)

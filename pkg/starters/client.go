@@ -85,33 +85,6 @@ func (client *Client) Start() {
 	utils.LogForModule("Registering module", module)
 	redis.PublishWithTimestamp(client.RedisSuffixUpRegistered, module)
 
-	// Unregister the module on interrupt signal
-	interrupt := make(chan os.Signal, 2)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-interrupt
-
-		utils.LogForModule("Unregistering module", module)
-		redis.PublishWithTimestamp(client.RedisSuffixUpUnRegistered, module)
-
-		utils.LogForModule("Cleaning up", module)
-
-		// Remove the added replace directives. Don't run if no pull modules have been specified.
-		if downModules[0] != "" {
-			rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
-			if err != nil {
-				utils.LogErrorFatal("Error", err)
-			}
-			goModContent := string(rawGoModContent)
-			moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
-			if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777); err != nil {
-				utils.LogErrorFatal("Error", err)
-			}
-		}
-
-		os.Exit(0)
-	}()
-
 	// Setup the pipeline
 	var commandStartState *exec.Cmd
 
@@ -156,6 +129,43 @@ func (client *Client) Start() {
 		Git:                     git,
 		Redis:                   redis,
 	}
+
+	// Unregister the module on interrupt signal
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-interrupt
+
+		utils.LogForModule("Stopping module", module)
+		processGroupId, err := syscall.Getpgid(pipeline.StartCommandState.Process.Pid)
+		if err != nil {
+			utils.LogErrorFatalCouldStopModule(err)
+		}
+
+		if err := syscall.Kill(-processGroupId, syscall.SIGKILL); err != nil {
+			utils.LogErrorFatalCouldStopModule(err)
+		}
+
+		utils.LogForModule("Unregistering module", module)
+		redis.PublishWithTimestamp(client.RedisSuffixUpUnRegistered, module)
+
+		utils.LogForModule("Cleaning up", module)
+
+		// Remove the added replace directives. Don't run if no pull modules have been specified.
+		if downModules[0] != "" {
+			rawGoModContent, err := ioutil.ReadFile(client.PipelineUpFileMod)
+			if err != nil {
+				utils.LogErrorFatal("Error", err)
+			}
+			goModContent := string(rawGoModContent)
+			moduleWithoutReplaces := utils.GetModuleWithoutReplaces(goModContent)
+			if err := ioutil.WriteFile(client.PipelineUpFileMod, []byte(moduleWithoutReplaces), 0777); err != nil {
+				utils.LogErrorFatal("Error", err)
+			}
+		}
+
+		os.Exit(0)
+	}()
 
 	// Run the pipeline once. If there are errors, don't exit.
 	if err := pipeline.RunAll(); err != nil {
