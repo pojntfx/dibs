@@ -15,7 +15,7 @@ var PipelinePushAssetsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		platformFromConfig := viper.GetString(PlatformKey)
 
-		Dibs.RunForPlatforms(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
+		Dibs.RunForPlatformsSerially(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
 			if output, err := platform.Assets.Push(platform.Platform, strings.Split(viper.GetString(PushAssetsVersionKey), " "), viper.GetString(PushAssetsGitHubTokenKey), viper.GetString(PushAssetsGithubUserNameKey), viper.GetString(PushAssetsGithubRepoNameKey)); err != nil {
 				utils.LogErrorFatalPlatformSpecific("Could not push assets", err, platform.Platform, output)
 			}

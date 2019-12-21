@@ -16,7 +16,7 @@ var PipelineCleanDevCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		platformFromConfig := viper.GetString(PlatformKey)
 
-		Dibs.RunForPlatforms(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
+		Dibs.RunForPlatformsConcurrently(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
 			if err := platform.Assets.Build.CleanStartedChart(platform.Platform, platform.ChartProfiles.Development); err != nil {
 				utils.LogErrorFatalWithProfile("Could not uninstall profile", err, platform.Platform, platform.ChartProfiles.Development)
 			}

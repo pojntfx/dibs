@@ -13,7 +13,7 @@ var PipelinePushImageCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		platformFromConfig := viper.GetString(PlatformKey)
 
-		Dibs.RunForPlatforms(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
+		Dibs.RunForPlatformsConcurrently(platformFromConfig, platformFromConfig == PlatformAll, func(platform pipes.Platform) {
 			if output, err := platform.Assets.Build.PushImage(platform.Platform); err != nil {
 				utils.LogErrorFatalPlatformSpecific("Could not push image", err, platform.Platform, output)
 			}

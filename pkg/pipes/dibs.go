@@ -104,8 +104,8 @@ func (dibs *Dibs) PushHelmChart(platform, gitUserName, gitUserEmail, gitCommitMe
 	return output, git.AddCommitAndPush()
 }
 
-// RunForPlatforms runs a function for specified platforms
-func (dibs *Dibs) RunForPlatforms(platformToRunFor string, all bool, funcToRun func(platform Platform)) {
+// RunForPlatformsConcurrently runs a function for specified platforms concurrently
+func (dibs *Dibs) RunForPlatformsConcurrently(platformToRunFor string, all bool, funcToRun func(platform Platform)) {
 	platforms, err := dibs.GetPlatforms(platformToRunFor, all)
 	if err != nil {
 		utils.LogErrorFatalPlatformNotFound(platforms, err)
@@ -123,4 +123,16 @@ func (dibs *Dibs) RunForPlatforms(platformToRunFor string, all bool, funcToRun f
 	}
 
 	wg.Wait()
+}
+
+// RunForPlatformsSerially runs a function for specified platforms serially
+func (dibs *Dibs) RunForPlatformsSerially(platformToRunFor string, all bool, funcToRun func(platform Platform)) {
+	platforms, err := dibs.GetPlatforms(platformToRunFor, all)
+	if err != nil {
+		utils.LogErrorFatalPlatformNotFound(platforms, err)
+	}
+
+	for _, platform := range platforms {
+		funcToRun(platform)
+	}
 }

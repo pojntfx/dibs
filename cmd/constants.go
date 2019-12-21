@@ -23,8 +23,6 @@ const (
 	SyncRedisSuffixUpUnregistered = "up_unregistered"
 	SyncRedisSuffixUpPushed       = "up_pushed"
 
-	TestIntegrationChartKubernetesIpDefault = "127.0.0.1"
-
 	PlatformAll     = "all"
 	PlatformDefault = PlatformAll
 
@@ -71,8 +69,6 @@ const (
 	SyncServerGitServerReposDirKey = SyncKeyPrefix + LangGo + "_dir_repos"
 	SyncServerGitServerHttpPortKey = SyncKeyPrefix + LangGo + "-port"
 	SyncServerGitServerHttpPathKey = SyncKeyPrefix + LangGo + "-path"
-
-	TestIntegrationChartKubernetesIpKey = "kubernetes_ip"
 
 	PlatformKey = "platform"
 	ExecutorKey = "executor"
