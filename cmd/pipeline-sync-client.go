@@ -25,7 +25,20 @@ var PipelineSyncClientCmd = &cobra.Command{
 
 			ignoreRegex := SyncClientIgnoreRegexPlaceholder
 			if len(platforms) > 0 && viper.GetString(SyncClientPipelineUpRegexIgnoreKey) == SyncClientIgnoreRegexPlaceholder {
-				ignoreRegex = platforms[0].Assets.CleanGlobs[0]
+				ignoreRegex = ""
+				for _, platform := range platforms {
+					for i, cleanGlob := range platform.Assets.CleanGlobs {
+						filesToRemove, _ := filepath.Glob(cleanGlob)
+
+						for _, fileToRemove := range filesToRemove {
+							if i == 0 {
+								ignoreRegex += fileToRemove
+								continue
+							}
+							ignoreRegex += "|" + fileToRemove
+						}
+					}
+				}
 			}
 
 			client := starters.Client{
