@@ -102,11 +102,8 @@ func (pipeline *Pipeline) runCommand(command string, start bool) error {
 		pipeline.StartCommandState = c
 
 		return c.Start()
-	} else {
-		return c.Run()
 	}
-
-	return nil
+	return c.Run()
 }
 
 // setupPushDir creates a temporary directory to do the Git operations in

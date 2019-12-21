@@ -43,11 +43,6 @@ func LogErrorFatalPlatformNotFound(platform interface{}, err error) {
 	log.Fatal("Platform(s) not found in configuration file", rz.Any("platforms", platform), rz.Err(err))
 }
 
-// LogErrorFatalCouldNotParseIP handles a fatal error if an IP can't be parsed
-func LogErrorFatalCouldNotParseIP(ip string) {
-	log.Fatal("Could not parse IP", rz.String("ip", ip))
-}
-
 // LogErrorFatalCouldNotStopModule handles a fatal error a module can't be stopped
 func LogErrorFatalCouldStopModule(err error) {
 	log.Fatal("Could not stop module", rz.Err(err))
