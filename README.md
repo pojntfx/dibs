@@ -61,6 +61,6 @@ Use "dibs [command] --help" for more information about a command.
 
 ## License
 
-dibs (c) 2019 Felix Pojtinger
+dibs (c) 2020 Felix Pojtinger
 
 SPDX-License-Identifier: AGPL-3.0

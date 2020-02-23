@@ -1,16 +1,17 @@
 package starters
 
 import (
-	"github.com/pojntfx/dibs/pkg/utils"
-	"github.com/pojntfx/dibs/pkg/workers"
-	"github.com/radovskyb/watcher"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
 	"syscall"
+
+	"github.com/pojntfx/dibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/workers"
+	"github.com/radovskyb/watcher"
+	"gitlab.com/bloom42/libs/rz-go"
+	"gitlab.com/bloom42/libs/rz-go/log"
 )
 
 // Client is a client for the sync server
