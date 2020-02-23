@@ -1,12 +1,13 @@
 package starters
 
 import (
-	"github.com/pojntfx/dibs/pkg/utils"
-	"github.com/pojntfx/dibs/pkg/workers"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
 	"path/filepath"
 	"strconv"
+
+	"github.com/pojntfx/dibs/pkg/utils"
+	"github.com/pojntfx/dibs/pkg/workers"
+	"gitlab.com/bloom42/libs/rz-go"
+	"gitlab.com/bloom42/libs/rz-go/log"
 )
 
 // Server is a server for the sync client

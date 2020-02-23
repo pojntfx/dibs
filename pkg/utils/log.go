@@ -2,8 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"gitlab.com/z0mbie42/rz-go/v2"
-	"gitlab.com/z0mbie42/rz-go/v2/log"
+
+	"gitlab.com/bloom42/libs/rz-go"
+	"gitlab.com/bloom42/libs/rz-go/log"
 )
 
 // LogError handles a non-platform-specific non-fatal error
