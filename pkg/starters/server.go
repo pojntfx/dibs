@@ -2,7 +2,6 @@ package starters
 
 import (
 	"path/filepath"
-	"strconv"
 
 	"github.com/pojntfx/dibs/pkg/utils"
 	"github.com/pojntfx/dibs/pkg/workers"
@@ -13,7 +12,7 @@ import (
 // Server is a server for the sync client
 type Server struct {
 	ServerReposDir string // Directory in which the Git repos should be stored
-	ServerHTTPPort string // Port on which the Git repos should be served
+	ServerHTTPPort string // Host:port on which the Git repos should be served
 	ServerHTTPPath string // HTTP path prefix for the served Git repos
 
 	RedisUrl                  string // URL of the Redis instance to use
@@ -34,17 +33,13 @@ func (server *Server) Start() {
 	redis.Connect()
 
 	// Build the configuration
-	httpPort, err := strconv.ParseInt(server.ServerHTTPPort, 0, 64)
-	if err != nil {
-		utils.LogErrorFatal("Error", err)
-	}
 	reposDirWithHTTPPathPrefix := filepath.Join(server.ServerReposDir, server.ServerHTTPPath)
 
 	// Setup workers
 	httpWorker := &workers.GitHTTPWorker{
 		ReposDir:       server.ServerReposDir,
 		HTTPPathPrefix: server.ServerHTTPPath,
-		Port:           int(httpPort),
+		Port:           server.ServerHTTPPort,
 	}
 
 	repoWorkerUpdate, repoWorkerDeleteOnly := &workers.GitRepoWorker{
@@ -85,7 +80,7 @@ func (server *Server) Start() {
 		case event := <-httpWorkerEvents:
 			switch event.Code {
 			case 0:
-				log.Info("Started", rz.String("system", "GitHTTPWorker"), rz.String("eventMessage", event.Message), rz.String("repositoriesDir", httpWorker.ReposDir), rz.String("HTTPPathPrefix", httpWorker.HTTPPathPrefix), rz.Int("Port", httpWorker.Port))
+				log.Info("Started", rz.String("system", "GitHTTPWorker"), rz.String("eventMessage", event.Message), rz.String("repositoriesDir", httpWorker.ReposDir), rz.String("HTTPPathPrefix", httpWorker.HTTPPathPrefix), rz.String("Port", httpWorker.Port))
 			case 1:
 				log.Info("Request", rz.String("system", "GitHTTPWorker"), rz.String("eventMessage", event.Message))
 			case 2:
