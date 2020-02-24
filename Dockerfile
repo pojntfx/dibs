@@ -17,6 +17,9 @@ RUN go run main.go pipeline build assets
 FROM --platform=$TARGETPLATFORM debian:buster-slim
 ARG TARGETPLATFORM
 
+RUN apt update
+RUN apt install -y git
+
 COPY ./.dibs.yml ./.dibs.yml
 
 COPY --from=build /app/.bin/dibs-* /usr/local/bin/dibs
