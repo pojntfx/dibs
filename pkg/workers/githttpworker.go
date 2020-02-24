@@ -1,18 +1,18 @@
 package workers
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/pojntfx/dibs/pkg/utils"
 	"gopkg.in/mysticmode/gitviahttp.v1"
-	"net/http"
-	"strconv"
 )
 
 // GitHTTPWorker serves Git repos via HTTP
 type GitHTTPWorker struct {
 	ReposDir       string // Directory in which the repos that should be served reside
 	HTTPPathPrefix string // Path prefix for the HTTP server
-	Port           int    // Port on which the HTTP server should listen
+	Port           string // Host:port on which the HTTP server should listen
 }
 
 // Start starts a GitHTTPWorker
@@ -35,7 +35,7 @@ func (worker *GitHTTPWorker) Start(errors chan error, events chan utils.Event) {
 
 	s := &http.Server{
 		Handler: r,
-		Addr:    "127.0.0.1:" + strconv.Itoa(worker.Port),
+		Addr:    worker.Port,
 	}
 
 	if err := s.ListenAndServe(); err != nil {
