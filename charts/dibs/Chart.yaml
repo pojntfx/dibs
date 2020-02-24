@@ -1,6 +1,6 @@
 apiVersion: v1
 name: dibs
-version: 0.0.7
+version: 0.0.8
 description: System for distributed polyglot, multi-module, multi-architecture development and CI/CD.
 type: application
 home: https://pojntfx.github.io/dibs/
@@ -10,4 +10,4 @@ maintainers:
   - name: Felix Pojtinger
     email: felix@pojtinger.com
     url: https://felix.pojtinger.com
-appVersion: 0.0.7
+appVersion: 0.0.8
