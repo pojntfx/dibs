@@ -23,6 +23,7 @@ type Config struct {
 		Build            string `yaml:"build"`
 		UnitTests        string `yaml:"unitTests"`
 		IntegrationTests string `yaml:"integrationTests"`
+		Start            string `yaml:"start"`
 	}
 }
 
@@ -90,16 +91,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	generateSourcesCommands, buildCommands, unitTestsCommands, integrationTestsCommands :=
+	generateSourcesCommands, buildCommands, unitTestsCommands, integrationTestsCommands, startCommands :=
 		strings.Fields(config.Commands.GenerateSources),
 		strings.Fields(config.Commands.Build),
 		strings.Fields(config.Commands.UnitTests),
-		strings.Fields(config.Commands.IntegrationTests)
-	generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand :=
+		strings.Fields(config.Commands.IntegrationTests),
+		strings.Fields(config.Commands.Start)
+	generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand :=
 		GetCommandWrappedInSh(generateSourcesCommands),
 		GetCommandWrappedInSh(buildCommands),
 		GetCommandWrappedInSh(unitTestsCommands),
-		GetCommandWrappedInSh(integrationTestsCommands)
+		GetCommandWrappedInSh(integrationTestsCommands),
+		GetCommandWrappedInSh(startCommands)
 	stdoutChan, stderrChan, errChan := make(chan string), make(chan string), make(chan error)
 
 	done := false
@@ -112,6 +115,9 @@ func main() {
 		RunCommand(unitTestsCommand, stdoutChan, stderrChan, errChan)
 		log.Println("Running integration tests")
 		RunCommand(integrationTestsCommand, stdoutChan, stderrChan, errChan)
+		log.Println("Starting app")
+		RunCommand(startCommand, stdoutChan, stderrChan, errChan)
+		log.Println(startCommand)
 
 		*done = true
 	}(&done)
@@ -123,11 +129,11 @@ func main() {
 		case stderr := <-stderrChan:
 			log.Println("STDERR", stderr)
 		case err := <-errChan:
-			log.Fatal("ERR", err)
-		default:
-			if done {
-				return
-			}
+			log.Println("ERR", err)
+		}
+
+		if done {
+			break
 		}
 	}
 }

@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
 	github.com/otiai10/copy v1.0.2
+	github.com/pojntfx/dibs/v2 v2.0.0-20200225205446-78b1cfa62c4a // indirect
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2

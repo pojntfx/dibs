@@ -5,4 +5,5 @@ commands:
   generateSources: go generate ./test-app/... # Command to generate sources
   build: go build -o test-app/.bin/test-app test-app/main.go # Command to build binary
   unitTests: go test ./test-app/... # Command to run unit test
-  integrationTests: test-app/.bin/test-app --help # Command to run integration test
+  integrationTests: test-app/.bin/test-app -help # Command to run integration test
+  start: test-app/.bin/test-app -keep-running # Command to start the app
