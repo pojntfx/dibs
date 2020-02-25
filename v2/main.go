@@ -9,17 +9,20 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
+	"time"
 
+	"github.com/radovskyb/watcher"
 	"gopkg.in/yaml.v2"
 )
 
 // Config is the main configuration
 type Config struct {
 	Paths struct {
-		Watch  string `yaml:"watch"`
-		Ignore string `yaml:"ignore"`
+		Watch   string `yaml:"watch"`
+		Include string `yaml:"include"`
 	}
 	Commands struct {
 		GenerateSources  string `yaml:"generateSources"`
@@ -153,6 +156,28 @@ func main() {
 	done := false
 	go RunPipeline(generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand, stdoutChan, stderrChan, errChan, &done)
 
+	watch := watcher.New()
+
+	includePathRegex := regexp.MustCompile(config.Paths.Include)
+	watch.AddFilterHook(watcher.RegexFilterHook(includePathRegex, true))
+
+	go func() {
+		for {
+			select {
+			case event := <-watch.Event:
+				log.Println("EVENT", event)
+			case err := <-watch.Error:
+				log.Fatal("ERR", err)
+			case <-watch.Closed:
+				return
+			}
+		}
+	}()
+
+	if err := watch.AddRecursive(config.Paths.Watch); err != nil {
+		log.Fatal(err)
+	}
+
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -163,6 +188,16 @@ func main() {
 
 			os.Exit(1)
 		}()
+
+		if err := StopCommand(startCommand); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
+		if err := watch.Start(time.Millisecond * 100); err != nil {
+			log.Fatal(err)
+		}
 
 		if err := StopCommand(startCommand); err != nil {
 			log.Fatal(err)
