@@ -124,7 +124,7 @@ func (client *Client) Start() {
 		ModulePushedRedisSuffix: client.RedisSuffixUpPushed,
 		SrcDir:                  client.PipelineUpDirSrc,
 		PushDir:                 client.PipelineUpDirPush,
-		RunCommands:             []utils.CommandWithEvent{unitTestCommand, integrationTestCommand, buildCommand},
+		RunCommands:             []utils.CommandWithEvent{buildCommand, unitTestCommand, integrationTestCommand},
 		StartCommand:            startCommand,
 		StartCommandState:       commandStartState,
 		Git:                     git,
