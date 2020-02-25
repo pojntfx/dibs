@@ -1,6 +1,6 @@
 paths:
   watch: test-app # The path to watch
-  ignore: /test-app/.bin(.*)/ # Regex of paths to ignore
+  include: (.*).go # Regex of paths to include
 commands:
   generateSources: go generate ./test-app/... # Command to generate sources
   build: go build -o test-app/.bin/test-app test-app/main.go # Command to build binary
