@@ -6,8 +6,11 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"gopkg.in/yaml.v2"
 )
@@ -42,7 +45,7 @@ func Read(reader io.Reader, outChan chan string) {
 }
 
 // RunCommand runs a command and sends it's outputs into channels
-func RunCommand(cmd *exec.Cmd, stdoutChan, stderrChan chan string, errChan chan error) {
+func RunCommand(cmd *exec.Cmd, stdoutChan, stderrChan chan string, errChan chan error, runInBackground bool) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		errChan <- err
@@ -58,6 +61,14 @@ func RunCommand(cmd *exec.Cmd, stdoutChan, stderrChan chan string, errChan chan 
 
 	go Read(stdout, stdoutChan)
 	go Read(stderr, stderrChan)
+
+	if runInBackground {
+		if err := cmd.Start(); err != nil {
+			errChan <- err
+		}
+
+		return
+	}
 
 	if err := cmd.Run(); err != nil {
 		errChan <- err
@@ -108,32 +119,68 @@ func main() {
 	done := false
 	go func(done *bool) {
 		log.Println("Generating sources")
-		RunCommand(generateSourcesCommand, stdoutChan, stderrChan, errChan)
+		RunCommand(generateSourcesCommand, stdoutChan, stderrChan, errChan, false)
 		log.Println("Building")
-		RunCommand(buildCommand, stdoutChan, stderrChan, errChan)
+		RunCommand(buildCommand, stdoutChan, stderrChan, errChan, false)
 		log.Println("Running unit tests")
-		RunCommand(unitTestsCommand, stdoutChan, stderrChan, errChan)
+		RunCommand(unitTestsCommand, stdoutChan, stderrChan, errChan, false)
 		log.Println("Running integration tests")
-		RunCommand(integrationTestsCommand, stdoutChan, stderrChan, errChan)
+		RunCommand(integrationTestsCommand, stdoutChan, stderrChan, errChan, false)
+
 		log.Println("Starting app")
-		RunCommand(startCommand, stdoutChan, stderrChan, errChan)
-		log.Println(startCommand)
+		startCommand.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		RunCommand(startCommand, stdoutChan, stderrChan, errChan, true)
+
+		_ = startCommand.Wait()
 
 		*done = true
+
+		close(stdoutChan)
+		close(stderrChan)
+		close(errChan)
 	}(&done)
+
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-interrupt
+
+		go func() {
+			<-interrupt
+
+			os.Exit(1)
+		}()
+
+		processGroupID, err := syscall.Getpgid(startCommand.Process.Pid)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := syscall.Kill(processGroupID, syscall.SIGKILL); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	for {
 		select {
 		case stdout := <-stdoutChan:
+			if done {
+				return
+			}
+
 			log.Println("STDOUT", stdout)
 		case stderr := <-stderrChan:
+			if done {
+				return
+			}
+
 			log.Println("STDERR", stderr)
 		case err := <-errChan:
-			log.Println("ERR", err)
-		}
+			if done {
+				return
+			}
 
-		if done {
-			break
+			log.Println("ERR", err)
 		}
 	}
 }
