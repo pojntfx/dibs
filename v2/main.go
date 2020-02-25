@@ -82,6 +82,40 @@ func GetCommandWrappedInSh(args []string) *exec.Cmd {
 	return exec.Command(wrappedArgs[0], wrappedArgs[1:]...)
 }
 
+// RunPipeline runs the pipeline
+func RunPipeline(generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand *exec.Cmd, stdoutChan, stderrChan chan string, errChan chan error, done *bool) {
+	log.Println("Generating sources")
+	RunCommand(generateSourcesCommand, stdoutChan, stderrChan, errChan, false)
+	log.Println("Building")
+	RunCommand(buildCommand, stdoutChan, stderrChan, errChan, false)
+	log.Println("Running unit tests")
+	RunCommand(unitTestsCommand, stdoutChan, stderrChan, errChan, false)
+	log.Println("Running integration tests")
+	RunCommand(integrationTestsCommand, stdoutChan, stderrChan, errChan, false)
+
+	log.Println("Starting app")
+	startCommand.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	RunCommand(startCommand, stdoutChan, stderrChan, errChan, true)
+
+	_ = startCommand.Wait()
+
+	*done = true
+
+	close(stdoutChan)
+	close(stderrChan)
+	close(errChan)
+}
+
+// StopCommand stops a command and it's children
+func StopCommand(command *exec.Cmd) error {
+	processGroupID, err := syscall.Getpgid(command.Process.Pid)
+	if err != nil {
+		return err
+	}
+
+	return syscall.Kill(processGroupID, syscall.SIGKILL)
+}
+
 func main() {
 	var (
 		configFilePath string
@@ -117,28 +151,7 @@ func main() {
 	stdoutChan, stderrChan, errChan := make(chan string), make(chan string), make(chan error)
 
 	done := false
-	go func(done *bool) {
-		log.Println("Generating sources")
-		RunCommand(generateSourcesCommand, stdoutChan, stderrChan, errChan, false)
-		log.Println("Building")
-		RunCommand(buildCommand, stdoutChan, stderrChan, errChan, false)
-		log.Println("Running unit tests")
-		RunCommand(unitTestsCommand, stdoutChan, stderrChan, errChan, false)
-		log.Println("Running integration tests")
-		RunCommand(integrationTestsCommand, stdoutChan, stderrChan, errChan, false)
-
-		log.Println("Starting app")
-		startCommand.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-		RunCommand(startCommand, stdoutChan, stderrChan, errChan, true)
-
-		_ = startCommand.Wait()
-
-		*done = true
-
-		close(stdoutChan)
-		close(stderrChan)
-		close(errChan)
-	}(&done)
+	go RunPipeline(generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand, stdoutChan, stderrChan, errChan, &done)
 
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -151,12 +164,7 @@ func main() {
 			os.Exit(1)
 		}()
 
-		processGroupID, err := syscall.Getpgid(startCommand.Process.Pid)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err := syscall.Kill(processGroupID, syscall.SIGKILL); err != nil {
+		if err := StopCommand(startCommand); err != nil {
 			log.Fatal(err)
 		}
 	}()
