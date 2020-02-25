@@ -2,7 +2,7 @@ paths:
   watch: test-app # The path to watch
   ignore: /test-app/.bin(.*)/ # Regex of paths to ignore
 commands:
-  generateSources: go generate test-app/** # Command to generate sources
+  generateSources: go generate ./test-app/... # Command to generate sources
   build: go build -o test-app/.bin/test-app test-app/main.go # Command to build binary
-  unitTests: go test test-app/** # Command to run unit test
-  integrationTests: .bin # Command to run integration test
+  unitTests: go test ./test-app/... # Command to run unit test
+  integrationTests: test-app/.bin/test-app --help # Command to run integration test
