@@ -7,9 +7,11 @@ import (
 )
 
 const (
-	testCommandCreate = "ls"
-	testCommandStart  = "ping -c 1 localhost"
-	testCommandStop   = "ping -c 60 localhost"
+	testCommandCreate                  = "ls"
+	testCommandStart                   = "ping -c 1 localhost"
+	testCommandStop                    = "ping -c 60 localhost"
+	testCommandIsStoppedRunningProcess = testCommandStop
+	testCommandIsStoppedStoppedProcess = testCommandStop
 )
 
 func TestCreateManageableCommand(t *testing.T) {
@@ -83,5 +85,42 @@ func TestStopManageableCommand(t *testing.T) {
 
 	if err := c.Wait(); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestIsStoppedRunningProcess(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandIsStoppedRunningProcess, stdoutChan, stderrChan)
+
+	defer c.Stop()
+	if err := c.Start(); err != nil {
+		t.Error(err)
+	}
+
+	if processIsStopped := c.IsStopped(); processIsStopped != false {
+		t.Error("command is running but IsStopped returned false")
+	}
+}
+
+func TestIsStoppedStoppedProcess(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandIsStoppedStoppedProcess, stdoutChan, stderrChan)
+
+	if err := c.Start(); err != nil {
+		t.Error(err)
+	}
+
+	if err := c.Stop(); err != nil {
+		t.Error(err)
+	}
+
+	if err := c.Wait(); err != nil {
+		t.Error(err)
+	}
+
+	if processIsStopped := c.IsStopped(); processIsStopped != true {
+		t.Error("command is not running but IsStopped returned true")
 	}
 }
