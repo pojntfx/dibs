@@ -49,7 +49,9 @@ func (f *CommandFlow) Wait() error {
 
 // Stop stops the flow
 func (f *CommandFlow) Stop() error {
-	for _, command := range f.commands {
+	for i := len(f.commands) - 1; i >= 0; i-- {
+		command := f.commands[i]
+
 		if !command.IsStopped() {
 			if err := command.Stop(); err != nil {
 				return err
