@@ -12,6 +12,7 @@ const (
 	testCommandStop                    = "ping -c 60 localhost"
 	testCommandIsStoppedRunningProcess = testCommandStop
 	testCommandIsStoppedStoppedProcess = testCommandStop
+	testCommandGetters                 = testCommandCreate
 )
 
 func TestCreateManageableCommand(t *testing.T) {
@@ -122,5 +123,35 @@ func TestIsStoppedStoppedProcess(t *testing.T) {
 
 	if processIsStopped := c.IsStopped(); processIsStopped != true {
 		t.Error("command is not running but IsStopped returned true")
+	}
+}
+
+func TestGetExecLine(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandGetters, stdoutChan, stderrChan)
+
+	if c.GetExecLine() != testCommandGetters {
+		t.Error("GetExecLine did not return the set execLine")
+	}
+}
+
+func TestGetStdoutChan(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandGetters, stdoutChan, stderrChan)
+
+	if c.GetStdoutChan() == nil {
+		t.Error("GetStdoutChan has not been set")
+	}
+}
+
+func TestGetStderrChan(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandGetters, stdoutChan, stderrChan)
+
+	if c.GetStderrChan() == nil {
+		t.Error("GetStderrChan has not been set")
 	}
 }

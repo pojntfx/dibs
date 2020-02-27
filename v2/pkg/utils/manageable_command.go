@@ -98,19 +98,16 @@ func (r *ManageableCommand) IsStopped() bool {
 	return false
 }
 
-// TODO: Add test
 // GetExecLine returns the command's execLine
 func (r *ManageableCommand) GetExecLine() string {
 	return r.execLine
 }
 
-// TODO: Add test
 // GetStdoutChan returns the command's stdout channel
 func (r *ManageableCommand) GetStdoutChan() chan string {
 	return r.stdoutChan
 }
 
-// TODO: Add test
 // GetStderrChan returns the command's stderr channel
 func (r *ManageableCommand) GetStderrChan() chan string {
 	return r.stderrChan
