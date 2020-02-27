@@ -8,15 +8,7 @@ import (
 )
 
 // ManageableCommand is a manageable command
-type ManageableCommand interface {
-	Start() error
-	Wait() error
-	Stop() error
-	Restart() error
-}
-
-// ManageableCommandImpl is an implementation of ManageableCommand
-type ManageableCommandImpl struct {
+type ManageableCommand struct {
 	execLine               string
 	stdoutChan, stderrChan chan string
 	instance               *exec.Cmd
@@ -42,7 +34,7 @@ func getCommandWrappedInSh(execLine string) *exec.Cmd {
 }
 
 // Start starts the command
-func (r *ManageableCommandImpl) Start() error {
+func (r *ManageableCommand) Start() error {
 	r.instance = getCommandWrappedInSh(r.execLine)
 
 	stdout, err := r.instance.StdoutPipe()
@@ -63,10 +55,10 @@ func (r *ManageableCommandImpl) Start() error {
 }
 
 // Wait waits for the command to complete
-func (r *ManageableCommandImpl) Wait() error { return r.instance.Wait() }
+func (r *ManageableCommand) Wait() error { return r.instance.Wait() }
 
 // Stop stops the command
-func (r *ManageableCommandImpl) Stop() error {
+func (r *ManageableCommand) Stop() error {
 	processGroupID, err := syscall.Getpgid(r.instance.Process.Pid)
 	if err != nil {
 		return err
@@ -75,12 +67,9 @@ func (r *ManageableCommandImpl) Stop() error {
 	return syscall.Kill(processGroupID, syscall.SIGKILL)
 }
 
-// Restart restarts the command
-func (r *ManageableCommandImpl) Restart() error { return nil }
-
 // New creates a new ManageableCommand
-func New(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommandImpl {
-	return &ManageableCommandImpl{
+func New(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
+	return &ManageableCommand{
 		execLine:   execLine,
 		stdoutChan: stdoutChan,
 		stderrChan: stderrChan,
