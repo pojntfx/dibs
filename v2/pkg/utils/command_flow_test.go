@@ -49,6 +49,10 @@ func TestStartCommandFlow(t *testing.T) {
 		t.Error(err)
 	}
 
+	if err := f.Wait(); err != nil {
+		t.Error(err)
+	}
+
 	if hits < 2 {
 		t.Error("commands did not match expected output")
 	}
