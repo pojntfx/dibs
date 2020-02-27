@@ -8,7 +8,9 @@ type CommandFlow struct {
 
 // NewCommandFlow creates a new CommandFlow
 func NewCommandFlow(commands []string, stdoutChan, stderrChan chan string) *CommandFlow {
-	commandFlow := &CommandFlow{}
+	commandFlow := &CommandFlow{
+		isRestart: false,
+	}
 
 	for _, command := range commands {
 		manageableCommand := NewManageableCommand(command, stdoutChan, stderrChan)
@@ -40,6 +42,19 @@ func (f *CommandFlow) Wait() error {
 
 	if f.isRestart {
 		return f.Wait()
+	}
+
+	return nil
+}
+
+// Stop stops the flow
+func (f *CommandFlow) Stop() error {
+	for _, command := range f.commands {
+		if !command.IsStopped() {
+			if err := command.Stop(); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

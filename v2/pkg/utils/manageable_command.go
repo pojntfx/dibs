@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"io"
+	"os"
 	"os/exec"
 	"syscall"
 )
@@ -31,6 +32,15 @@ func getCommandWrappedInSh(execLine string) *exec.Cmd {
 	wrappedArgs := append([]string{"sh", "-c"}, execLine)
 
 	return exec.Command(wrappedArgs[0], wrappedArgs[1:]...)
+}
+
+// NewManageableCommand creates a new ManageableCommand
+func NewManageableCommand(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
+	return &ManageableCommand{
+		execLine:   execLine,
+		stdoutChan: stdoutChan,
+		stderrChan: stderrChan,
+	}
 }
 
 // Start starts the command
@@ -73,11 +83,17 @@ func (r *ManageableCommand) Stop() error {
 	return syscall.Kill(processGroupID, syscall.SIGKILL)
 }
 
-// NewManageableCommand creates a new ManageableCommand
-func NewManageableCommand(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
-	return &ManageableCommand{
-		execLine:   execLine,
-		stdoutChan: stdoutChan,
-		stderrChan: stderrChan,
+// IsStopped returns true if the command has stopped
+func (r *ManageableCommand) IsStopped() bool {
+	process, err := os.FindProcess(r.instance.Process.Pid)
+	if err != nil {
+		return true
+	} else {
+		err := process.Signal(syscall.Signal(0))
+		if err != nil {
+			return true
+		}
+
+		return false
 	}
 }

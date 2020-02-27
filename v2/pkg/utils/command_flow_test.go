@@ -1,13 +1,16 @@
 package utils
 
 import (
+	"log"
 	"strings"
 	"testing"
+	"time"
 )
 
 var (
 	testCommandsCreate = []string{"ls", "ls -la"}
 	testCommandsStart  = []string{"ping -c 1 localhost", "ping -c 1 127.0.0.1"}
+	testCommandsStop   = []string{"ping -c 1 localhost", "ping -c 60 127.0.0.1"}
 )
 
 func TestCreateCommandFlow(t *testing.T) {
@@ -17,6 +20,10 @@ func TestCreateCommandFlow(t *testing.T) {
 
 	if len(f.commands) < 2 {
 		t.Error("commands not set")
+	}
+
+	if f.isRestart != false {
+		t.Error("isRestart not false")
 	}
 }
 
@@ -55,5 +62,29 @@ func TestStartCommandFlow(t *testing.T) {
 
 	if hits < 2 {
 		t.Error("commands did not match expected output")
+	}
+}
+
+func TestStopCommandFlow(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	f := NewCommandFlow(testCommandsStop, stdoutChan, stderrChan)
+
+	if err := f.Start(); err != nil {
+		t.Error(err)
+	}
+
+	go func(t *testing.T) {
+		time.Sleep(time.Second * 2)
+
+		if err := f.Stop(); err != nil {
+			t.Error(err)
+
+			log.Fatal(err)
+		}
+	}(t)
+
+	if err := f.Wait(); err != nil {
+		t.Error(err)
 	}
 }
