@@ -40,7 +40,7 @@ func TestStartManageableCommand(t *testing.T) {
 			case stdout := <-stdoutChan:
 				t.Log("test stdout", stdout)
 
-				if strings.Contains(stdout, "PING") {
+				if strings.Contains(stdout, "PING localhost") {
 					hits++
 				}
 			case stderr := <-stderrChan:
@@ -59,7 +59,7 @@ func TestStartManageableCommand(t *testing.T) {
 		t.Error(err)
 	}
 
-	if hits < 0 {
+	if hits <= 0 {
 		t.Error("command did not match expected output")
 	}
 }
