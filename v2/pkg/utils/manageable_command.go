@@ -67,8 +67,8 @@ func (r *ManageableCommand) Stop() error {
 	return syscall.Kill(processGroupID, syscall.SIGKILL)
 }
 
-// New creates a new ManageableCommand
-func New(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
+// NewManageableCommand creates a new ManageableCommand
+func NewManageableCommand(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
 	return &ManageableCommand{
 		execLine:   execLine,
 		stdoutChan: stdoutChan,
