@@ -21,6 +21,26 @@ func NewCommandFlow(commands []string, stdoutChan, stderrChan chan string) *Comm
 	return commandFlow
 }
 
+func (f *CommandFlow) recreateCommands() error {
+	newCommands := []*ManageableCommand{}
+
+	for _, command := range f.commands {
+		manageableCommand := NewManageableCommand(command.GetExecLine(), command.GetStdoutChan(), command.GetStderrChan())
+
+		newCommands = append(newCommands, manageableCommand)
+	}
+
+	for _, command := range newCommands {
+		if err := command.Start(); err != nil {
+			return err
+		}
+	}
+
+	f.commands = newCommands
+
+	return nil
+}
+
 // Start starts the command flow
 func (f *CommandFlow) Start() error {
 	for _, command := range f.commands {
@@ -34,6 +54,10 @@ func (f *CommandFlow) Start() error {
 
 // Wait waits for the command flow to complete
 func (f *CommandFlow) Wait() error {
+	if f.isRestart {
+		return f.Wait()
+	}
+
 	for _, command := range f.commands {
 		if err := command.Wait(); err != nil {
 			return err
@@ -58,6 +82,23 @@ func (f *CommandFlow) Stop() error {
 			}
 		}
 	}
+
+	return nil
+}
+
+// Restart restarts the flow
+func (f *CommandFlow) Restart() error {
+	f.isRestart = true
+
+	if err := f.Stop(); err != nil {
+		return err
+	}
+
+	if err := f.recreateCommands(); err != nil {
+		return err
+	}
+
+	f.isRestart = false
 
 	return nil
 }

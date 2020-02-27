@@ -15,6 +15,15 @@ type ManageableCommand struct {
 	instance               *exec.Cmd
 }
 
+// NewManageableCommand creates a new ManageableCommand
+func NewManageableCommand(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
+	return &ManageableCommand{
+		execLine:   execLine,
+		stdoutChan: stdoutChan,
+		stderrChan: stderrChan,
+	}
+}
+
 func readFromReader(reader io.Reader, outChan chan string) {
 	bufStdout := bufio.NewReader(reader)
 
@@ -32,15 +41,6 @@ func getCommandWrappedInSh(execLine string) *exec.Cmd {
 	wrappedArgs := append([]string{"sh", "-c"}, execLine)
 
 	return exec.Command(wrappedArgs[0], wrappedArgs[1:]...)
-}
-
-// NewManageableCommand creates a new ManageableCommand
-func NewManageableCommand(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
-	return &ManageableCommand{
-		execLine:   execLine,
-		stdoutChan: stdoutChan,
-		stderrChan: stderrChan,
-	}
 }
 
 // Start starts the command
@@ -88,12 +88,30 @@ func (r *ManageableCommand) IsStopped() bool {
 	process, err := os.FindProcess(r.instance.Process.Pid)
 	if err != nil {
 		return true
-	} else {
-		err := process.Signal(syscall.Signal(0))
-		if err != nil {
-			return true
-		}
-
-		return false
 	}
+
+	err = process.Signal(syscall.Signal(0))
+	if err != nil {
+		return true
+	}
+
+	return false
+}
+
+// TODO: Add test
+// GetExecLine returns the command's execLine
+func (r *ManageableCommand) GetExecLine() string {
+	return r.execLine
+}
+
+// TODO: Add test
+// GetStdoutChan returns the command's stdout channel
+func (r *ManageableCommand) GetStdoutChan() chan string {
+	return r.stdoutChan
+}
+
+// TODO: Add test
+// GetStderrChan returns the command's stderr channel
+func (r *ManageableCommand) GetStderrChan() chan string {
+	return r.stderrChan
 }
