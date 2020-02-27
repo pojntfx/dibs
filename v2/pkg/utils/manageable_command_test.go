@@ -5,7 +5,30 @@ import (
 	"testing"
 )
 
-func TestStart(t *testing.T) {
+const (
+	testCommandCreate = "ls"
+	testCommandStart  = "ping -c 1 localhost"
+)
+
+func TestCreateManageableCommand(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandCreate, stdoutChan, stderrChan)
+
+	if c.execLine == "" {
+		t.Error("exec line not set")
+	}
+
+	if c.stdoutChan == nil {
+		t.Error("stdoutChan not set")
+	}
+
+	if c.stderrChan == nil {
+		t.Error("stderrChan not set")
+	}
+}
+
+func TestStartManageableCommand(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
 	hits := 0
@@ -24,7 +47,7 @@ func TestStart(t *testing.T) {
 		}
 	}()
 
-	c := New("ping -c 1 localhost", stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandStart, stdoutChan, stderrChan)
 
 	if err := c.Start(); err != nil {
 		t.Error(err)
