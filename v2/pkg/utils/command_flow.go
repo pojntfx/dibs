@@ -17,3 +17,18 @@ func NewCommandFlow(commands []string, stdoutChan, stderrChan chan string) *Comm
 
 	return commandFlow
 }
+
+// Start starts the command flow
+func (f *CommandFlow) Start() error {
+	for _, command := range f.commands {
+		if err := command.Start(); err != nil {
+			return err
+		}
+
+		if err := command.Wait(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
