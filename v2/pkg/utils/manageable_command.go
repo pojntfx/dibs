@@ -55,7 +55,13 @@ func (r *ManageableCommand) Start() error {
 }
 
 // Wait waits for the command to complete
-func (r *ManageableCommand) Wait() error { return r.instance.Wait() }
+func (r *ManageableCommand) Wait() error {
+	if err := r.instance.Wait(); err != nil && err.Error() != "signal: killed" {
+		return err
+	}
+
+	return nil
+}
 
 // Stop stops the command
 func (r *ManageableCommand) Stop() error {

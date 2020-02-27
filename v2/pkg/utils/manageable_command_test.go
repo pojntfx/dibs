@@ -3,11 +3,13 @@ package utils
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
 	testCommandCreate = "ls"
 	testCommandStart  = "ping -c 1 localhost"
+	testCommandStop   = "ping -c 60 localhost"
 )
 
 func TestCreateManageableCommand(t *testing.T) {
@@ -59,5 +61,27 @@ func TestStartManageableCommand(t *testing.T) {
 
 	if hits < 0 {
 		t.Error("command did not match expected output")
+	}
+}
+
+func TestStopManageableCommand(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandStop, stdoutChan, stderrChan)
+
+	if err := c.Start(); err != nil {
+		t.Error(err)
+	}
+
+	go func() {
+		time.Sleep(time.Second * 1)
+
+		if err := c.Stop(); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	if err := c.Wait(); err != nil {
+		t.Error(err)
 	}
 }
