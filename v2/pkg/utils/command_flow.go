@@ -2,7 +2,8 @@ package utils
 
 // CommandFlow is a manageable collection of commands
 type CommandFlow struct {
-	commands []*ManageableCommand
+	isRestart bool
+	commands  []*ManageableCommand
 }
 
 // NewCommandFlow creates a new CommandFlow
@@ -24,10 +25,21 @@ func (f *CommandFlow) Start() error {
 		if err := command.Start(); err != nil {
 			return err
 		}
+	}
 
+	return nil
+}
+
+// Wait waits for the command flow to complete
+func (f *CommandFlow) Wait() error {
+	for _, command := range f.commands {
 		if err := command.Wait(); err != nil {
 			return err
 		}
+	}
+
+	if f.isRestart {
+		return f.Wait()
 	}
 
 	return nil
