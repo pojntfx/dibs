@@ -20,16 +20,20 @@ func TestCreateManageableCommand(t *testing.T) {
 
 	c := NewManageableCommand(testCommandCreate, stdoutChan, stderrChan)
 
-	if c.execLine == "" {
-		t.Error("exec line not set")
+	if c == nil {
+		t.Error("New manageable command is nil")
 	}
 
-	if c.stdoutChan == nil {
-		t.Error("stdoutChan not set")
+	if c.execLine != testCommandCreate {
+		t.Error("execLine not set correctly")
 	}
 
-	if c.stderrChan == nil {
-		t.Error("stderrChan not set")
+	if c.stdoutChan != stdoutChan {
+		t.Error("stdoutChan not set correctly")
+	}
+
+	if c.stderrChan != stderrChan {
+		t.Error("stderrChan not correctly")
 	}
 }
 
@@ -94,7 +98,11 @@ func TestIsStoppedRunningProcess(t *testing.T) {
 
 	c := NewManageableCommand(testCommandIsStoppedRunningProcess, stdoutChan, stderrChan)
 
-	defer c.Stop()
+	defer func() {
+		if err := c.Stop(); err != nil {
+			t.Error(err)
+		}
+	}()
 	if err := c.Start(); err != nil {
 		t.Error(err)
 	}
