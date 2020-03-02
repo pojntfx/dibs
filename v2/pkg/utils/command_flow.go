@@ -30,11 +30,20 @@ func (f *CommandFlow) recreateCommands() error {
 		newCommands = append(newCommands, manageableCommand)
 	}
 
-	for _, command := range newCommands {
-		if err := command.Start(); err != nil {
-			return err
+	var err error
+	go func() {
+		for _, command := range f.commands {
+			if err != nil {
+				break
+			}
+
+			err = command.Start()
+
+			_ = command.Wait()
 		}
-	}
+	}()
+
+	return err
 
 	f.commands = newCommands
 
@@ -43,16 +52,22 @@ func (f *CommandFlow) recreateCommands() error {
 
 // Start starts the command flow
 func (f *CommandFlow) Start() error {
-	// TODO: Refactor to ensure serial execution of commands (wait for each one to finish before running the next one,
-	// but don't block this call)
 	// TODO: Add test that ensures serial execution of commands
-	for _, command := range f.commands {
-		if err := command.Start(); err != nil {
-			return err
-		}
-	}
 
-	return nil
+	var err error
+	go func() {
+		for _, command := range f.commands {
+			if err != nil {
+				break
+			}
+
+			err = command.Start()
+
+			_ = command.Wait()
+		}
+	}()
+
+	return err
 }
 
 // Wait waits for the command flow to complete
@@ -91,6 +106,8 @@ func (f *CommandFlow) Stop() error {
 
 // Restart restarts the flow
 func (f *CommandFlow) Restart() error {
+	// TODO: Add test that ensures serial execution of commands
+
 	f.isRestart = true
 
 	if err := f.Stop(); err != nil {
