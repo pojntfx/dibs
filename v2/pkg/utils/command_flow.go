@@ -22,7 +22,7 @@ func NewCommandFlow(commands []string, stdoutChan, stderrChan chan string) *Comm
 }
 
 func (f *CommandFlow) recreateCommands() error {
-	newCommands := []*ManageableCommand{}
+	var newCommands []*ManageableCommand
 
 	for _, command := range f.commands {
 		manageableCommand := NewManageableCommand(command.GetExecLine(), command.GetStdoutChan(), command.GetStderrChan())
