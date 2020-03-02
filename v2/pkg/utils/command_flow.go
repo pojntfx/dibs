@@ -43,6 +43,9 @@ func (f *CommandFlow) recreateCommands() error {
 
 // Start starts the command flow
 func (f *CommandFlow) Start() error {
+	// TODO: Refactor to ensure serial execution of commands (wait for each one to finish before running the next one,
+	// but don't block this call)
+	// TODO: Add test that ensures serial execution of commands
 	for _, command := range f.commands {
 		if err := command.Start(); err != nil {
 			return err

@@ -73,17 +73,33 @@ func (r *ManageableCommand) Wait() error {
 	return nil
 }
 
+// TODO: Add test for Zombie processes
 // Stop stops the command
 func (r *ManageableCommand) Stop() error {
+	noSuchProcessError := "no such process"
+
 	processGroupID, err := syscall.Getpgid(r.instance.Process.Pid)
+	if err != nil && err.Error() == noSuchProcessError {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
 
-	return syscall.Kill(processGroupID, syscall.SIGKILL)
+	// Ignore Zombie processes, which can't be killed
+	err = syscall.Kill(processGroupID, syscall.SIGKILL)
+	if err != nil && err.Error() == noSuchProcessError {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// IsStopped returns true if the command has stopped
+// TODO: Add test for Zombie processes
+// IsStopped returns true if the command has stopped. WARNING: This always returns false for Zombie processes.
 func (r *ManageableCommand) IsStopped() bool {
 	process, err := os.FindProcess(r.instance.Process.Pid)
 	if err != nil {
