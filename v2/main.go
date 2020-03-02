@@ -1,24 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"flag"
-	"io"
+	"github.com/pojntfx/dibs/v2/pkg/utils"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-	"os"
-	"os/exec"
-	"os/signal"
-	"regexp"
-	"strings"
-	"syscall"
-	"time"
-
-	"github.com/radovskyb/watcher"
-	"gopkg.in/yaml.v2"
 )
 
-// Config is the main configuration
+// Config is a dibs configuration
 type Config struct {
 	Paths struct {
 		Watch   string `yaml:"watch"`
@@ -33,197 +23,67 @@ type Config struct {
 	}
 }
 
-// Read reads from a reader till EOF
-func Read(reader io.Reader, outChan chan string) {
-	bufStdout := bufio.NewReader(reader)
-
-	for {
-		line, _, err := bufStdout.ReadLine()
-		if err != nil {
-			return
-		}
-
-		outChan <- string(line)
-	}
-}
-
-// RunCommand runs a command and sends it's outputs into channels
-func RunCommand(cmd *exec.Cmd, stdoutChan, stderrChan chan string, errChan chan error, runInBackground bool) {
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		errChan <- err
-
-		return
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		errChan <- err
-
-		return
-	}
-
-	go Read(stdout, stdoutChan)
-	go Read(stderr, stderrChan)
-
-	if runInBackground {
-		if err := cmd.Start(); err != nil {
-			errChan <- err
-		}
-
-		return
-	}
-
-	if err := cmd.Run(); err != nil {
-		errChan <- err
-	}
-}
-
-// GetCommandWrappedInSh returns a command wrapped in a call to `sh`
-func GetCommandWrappedInSh(args []string) *exec.Cmd {
-	wrappedArgs := append([]string{"sh", "-c"}, strings.Join(args, " "))
-
-	return exec.Command(wrappedArgs[0], wrappedArgs[1:]...)
-}
-
-// RunPipeline runs the pipeline
-func RunPipeline(generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand *exec.Cmd, stdoutChan, stderrChan chan string, errChan chan error, done *bool) {
-	log.Println("Generating sources")
-	RunCommand(generateSourcesCommand, stdoutChan, stderrChan, errChan, false)
-	log.Println("Building")
-	RunCommand(buildCommand, stdoutChan, stderrChan, errChan, false)
-	log.Println("Running unit tests")
-	RunCommand(unitTestsCommand, stdoutChan, stderrChan, errChan, false)
-	log.Println("Running integration tests")
-	RunCommand(integrationTestsCommand, stdoutChan, stderrChan, errChan, false)
-
-	log.Println("Starting app")
-	startCommand.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	RunCommand(startCommand, stdoutChan, stderrChan, errChan, true)
-
-	_ = startCommand.Wait()
-
-	*done = true
-
-	close(stdoutChan)
-	close(stderrChan)
-	close(errChan)
-}
-
-// StopCommand stops a command and it's children
-func StopCommand(command *exec.Cmd) error {
-	processGroupID, err := syscall.Getpgid(command.Process.Pid)
-	if err != nil {
-		return err
-	}
-
-	return syscall.Kill(processGroupID, syscall.SIGKILL)
-}
-
 func main() {
-	var (
-		configFilePath string
-	)
-
-	flag.StringVar(&configFilePath, "config-file", "dibs.yaml", "Config file to use")
-
+	var configFilePath string
+	flag.StringVar(&configFilePath, "config-file", "dibs.yaml", "The config file to use")
 	flag.Parse()
 
-	configFileContent, err := ioutil.ReadFile(configFilePath)
+	configFile, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	config := Config{}
-
-	if err := yaml.Unmarshal(configFileContent, &config); err != nil {
+	if err := yaml.Unmarshal(configFile, &config); err != nil {
 		log.Fatal(err)
 	}
 
-	generateSourcesCommands, buildCommands, unitTestsCommands, integrationTestsCommands, startCommands :=
-		strings.Fields(config.Commands.GenerateSources),
-		strings.Fields(config.Commands.Build),
-		strings.Fields(config.Commands.UnitTests),
-		strings.Fields(config.Commands.IntegrationTests),
-		strings.Fields(config.Commands.Start)
-	generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand :=
-		GetCommandWrappedInSh(generateSourcesCommands),
-		GetCommandWrappedInSh(buildCommands),
-		GetCommandWrappedInSh(unitTestsCommands),
-		GetCommandWrappedInSh(integrationTestsCommands),
-		GetCommandWrappedInSh(startCommands)
-	stdoutChan, stderrChan, errChan := make(chan string), make(chan string), make(chan error)
+	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	done := false
-	go RunPipeline(generateSourcesCommand, buildCommand, unitTestsCommand, integrationTestsCommand, startCommand, stdoutChan, stderrChan, errChan, &done)
+	commandFlow := utils.NewCommandFlow([]string{
+		config.Commands.GenerateSources,
+		config.Commands.Build,
+		config.Commands.UnitTests,
+		config.Commands.IntegrationTests,
+		config.Commands.Start,
+	}, stdoutChan, stderrChan)
 
-	watch := watcher.New()
-
-	includePathRegex := regexp.MustCompile(config.Paths.Include)
-	watch.AddFilterHook(watcher.RegexFilterHook(includePathRegex, true))
+	if err := commandFlow.Start(); err != nil {
+		log.Fatal(err)
+	}
 
 	go func() {
 		for {
 			select {
-			case event := <-watch.Event:
-				log.Println("EVENT", event)
-			case err := <-watch.Error:
-				log.Fatal("ERR", err)
-			case <-watch.Closed:
-				return
+			case stdout := <-stdoutChan:
+				log.Println("STDOUT", stdout)
+			case stderr := <-stderrChan:
+				log.Println("STDERR", stderr)
 			}
 		}
 	}()
 
-	if err := watch.AddRecursive(config.Paths.Watch); err != nil {
+	eventChan := make(chan string)
+
+	pathWatcher := utils.NewPathWatcher(config.Paths.Watch, config.Paths.Include, eventChan)
+
+	go func() {
+		for {
+			select {
+			case <-eventChan:
+				if err := commandFlow.Restart(); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}
+	}()
+
+	defer func() {
+		if err := commandFlow.Stop(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	if err := pathWatcher.Start(); err != nil {
 		log.Fatal(err)
-	}
-
-	interrupt := make(chan os.Signal, 2)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-interrupt
-
-		go func() {
-			<-interrupt
-
-			os.Exit(1)
-		}()
-
-		if err := StopCommand(startCommand); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	go func() {
-		if err := watch.Start(time.Millisecond * 100); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := StopCommand(startCommand); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	for {
-		select {
-		case stdout := <-stdoutChan:
-			if done {
-				return
-			}
-
-			log.Println("STDOUT", stdout)
-		case stderr := <-stderrChan:
-			if done {
-				return
-			}
-
-			log.Println("STDERR", stderr)
-		case err := <-errChan:
-			if done {
-				return
-			}
-
-			log.Println("ERR", err)
-		}
 	}
 }

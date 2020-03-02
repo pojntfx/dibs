@@ -35,7 +35,7 @@ func TestStartPathWatcher(t *testing.T) {
 
 	w := NewPathWatcher(pathWatch, pathInclude, eventChan)
 
-	// FIXME: Add test that tests if the watcher actually gets a file change
+	// FIXME: Add tests that test if the watcher actually gets a file change, creation and deletion event etc.
 	go func() {
 		if err := w.Start(); err != nil {
 			t.Error(err)
