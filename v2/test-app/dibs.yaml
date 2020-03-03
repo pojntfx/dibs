@@ -1,5 +1,5 @@
 paths:
-  watch: test-app # The path to watch
+  watch: . # The path to watch
   include: (.*).go # Regex of paths to include
   assetInImage: /app/.bin/test-app # Path of the asset in the Docker image
   assetOut: .bin/test-app # Path to which the asset should be copied

@@ -36,8 +36,8 @@ type dockerConfig struct {
 	Tag     string `yaml:"tag"`
 }
 
-func runCommandWithLog(execLine, pwd string, stdoutChan, stderrChan chan string) {
-	command := utils.NewManageableCommand(execLine, pwd, stdoutChan, stderrChan)
+func runCommandWithLog(execLine, dir string, stdoutChan, stderrChan chan string) {
+	command := utils.NewManageableCommand(execLine, dir, stdoutChan, stderrChan)
 
 	if err := command.Start(); err != nil {
 		log.Fatal(err)
@@ -67,6 +67,7 @@ func handleStdoutAndStderr(stdoutChan, stderrChan chan string) {
 func main() {
 	var (
 		configFilePath   string
+		context          string
 		dev              bool
 		generateSources  bool
 		build            bool
@@ -76,7 +77,13 @@ func main() {
 		pushImage        bool
 		docker           bool
 	)
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
+	flag.StringVar(&context, "context", "", "The config file to use")
 	flag.BoolVar(&dev, "dev", false, "Start the development flow for the project")
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
@@ -87,16 +94,14 @@ func main() {
 	flag.BoolVar(&docker, "docker", false, "Run in Docker")
 	flag.Parse()
 
+	if context == "" {
+		context = filepath.Join(pwd, configFilePath, "..")
+	}
+
 	configFile, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	rawPwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	pwd := filepath.Join(rawPwd, configFilePath, "..")
 
 	config := Config{}
 	if err := yaml.Unmarshal(configFile, &config); err != nil {
@@ -112,7 +117,7 @@ func main() {
 			config.Commands.UnitTests,
 			config.Commands.IntegrationTests,
 			config.Commands.Start,
-		}, pwd, stdoutChan, stderrChan)
+		}, context, stdoutChan, stderrChan)
 
 		if err := commandFlow.Start(); err != nil {
 			log.Fatal(err)
@@ -122,7 +127,7 @@ func main() {
 
 		eventChan := make(chan string)
 
-		pathWatcher := utils.NewPathWatcher(config.Paths.Watch, config.Paths.Include, eventChan)
+		pathWatcher := utils.NewPathWatcher(filepath.Join(context, config.Paths.Watch), filepath.Join(context, config.Paths.Include), eventChan)
 
 		go func() {
 			for {
@@ -146,30 +151,30 @@ func main() {
 	}
 
 	if generateSources {
-		runCommandWithLog(config.Commands.GenerateSources, pwd, stdoutChan, stderrChan)
+		runCommandWithLog(config.Commands.GenerateSources, context, stdoutChan, stderrChan)
 	}
 
 	if build {
-		runCommandWithLog(config.Commands.Build, pwd, stdoutChan, stderrChan)
+		runCommandWithLog(config.Commands.Build, context, stdoutChan, stderrChan)
 	}
 
 	if buildImage {
-		d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
+		d := utils.NewDockerManager(context, stdoutChan, stderrChan)
 
 		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-		if err := d.Build(filepath.Join(pwd, config.Docker.Build.File), filepath.Join(pwd, config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
+		if err := d.Build(filepath.Join(context, config.Docker.Build.File), filepath.Join(context, config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	if unitTests {
 		if docker {
-			d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
+			d := utils.NewDockerManager(context, stdoutChan, stderrChan)
 
 			go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-			if err := d.Build(filepath.Join(pwd, config.Docker.UnitTests.File), filepath.Join(pwd, config.Docker.UnitTests.Context), config.Docker.UnitTests.Tag); err != nil {
+			if err := d.Build(filepath.Join(context, config.Docker.UnitTests.File), filepath.Join(context, config.Docker.UnitTests.Context), config.Docker.UnitTests.Tag); err != nil {
 				log.Fatal(err)
 			}
 
@@ -177,17 +182,17 @@ func main() {
 				log.Fatal(err)
 			}
 		} else {
-			runCommandWithLog(config.Commands.UnitTests, pwd, stdoutChan, stderrChan)
+			runCommandWithLog(config.Commands.UnitTests, context, stdoutChan, stderrChan)
 		}
 	}
 
 	if integrationTests {
 		if docker {
-			d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
+			d := utils.NewDockerManager(context, stdoutChan, stderrChan)
 
 			go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-			if err := d.Build(filepath.Join(pwd, config.Docker.IntegrationTests.File), filepath.Join(pwd, config.Docker.IntegrationTests.Context), config.Docker.IntegrationTests.Tag); err != nil {
+			if err := d.Build(filepath.Join(context, config.Docker.IntegrationTests.File), filepath.Join(context, config.Docker.IntegrationTests.Context), config.Docker.IntegrationTests.Tag); err != nil {
 				log.Fatal(err)
 			}
 
@@ -195,12 +200,12 @@ func main() {
 				log.Fatal(err)
 			}
 		} else {
-			runCommandWithLog(config.Commands.IntegrationTests, pwd, stdoutChan, stderrChan)
+			runCommandWithLog(config.Commands.IntegrationTests, context, stdoutChan, stderrChan)
 		}
 	}
 
 	if pushImage {
-		d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
+		d := utils.NewDockerManager(context, stdoutChan, stderrChan)
 
 		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
