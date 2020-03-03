@@ -42,7 +42,7 @@ func runCommandWithLog(execLine string, stdoutChan, stderrChan chan string) {
 	}()
 
 	if err := command.Wait(); err != nil {
-		if err.Error() == "exit status 2" { // -help
+		if err != nil && err.Error() == "exit status 2" { // -help
 			return
 		}
 		log.Fatal(err)

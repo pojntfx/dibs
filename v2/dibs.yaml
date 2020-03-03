@@ -1,9 +1,24 @@
 paths:
   watch: test-app # The path to watch
   include: (.*).go # Regex of paths to include
+  assetInDocker: /app/.bin/test-app # Path of the asset in the docker image
+  assetOut: .bin/test-app # Path to which the asset should be copied
 commands:
   generateSources: go generate ./test-app/... # Command to generate sources
   build: go build -o test-app/.bin/test-app test-app/main.go # Command to build binary
   unitTests: go test ./test-app/... # Command to run unit test
   integrationTests: test-app/.bin/test-app -help # Command to run integration test
   start: test-app/.bin/test-app -keep-running # Command to start the app
+docker:
+  build: # The main Docker config
+    file: Dockerfile
+    context: .
+    tag: pojntfx/test-app
+  unitTests: # Docker configuration for unit tests
+    file: Dockerfile.unitTests
+    context: .
+    tag: pojntfx/test-app-unit-tests
+  integrationTests: # Docker configuration for integration tests
+    file: Dockerfile.integrationTests
+    context: .
+    tag: pojntfx/test-app-integration-tests
