@@ -23,8 +23,9 @@ type Config struct {
 		Start            string `yaml:"start"`
 	}
 	Docker struct {
-		Build     dockerConfig `yaml:"build"`
-		UnitTests dockerConfig `yaml:"unitTests"`
+		Build            dockerConfig `yaml:"build"`
+		UnitTests        dockerConfig `yaml:"unitTests"`
+		IntegrationTests dockerConfig `yaml:"integrationTests"`
 	}
 }
 
@@ -174,7 +175,21 @@ func main() {
 	}
 
 	if integrationTests {
-		runCommandWithLog(config.Commands.IntegrationTests, stdoutChan, stderrChan)
+		if docker {
+			d := utils.NewDockerManager(stdoutChan, stderrChan)
+
+			go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+			if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.IntegrationTests.File), filepath.Join(configFilePath, "..", config.Docker.IntegrationTests.Context), config.Docker.IntegrationTests.Tag); err != nil {
+				log.Fatal(err)
+			}
+
+			if err := d.Run(config.Docker.IntegrationTests.Tag, ""); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			runCommandWithLog(config.Commands.IntegrationTests, stdoutChan, stderrChan)
+		}
 	}
 
 	if pushImage {
