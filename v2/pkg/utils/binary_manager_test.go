@@ -35,6 +35,10 @@ func TestCreateBinaryManager(t *testing.T) {
 // TestPushBinaryManager requires the environment variables below to be set; it is disabled by default.
 func TestPushBinaryManager(t *testing.T) {
 	if os.Getenv("DIBS_BINARY_PUSH_TEST_ENABLED") == "1" {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
+		}
+
 		stdoutChan, stderrChan := make(chan string), make(chan string)
 
 		b := NewBinaryManager(testContext, stdoutChan, stderrChan)

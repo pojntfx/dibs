@@ -1,5 +1,7 @@
+# syntax=docker/dockerfile:experimental
 # Build container
-FROM golang:alpine AS build
+FROM --platform=$TARGETPLATFORM golang:alpine AS build
+ARG TARGETPLATFORM
 
 WORKDIR /app
 
@@ -13,8 +15,9 @@ ADD . .
 RUN dibs -build
 
 # Run container
-FROM alpine
+FROM --platform=$TARGETPLATFORM alpine
+ARG TARGETPLATFORM
 
-COPY --from=build /app/.bin/binaries/test-app* /usr/local/bin
+COPY --from=build /app/.bin/binaries/test-app* /usr/local/bin/test-app
 
 CMD /usr/local/bin/test-app

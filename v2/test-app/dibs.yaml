@@ -11,7 +11,7 @@ platforms:
       build: GOOS=linux GOARCH=amd64 go build -o .bin/binaries/test-app-linux-amd64 main.go # Command to build binary
       unitTests: go test ./... # Command to run unit test
       integrationTests: .bin/binaries/test-app-linux-amd64 -help # Command to run integration test
-      imageTests: docker run pojntfx/test-app-linux-amd64 /usr/local/bin/test-app -help # Command to run to test the Docker image
+      imageTests: docker run --platform linux/amd64 -e TARGETPLATFORM=linux/amd64 pojntfx/test-app-linux-amd64 /usr/local/bin/test-app -help # Command to run to test the Docker image
       chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
       start: .bin/binaries/test-app-linux-amd64 -keep-running # Command to start the app
     docker:
@@ -46,7 +46,7 @@ platforms:
       build: GOOS=linux GOARCH=arm64 go build -o .bin/binaries/test-app-linux-arm64 main.go # Command to build binary
       unitTests: go test ./... # Command to run unit test
       integrationTests: .bin/binaries/test-app-linux-arm64 -help # Command to run integration test
-      imageTests: docker run pojntfx/test-app-linux-arm64 /usr/local/bin/test-app -help # Command to run to test the Docker image
+      imageTests: docker run --platform linux/arm64 -e TARGETPLATFORM=linux/arm64 pojntfx/test-app-linux-arm64 /usr/local/bin/test-app -help # Command to run to test the Docker image
       chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
       start: .bin/binaries/test-app-linux-arm64 -keep-running # Command to start the app
     docker:
