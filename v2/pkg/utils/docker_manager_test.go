@@ -59,3 +59,37 @@ func TestBuildDockerManager(t *testing.T) {
 		t.Error("Docker output did not match expected output")
 	}
 }
+
+func TestPushDockerManager(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	d := NewDockerManager(stdoutChan, stderrChan)
+
+	hits := 0
+	go func() {
+		for {
+			select {
+			case stdout := <-stdoutChan:
+				t.Log("test stdout", stdout)
+
+				if strings.Contains(stdout, "The push refers to repository") || strings.Contains(stdout, "digest:") {
+					hits++
+				}
+			case stderr := <-stderrChan:
+				t.Error("error while building or pushing Docker image", stderr)
+			}
+		}
+	}()
+
+	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+		t.Error(err)
+	}
+
+	if err := d.Push(testTag); err != nil {
+		t.Error(err)
+	}
+
+	if hits < 2 {
+		t.Error("Docker output did not match expected output")
+	}
+}
