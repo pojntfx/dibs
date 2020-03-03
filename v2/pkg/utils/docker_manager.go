@@ -40,8 +40,12 @@ func (d *DockerManager) Push(tag string) error {
 }
 
 // Run runs a command in a Docker image
-func (d *DockerManager) Run(tag, execLine string) error {
+func (d *DockerManager) Run(tag, execLine string, dockerInDocker bool) error {
 	command := NewManageableCommand("docker run "+tag+" "+execLine, d.dir, d.stdoutChan, d.stderrChan)
+	// TODO: Add test for Docker in Docker run
+	if dockerInDocker {
+		command = NewManageableCommand("docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock "+tag+" "+execLine, d.dir, d.stdoutChan, d.stderrChan)
+	}
 
 	if err := command.Start(); err != nil {
 		return err

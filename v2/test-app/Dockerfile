@@ -1,3 +1,4 @@
+# Build container
 FROM golang AS build
 
 WORKDIR /app
@@ -9,6 +10,7 @@ ADD . .
 
 RUN dibs -build
 
+# Run container
 FROM debian
 
 COPY --from=build /app/.bin/binaries/test-app /usr/local/bin
