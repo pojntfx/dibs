@@ -1,7 +1,7 @@
 paths:
   watch: test-app # The path to watch
   include: (.*).go # Regex of paths to include
-  assetInDocker: /app/.bin/test-app # Path of the asset in the docker image
+  assetInImage: /app/.bin/test-app # Path of the asset in the Docker image
   assetOut: .bin/test-app # Path to which the asset should be copied
 commands:
   generateSources: go generate ./test-app/... # Command to generate sources

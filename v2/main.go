@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 )
 
 // Config is a dibs configuration
@@ -21,6 +22,15 @@ type Config struct {
 		IntegrationTests string `yaml:"integrationTests"`
 		Start            string `yaml:"start"`
 	}
+	Docker struct {
+		Build dockerConfig
+	}
+}
+
+type dockerConfig struct {
+	File    string `yaml:"file"`
+	Context string `yaml:"context"`
+	Tag     string `yaml:"tag"`
 }
 
 func runCommandWithLog(execLine string, stdoutChan, stderrChan chan string) {
@@ -42,7 +52,7 @@ func runCommandWithLog(execLine string, stdoutChan, stderrChan chan string) {
 	}()
 
 	if err := command.Wait(); err != nil {
-		if err != nil && err.Error() == "exit status 2" { // -help
+		if err.Error() == "exit status 2" { // -help
 			return
 		}
 		log.Fatal(err)
@@ -55,6 +65,7 @@ func main() {
 		dev              bool
 		generateSources  bool
 		build            bool
+		buildImage       bool
 		unitTests        bool
 		integrationTests bool
 	)
@@ -62,6 +73,7 @@ func main() {
 	flag.BoolVar(&dev, "dev", false, "Run the development mode for the project")
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
+	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image for the project")
 	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests to the project")
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests to the project")
 	flag.Parse()
@@ -133,6 +145,25 @@ func main() {
 
 	if build {
 		runCommandWithLog(config.Commands.Build, stdoutChan, stderrChan)
+	}
+
+	if buildImage {
+		d := utils.NewDockerManager(stdoutChan, stderrChan)
+
+		go func() {
+			for {
+				select {
+				case stdout := <-stdoutChan:
+					log.Println("STDOUT", stdout)
+				case stderr := <-stderrChan:
+					log.Println("STDERR", stderr)
+				}
+			}
+		}()
+
+		if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.Build.File), filepath.Join(configFilePath, "..", config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if unitTests {
