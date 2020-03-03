@@ -1,16 +1,15 @@
 # Build container
-FROM debian AS build
+FROM alpine AS build
 
 WORKDIR /app
 
-RUN apt update
-RUN apt install -y curl
-
-RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >/tmp/helm
-RUN install /tmp/helm /usr/local/bin
+RUN apk add -u curl tar
 
 RUN curl -Lo /tmp/dibs https://nx904.your-storageshare.de/s/FkBmkPRPPC7Ea2A/download
 RUN install /tmp/dibs /usr/local/bin
+
+RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >/tmp/helm
+RUN install /tmp/helm /usr/local/bin
 
 RUN helm init --client-only
 
@@ -23,8 +22,7 @@ FROM docker:stable
 
 WORKDIR /app
 
-RUN apk update
-RUN apk add curl tar
+RUN apk add -u curl tar
 
 RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >/tmp/helm
 RUN install /tmp/helm /usr/local/bin

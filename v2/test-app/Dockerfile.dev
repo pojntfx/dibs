@@ -9,4 +9,4 @@ RUN install /tmp/dibs /usr/local/bin
 
 ADD . .
 
-CMD dibs -unitTests
+CMD dibs -dev
