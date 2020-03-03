@@ -1,4 +1,6 @@
-FROM golang:alpine
+# syntax=docker/dockerfile:experimental
+FROM --platform=$TARGETPLATFORM golang:alpine
+ARG TARGETPLATFORM
 
 WORKDIR /app
 

@@ -24,6 +24,21 @@ var (
 	testAssetOut     = filepath.Join(os.TempDir(), "test-app")
 )
 
+func enableBuildx() error {
+	envVariablesToSet := [][]string{
+		{"TARGETPLATFORM", "linux/amd64"},
+		{"DOCKER_CLI_EXPERIMENTAL", "enabled"},
+		{"DOCKER_BUILDKIT", "1"},
+	}
+	for _, envVariableToSet := range envVariablesToSet {
+		if err := os.Setenv(envVariableToSet[0], envVariableToSet[1]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func TestCreateDockerManager(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
@@ -47,6 +62,10 @@ func TestCreateDockerManager(t *testing.T) {
 }
 
 func TestBuildDockerManager(t *testing.T) {
+	if err := enableBuildx(); err != nil {
+		t.Error(err)
+	}
+
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
 	d := NewDockerManager(testContext, stdoutChan, stderrChan)
@@ -57,12 +76,12 @@ func TestBuildDockerManager(t *testing.T) {
 			select {
 			case stdout := <-stdoutChan:
 				t.Log("test stdout", stdout)
+			case stderr := <-stderrChan:
+				t.Log("test stderr", stderr)
 
-				if strings.Contains(stdout, "Successfully built") || strings.Contains(stdout, "Successfully tagged") {
+				if strings.Contains(stderr, "DONE") || strings.Contains(stderr, "naming to") {
 					hits++
 				}
-			case stderr := <-stderrChan:
-				t.Error("error while building Docker image", stderr)
 			}
 		}
 	}()
@@ -77,6 +96,10 @@ func TestBuildDockerManager(t *testing.T) {
 }
 
 func TestPushDockerManager(t *testing.T) {
+	if err := enableBuildx(); err != nil {
+		t.Error(err)
+	}
+
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
 	d := NewDockerManager(testContext, stdoutChan, stderrChan)
@@ -92,7 +115,7 @@ func TestPushDockerManager(t *testing.T) {
 					hits++
 				}
 			case stderr := <-stderrChan:
-				t.Error("error while building or pushing Docker image", stderr)
+				t.Log("test stderr", stderr)
 			}
 		}
 	}()
@@ -111,6 +134,10 @@ func TestPushDockerManager(t *testing.T) {
 }
 
 func TestRunDockerManager(t *testing.T) {
+	if err := enableBuildx(); err != nil {
+		t.Error(err)
+	}
+
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
 	d := NewDockerManager(testContext, stdoutChan, stderrChan)
@@ -126,7 +153,7 @@ func TestRunDockerManager(t *testing.T) {
 					hits++
 				}
 			case stderr := <-stderrChan:
-				t.Error("error while building or running Docker image", stderr)
+				t.Log("test stderr", stderr)
 			}
 		}
 	}()
@@ -139,12 +166,16 @@ func TestRunDockerManager(t *testing.T) {
 		t.Error(err)
 	}
 
-	if hits < 2 {
+	if hits < 1 {
 		t.Error("Docker output did not match expected output")
 	}
 }
 
 func TestCopyFromImageDockerManager(t *testing.T) {
+	if err := enableBuildx(); err != nil {
+		t.Error(err)
+	}
+
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
 	d := NewDockerManager(testContext, stdoutChan, stderrChan)

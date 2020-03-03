@@ -143,12 +143,18 @@ This command requires the following env variables to be set:
 This may also be set with the TARGETPLATFORM env variable; a value of "*" runs for all platforms.`)
 	flag.Parse()
 
+	// Normalize the environment and pass on env variables
 	if platformFromEnv := os.Getenv("TARGETPLATFORM"); platformFromEnv != "" {
 		platform = platformFromEnv
 	}
-
-	if err := os.Setenv("TARGETPLATFORM", platform); err != nil {
-		log.Fatal(err)
+	envVariablesToSet := [][]string{
+		{"DOCKER_CLI_EXPERIMENTAL", "enabled"},
+		{"DOCKER_BUILDKIT", "1"},
+	}
+	for _, envVariableToSet := range envVariablesToSet {
+		if err := os.Setenv(envVariableToSet[0], envVariableToSet[1]); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	pwd, err := os.Getwd()
@@ -174,6 +180,10 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 
 	for _, config := range configs.Platforms {
 		if config.Identifier == platform || platform == "*" {
+			if err := os.Setenv("TARGETPLATFORM", config.Identifier); err != nil {
+				log.Fatal(err)
+			}
+
 			if dev {
 				commandFlow := utils.NewCommandFlow([]string{
 					config.Commands.GenerateSources,

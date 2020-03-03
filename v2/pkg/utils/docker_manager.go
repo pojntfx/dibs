@@ -20,9 +20,19 @@ func NewDockerManager(dir string, stdoutChan, stderrChan chan string) *DockerMan
 	}
 }
 
+func getTargetPlatform() string {
+	return os.Getenv("TARGETPLATFORM")
+}
+
+func getDockerRunPrefix() string {
+	targetplatform := getTargetPlatform()
+
+	return "docker run -e TARGETPLATFORM=" + targetplatform + " --platform " + targetplatform
+}
+
 // Build builds and tags a Docker image
 func (d *DockerManager) Build(file, context, tag string) error {
-	command := NewManageableCommand("docker build -f "+file+" -t "+tag+" "+context, d.dir, d.stdoutChan, d.stderrChan)
+	command := NewManageableCommand("docker buildx build --progress plain --pull --load --platform "+getTargetPlatform()+" -f "+file+" -t "+tag+" "+context, d.dir, d.stdoutChan, d.stderrChan)
 
 	if err := command.Start(); err != nil {
 		return err
@@ -44,10 +54,10 @@ func (d *DockerManager) Push(tag string) error {
 
 // Run runs a command in a Docker image
 func (d *DockerManager) Run(tag, execLine string, dockerInDocker bool) error {
-	command := NewManageableCommand("docker run -e TARGETPLATFORM="+os.Getenv("TARGETPLATFORM")+" "+tag+" "+execLine, d.dir, d.stdoutChan, d.stderrChan)
+	command := NewManageableCommand(getDockerRunPrefix()+" "+tag+" "+execLine, d.dir, d.stdoutChan, d.stderrChan)
 	// TODO: Add test for Docker in Docker run
 	if dockerInDocker {
-		command = NewManageableCommand("docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock -e TARGETPLATFORM="+os.Getenv("TARGETPLATFORM")+" "+tag+" "+execLine, d.dir, d.stdoutChan, d.stderrChan)
+		command = NewManageableCommand(getDockerRunPrefix()+" --privileged -v /var/run/docker.sock:/var/run/docker.sock "+tag+" "+execLine, d.dir, d.stdoutChan, d.stderrChan)
 	}
 
 	if err := command.Start(); err != nil {
@@ -61,7 +71,7 @@ func (d *DockerManager) Run(tag, execLine string, dockerInDocker bool) error {
 func (d *DockerManager) CopyFromImage(tag, assetInImage, assetOut string) error {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	runInBackgroundCommand := NewManageableCommand("docker run -d "+tag+" "+"ls", d.dir, stdoutChan, stderrChan)
+	runInBackgroundCommand := NewManageableCommand(getDockerRunPrefix()+" -d "+tag+" "+"ls", d.dir, stdoutChan, stderrChan)
 
 	if err := runInBackgroundCommand.Start(); err != nil {
 		return err

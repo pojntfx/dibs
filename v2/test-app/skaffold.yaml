@@ -10,6 +10,8 @@ profiles:
           context: .
           docker:
             dockerfile: Dockerfile
+      local:
+        useBuildkit: true
     deploy:
       helm:
         releases:
@@ -27,6 +29,8 @@ profiles:
           sync:
             infer:
               - "**/*.go"
+      local:
+        useBuildkit: true
     deploy:
       helm:
         releases:
