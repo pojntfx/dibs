@@ -24,6 +24,7 @@ type Config struct {
 		UnitTests        string `yaml:"unitTests"`
 		IntegrationTests string `yaml:"integrationTests"`
 		ImageTests       string `yaml:"imageTests"`
+		ChartTests       string `yaml:"chartTests"`
 		Start            string `yaml:"start"`
 	}
 	Docker struct {
@@ -82,6 +83,7 @@ func main() {
 		unitTests        bool
 		integrationTests bool
 		imageTests       bool
+		chartTests       bool
 		pushImage        bool
 		docker           bool
 		buildChart       bool
@@ -97,6 +99,7 @@ func main() {
 	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests of the project")
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
 	flag.BoolVar(&imageTests, "imageTests", false, "Run the image tests of the project")
+	flag.BoolVar(&chartTests, "chartTests", false, "Run the chart tests of the project")
 	flag.BoolVar(&pushImage, "pushImage", false, "Push to Docker image of the project")
 	flag.BoolVar(&buildChart, "buildChart", false, "Build the Helm chart of the project")
 	flag.Parse()
@@ -236,6 +239,10 @@ func main() {
 
 	if imageTests {
 		runCommandWithLog(config.Commands.ImageTests, context, stdoutChan, stderrChan)
+	}
+
+	if chartTests {
+		runCommandWithLog(config.Commands.ChartTests, context, stdoutChan, stderrChan)
 	}
 
 	if pushImage {
