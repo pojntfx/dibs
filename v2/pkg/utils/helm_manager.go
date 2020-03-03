@@ -1,5 +1,14 @@
 package utils
 
+import (
+	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	"os"
+	"path/filepath"
+	"time"
+)
+
 // HelmManager manages Helm
 type HelmManager struct {
 	dir                    string
@@ -48,5 +57,53 @@ func (h *HelmManager) Push(gitUserName, gitUserEmail, gitCommitMessage, githubUs
 		return err
 	}
 
-	return nil
+	if err := os.RemoveAll(cloneDir); err != nil {
+		return err
+	}
+
+	if _, err := git.PlainClone(cloneDir, false, &git.CloneOptions{
+		URL:      githubRepositoryUrl,
+		Auth:     &http.BasicAuth{Username: githubUserName, Password: githubToken},
+		Progress: nil,
+	}); err != nil {
+		return err
+	}
+
+	updateIndexCommand := NewManageableCommand("cr index -o "+githubUserName+" -t "+githubToken+" -r "+githubRepositoryName+" -p "+chartDist+" -i "+filepath.Join(cloneDir, "index.yaml")+" -c "+githubPagesUrl, h.dir, h.stdoutChan, h.stderrChan)
+
+	if err := updateIndexCommand.Start(); err != nil {
+		return err
+	}
+
+	if err := updateIndexCommand.Wait(); err != nil {
+		return err
+	}
+
+	g, err := git.PlainOpen(cloneDir)
+	if err != nil {
+		return err
+	}
+
+	wt, err := g.Worktree()
+	if err != nil {
+		return err
+	}
+
+	if _, err = wt.Add("."); err != nil {
+		return err
+	}
+
+	if _, err = wt.Commit(gitCommitMessage, &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  gitUserName,
+			Email: gitUserEmail,
+			When:  time.Now(),
+		},
+	}); err != nil {
+		return err
+	}
+
+	return g.Push(&git.PushOptions{
+		Auth: &http.BasicAuth{Username: githubUserName, Password: githubToken},
+	})
 }

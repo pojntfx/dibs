@@ -102,6 +102,7 @@ func main() {
 		pushImage        bool
 		docker           bool
 		buildChart       bool
+		pushChart        bool
 	)
 
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
@@ -115,8 +116,18 @@ func main() {
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
 	flag.BoolVar(&imageTests, "imageTests", false, "Run the image tests of the project")
 	flag.BoolVar(&chartTests, "chartTests", false, "Run the chart tests of the project")
-	flag.BoolVar(&pushImage, "pushImage", false, "Push to Docker image of the project")
+	flag.BoolVar(&pushImage, "pushImage", false, "Push the Docker image of the project")
 	flag.BoolVar(&buildChart, "buildChart", false, "Build the Helm chart of the project")
+	flag.BoolVar(&pushChart, "pushChart", false, `Push the Helm chart of the project.
+This command requires the following env variables to be set:
+- DIBS_GIT_USER_NAME
+- DIBS_GIT_USER_EMAIL
+- DIBS_GIT_COMMIT_MESSAGE
+- DIBS_GITHUB_USER_NAME
+- DIBS_GITHUB_TOKEN
+- DIBS_GITHUB_REPOSITORY_NAME
+- DIBS_GITHUB_REPOSITORY_URL
+- DIBS_GITHUB_PAGES_URL`)
 	flag.Parse()
 
 	pwd, err := os.Getwd()
@@ -263,7 +274,28 @@ func main() {
 
 		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-		if err := h.Build(config.Helm.Src, config.Helm.Dist); err != nil {
+		if err := h.Build(filepath.Join(context, config.Helm.Src), filepath.Join(config.Helm.Dist)); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if pushChart {
+		h := utils.NewHelmManager(context, stdoutChan, stderrChan)
+
+		go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+		if err := h.Push(
+			os.Getenv("DIBS_GIT_USER_NAME"),
+			os.Getenv("DIBS_GIT_USER_EMAIL"),
+			os.Getenv("DIBS_GIT_COMMIT_MESSAGE"),
+			os.Getenv("DIBS_GITHUB_USER_NAME"),
+			os.Getenv("DIBS_GITHUB_TOKEN"),
+			os.Getenv("DIBS_GITHUB_REPOSITORY_NAME"),
+			os.Getenv("DIBS_GITHUB_REPOSITORY_URL"),
+			os.Getenv("DIBS_GITHUB_PAGES_URL"),
+			filepath.Join(context, config.Helm.Dist),
+			filepath.Join(os.TempDir(), "dibs-push-chart-repo"),
+		); err != nil {
 			log.Fatal(err)
 		}
 	}
