@@ -8,6 +8,7 @@ commands:
   build: go build -o .bin/binaries/test-app main.go # Command to build binary
   unitTests: go test ./... # Command to run unit test
   integrationTests: .bin/binaries/test-app -help # Command to run integration test
+  imageTests: docker run pojntfx/test-app /usr/local/bin/test-app -help # Command to run to test the Docker image
   start: .bin/binaries/test-app -keep-running # Command to start the app
 docker:
   build: # The main Docker config

@@ -23,6 +23,7 @@ type Config struct {
 		Build            string `yaml:"build"`
 		UnitTests        string `yaml:"unitTests"`
 		IntegrationTests string `yaml:"integrationTests"`
+		ImageTests       string `yaml:"imageTests"`
 		Start            string `yaml:"start"`
 	}
 	Docker struct {
@@ -80,27 +81,30 @@ func main() {
 		buildImage       bool
 		unitTests        bool
 		integrationTests bool
+		imageTests       bool
 		pushImage        bool
 		docker           bool
 		buildChart       bool
 	)
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
 	flag.StringVar(&context, "context", "", "The config file to use")
+	flag.BoolVar(&docker, "docker", false, "Run in Docker")
 	flag.BoolVar(&dev, "dev", false, "Start the development flow for the project")
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
 	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image of the project")
 	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests of the project")
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
+	flag.BoolVar(&imageTests, "imageTests", false, "Run the image tests of the project")
 	flag.BoolVar(&pushImage, "pushImage", false, "Push to Docker image of the project")
-	flag.BoolVar(&docker, "docker", false, "Run in Docker")
 	flag.BoolVar(&buildChart, "buildChart", false, "Build the Helm chart of the project")
 	flag.Parse()
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if context == "" {
 		context = filepath.Join(pwd, configFilePath, "..")
@@ -228,6 +232,10 @@ func main() {
 		} else {
 			runCommandWithLog(config.Commands.IntegrationTests, context, stdoutChan, stderrChan)
 		}
+	}
+
+	if imageTests {
+		runCommandWithLog(config.Commands.ImageTests, context, stdoutChan, stderrChan)
 	}
 
 	if pushImage {
