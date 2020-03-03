@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app{{ if .Values.dev}}-dev{{ end }}
+spec:
+  selector:
+    matchLabels:
+      app: test-app{{ if .Values.dev}}-dev{{ end }}
+  template:
+    metadata:
+      labels:
+        app: test-app{{ if .Values.dev}}-dev{{ end }}
+    spec:
+      containers:
+        - name: test-app{{ if .Values.dev}}-dev{{ end }}
+          image: {{ .Values.image }}
