@@ -1,0 +1,38 @@
+apiVersion: skaffold/v1
+kind: Config
+metadata:
+  name: test-app
+profiles:
+  - name: test-app
+    build:
+      artifacts:
+        - image: pojntfx/test-app
+          context: .
+          docker:
+            dockerfile: Dockerfile
+    deploy:
+      helm:
+        releases:
+          - name: test-app
+            chartPath: charts/test-app
+            values:
+              image: pojntfx/test-app
+  - name: test-app-dev
+    build:
+      artifacts:
+        - image: pojntfx/test-app-dev
+          context: .
+          docker:
+            dockerfile: Dockerfile.dev
+          sync:
+            infer:
+              - "**/*.go"
+    deploy:
+      helm:
+        releases:
+          - name: test-app-dev
+            chartPath: charts/test-app
+            values:
+              image: pojntfx/test-app-dev
+            setValues:
+              dev: true
