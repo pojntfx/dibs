@@ -35,3 +35,18 @@ func (h *HelmManager) Build(src, dist string) error {
 
 	return buildCommand.Wait()
 }
+
+// Push releases a Helm chart using GitHub, GitHub releases and GitHub pages
+func (h *HelmManager) Push(gitUserName, gitUserEmail, gitCommitMessage, githubUserName, githubToken, githubRepositoryName, githubRepositoryUrl, githubPagesUrl, chartDist, cloneDir string) error {
+	uploadCommand := NewManageableCommand("cr upload -o "+githubUserName+" -t "+githubToken+" -r "+githubRepositoryName+" -p "+chartDist, h.dir, h.stdoutChan, h.stderrChan)
+
+	if err := uploadCommand.Start(); err != nil {
+		return err
+	}
+
+	if err := uploadCommand.Wait(); err != nil {
+		return err
+	}
+
+	return nil
+}
