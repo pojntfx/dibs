@@ -17,8 +17,8 @@ func main() {
 
 	if keepRunning {
 		for {
-			time.Sleep(time.Second * 2)
 			fmt.Println("Hello, world!")
+			time.Sleep(time.Second * 2)
 		}
 	}
 }
