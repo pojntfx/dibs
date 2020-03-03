@@ -17,9 +17,11 @@ var (
 
 		return filepath.Join(pwd, "..", "..", "test-app")
 	}()
-	testDockerfile = filepath.Join(testContext, "Dockerfile")
-	testTag        = filepath.Join("pojntfx/test-app")
-	testExecLine   = "ls"
+	testDockerfile   = filepath.Join(testContext, "Dockerfile")
+	testTag          = filepath.Join("pojntfx/test-app")
+	testExecLine     = "ls"
+	testAssetInImage = "/usr/local/bin/test-app" // Don't `filepath.Join` as this is hard-coded in `dibs.yaml` anyways
+	testAssetOut     = filepath.Join(os.TempDir(), "test-app")
 )
 
 func TestCreateDockerManager(t *testing.T) {
@@ -139,5 +141,27 @@ func TestRunDockerManager(t *testing.T) {
 
 	if hits < 2 {
 		t.Error("Docker output did not match expected output")
+	}
+}
+
+func TestCopyFromImageDockerManager(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
+
+	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.RemoveAll(testAssetOut); err != nil {
+		t.Error(err)
+	}
+
+	if err := d.CopyFromImage(testTag, testAssetInImage, testAssetOut); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Stat(testAssetOut); err != nil {
+		t.Error(err)
 	}
 }
