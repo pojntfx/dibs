@@ -1,5 +1,7 @@
 package utils
 
+import "errors"
+
 // DockerManager manages Docker
 type DockerManager struct {
 	dir                    string
@@ -46,4 +48,40 @@ func (d *DockerManager) Run(tag, execLine string) error {
 	}
 
 	return command.Wait()
+}
+
+// CopyFromImage copies an asset from a Docker image
+func (d *DockerManager) CopyFromImage(tag, assetInImage, assetOut string) error {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	runInBackgroundCommand := NewManageableCommand("docker run -d "+tag+" "+"ls", d.dir, stdoutChan, stderrChan)
+
+	if err := runInBackgroundCommand.Start(); err != nil {
+		return err
+	}
+
+	containerId := func() string {
+		for {
+			select {
+			case id := <-stdoutChan:
+				return id
+			}
+		}
+	}()
+
+	if err := runInBackgroundCommand.Wait(); err != nil {
+		return err
+	}
+
+	if containerId == "" {
+		return errors.New("could not get ID from running the image")
+	}
+
+	copyCommand := NewManageableCommand("docker cp "+containerId+":"+assetInImage+" "+assetOut, d.dir, d.stdoutChan, d.stderrChan)
+
+	if err := copyCommand.Start(); err != nil {
+		return err
+	}
+
+	return copyCommand.Wait()
 }

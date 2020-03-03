@@ -13,8 +13,10 @@ import (
 // Config is a dibs configuration
 type Config struct {
 	Paths struct {
-		Watch   string `yaml:"watch"`
-		Include string `yaml:"include"`
+		Watch        string `yaml:"watch"`
+		Include      string `yaml:"include"`
+		AssetInImage string `yaml:"assetInImage"`
+		AssetOut     string `yaml:"assetOut"`
 	}
 	Commands struct {
 		GenerateSources  string `yaml:"generateSources"`
@@ -155,7 +157,25 @@ func main() {
 	}
 
 	if build {
-		runCommandWithLog(config.Commands.Build, context, stdoutChan, stderrChan)
+		if docker {
+			d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+			go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+			if err := d.Build(filepath.Join(context, config.Docker.Build.File), filepath.Join(context, config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
+				log.Fatal(err)
+			}
+
+			if err := os.MkdirAll(filepath.Join(context, config.Paths.AssetOut, ".."), 0777); err != nil {
+				log.Fatal(err)
+			}
+
+			if err := d.CopyFromImage(config.Docker.Build.Tag, config.Paths.AssetInImage, config.Paths.AssetOut); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			runCommandWithLog(config.Commands.Build, context, stdoutChan, stderrChan)
+		}
 	}
 
 	if buildImage {
