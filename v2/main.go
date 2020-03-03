@@ -40,22 +40,24 @@ func runCommandWithLog(execLine string, stdoutChan, stderrChan chan string) {
 		log.Fatal(err)
 	}
 
-	go func() {
-		for {
-			select {
-			case stdout := <-stdoutChan:
-				log.Println("STDOUT", stdout)
-			case stderr := <-stderrChan:
-				log.Println("STDERR", stderr)
-			}
-		}
-	}()
+	go handleStdoutAndStderr(stdoutChan, stderrChan)
 
 	if err := command.Wait(); err != nil {
 		if err.Error() == "exit status 2" { // -help
 			return
 		}
 		log.Fatal(err)
+	}
+}
+
+func handleStdoutAndStderr(stdoutChan, stderrChan chan string) {
+	for {
+		select {
+		case stdout := <-stdoutChan:
+			log.Println("STDOUT", stdout)
+		case stderr := <-stderrChan:
+			log.Println("STDERR", stderr)
+		}
 	}
 }
 
@@ -103,16 +105,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		go func() {
-			for {
-				select {
-				case stdout := <-stdoutChan:
-					log.Println("STDOUT", stdout)
-				case stderr := <-stderrChan:
-					log.Println("STDERR", stderr)
-				}
-			}
-		}()
+		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
 		eventChan := make(chan string)
 
@@ -150,16 +143,7 @@ func main() {
 	if buildImage {
 		d := utils.NewDockerManager(stdoutChan, stderrChan)
 
-		go func() {
-			for {
-				select {
-				case stdout := <-stdoutChan:
-					log.Println("STDOUT", stdout)
-				case stderr := <-stderrChan:
-					log.Println("STDERR", stderr)
-				}
-			}
-		}()
+		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
 		if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.Build.File), filepath.Join(configFilePath, "..", config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
 			log.Fatal(err)
