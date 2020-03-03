@@ -70,14 +70,16 @@ func main() {
 		buildImage       bool
 		unitTests        bool
 		integrationTests bool
+		pushImage        bool
 	)
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
-	flag.BoolVar(&dev, "dev", false, "Run the development mode for the project")
+	flag.BoolVar(&dev, "dev", false, "Start the development flow for the project")
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
-	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image for the project")
-	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests to the project")
-	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests to the project")
+	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image of the project")
+	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests of the project")
+	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
+	flag.BoolVar(&pushImage, "pushImage", false, "Push to Docker image of the project")
 	flag.Parse()
 
 	configFile, err := ioutil.ReadFile(configFilePath)
@@ -156,5 +158,15 @@ func main() {
 
 	if integrationTests {
 		runCommandWithLog(config.Commands.IntegrationTests, stdoutChan, stderrChan)
+	}
+
+	if pushImage {
+		d := utils.NewDockerManager(stdoutChan, stderrChan)
+
+		go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+		if err := d.Push(config.Docker.Build.Tag); err != nil {
+			log.Fatal(err)
+		}
 	}
 }

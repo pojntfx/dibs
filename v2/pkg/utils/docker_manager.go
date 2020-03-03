@@ -23,3 +23,14 @@ func (d *DockerManager) Build(file, context, tag string) error {
 
 	return command.Wait()
 }
+
+// Push pushes a Docker image
+func (d *DockerManager) Push(tag string) error {
+	command := NewManageableCommand("docker push "+tag, d.stdoutChan, d.stderrChan)
+
+	if err := command.Start(); err != nil {
+		return err
+	}
+
+	return command.Wait()
+}
