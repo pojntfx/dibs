@@ -3,6 +3,7 @@ paths:
   include: (.*).go # Regex of paths to include
   assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
   assetOut: .bin/binaries/test-app # Path to the file to which the asset should be copied
+  gitRepoRoot: ../.. # Root of the Git repo
 commands:
   generateSources: go generate ./... # Command to generate sources
   build: go build -o .bin/binaries/test-app main.go # Command to build binary

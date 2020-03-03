@@ -17,6 +17,7 @@ type Config struct {
 		Include      string `yaml:"include"`
 		AssetInImage string `yaml:"assetInImage"`
 		AssetOut     string `yaml:"assetOut"`
+		GitRepoRoot  string `yaml:"gitRepoRoot"`
 	}
 	Commands struct {
 		GenerateSources  string `yaml:"generateSources"`
@@ -103,6 +104,7 @@ func main() {
 		docker           bool
 		buildChart       bool
 		pushChart        bool
+		pushBinary       bool
 	)
 
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
@@ -128,6 +130,11 @@ This command requires the following env variables to be set:
 - DIBS_GITHUB_REPOSITORY_NAME
 - DIBS_GITHUB_REPOSITORY_URL
 - DIBS_GITHUB_PAGES_URL`)
+	flag.BoolVar(&pushBinary, "pushBinary", false, `Push the binary of the project.
+This command requires the following env variables to be set:
+- DIBS_GITHUB_USER_NAME
+- DIBS_GITHUB_TOKEN
+- DIBS_GITHUB_REPOSITORY`)
 	flag.Parse()
 
 	pwd, err := os.Getwd()
@@ -209,7 +216,7 @@ This command requires the following env variables to be set:
 				log.Fatal(err)
 			}
 
-			if err := d.CopyFromImage(config.Docker.Build.Tag, config.Paths.AssetInImage, config.Paths.AssetOut); err != nil {
+			if err := d.CopyFromImage(config.Docker.Build.Tag, config.Paths.AssetInImage, filepath.Join(context, config.Paths.AssetOut)); err != nil {
 				log.Fatal(err)
 			}
 		} else {
@@ -295,6 +302,22 @@ This command requires the following env variables to be set:
 			os.Getenv("DIBS_GITHUB_PAGES_URL"),
 			filepath.Join(context, config.Helm.Dist),
 			filepath.Join(os.TempDir(), "dibs-push-chart-repo"),
+		); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if pushBinary {
+		h := utils.NewBinaryManager(context, stdoutChan, stderrChan)
+
+		go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+		if err := h.Push(
+			os.Getenv("DIBS_GITHUB_USER_NAME"),
+			os.Getenv("DIBS_GITHUB_TOKEN"),
+			os.Getenv("DIBS_GITHUB_REPOSITORY"),
+			filepath.Join(context, config.Paths.GitRepoRoot),
+			filepath.Join(context, config.Paths.AssetOut),
 		); err != nil {
 			log.Fatal(err)
 		}
