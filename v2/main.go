@@ -23,7 +23,8 @@ type Config struct {
 		Start            string `yaml:"start"`
 	}
 	Docker struct {
-		Build dockerConfig
+		Build     dockerConfig `yaml:"build"`
+		UnitTests dockerConfig `yaml:"unitTests"`
 	}
 }
 
@@ -71,6 +72,7 @@ func main() {
 		unitTests        bool
 		integrationTests bool
 		pushImage        bool
+		docker           bool
 	)
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
 	flag.BoolVar(&dev, "dev", false, "Start the development flow for the project")
@@ -80,6 +82,7 @@ func main() {
 	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests of the project")
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
 	flag.BoolVar(&pushImage, "pushImage", false, "Push to Docker image of the project")
+	flag.BoolVar(&docker, "docker", false, "Run in Docker")
 	flag.Parse()
 
 	configFile, err := ioutil.ReadFile(configFilePath)
@@ -153,7 +156,21 @@ func main() {
 	}
 
 	if unitTests {
-		runCommandWithLog(config.Commands.UnitTests, stdoutChan, stderrChan)
+		if docker {
+			d := utils.NewDockerManager(stdoutChan, stderrChan)
+
+			go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+			if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.UnitTests.File), filepath.Join(configFilePath, "..", config.Docker.UnitTests.Context), config.Docker.UnitTests.Tag); err != nil {
+				log.Fatal(err)
+			}
+
+			if err := d.Run(config.Docker.UnitTests.Tag, ""); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			runCommandWithLog(config.Commands.UnitTests, stdoutChan, stderrChan)
+		}
 	}
 
 	if integrationTests {

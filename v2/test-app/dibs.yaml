@@ -4,11 +4,11 @@ paths:
   assetInImage: /app/.bin/test-app # Path of the asset in the Docker image
   assetOut: .bin/test-app # Path to which the asset should be copied
 commands:
-  generateSources: go generate ./test-app/... # Command to generate sources
-  build: go build -o test-app/.bin/test-app test-app/main.go # Command to build binary
-  unitTests: go test ./test-app/... # Command to run unit test
-  integrationTests: test-app/.bin/test-app -help # Command to run integration test
-  start: test-app/.bin/test-app -keep-running # Command to start the app
+  generateSources: go generate ./... # Command to generate sources
+  build: go build -o .bin/test-app main.go # Command to build binary
+  unitTests: go test ./... # Command to run unit test
+  integrationTests: .bin/test-app -help # Command to run integration test
+  start: .bin/test-app -keep-running # Command to start the app
 docker:
   build: # The main Docker config
     file: Dockerfile

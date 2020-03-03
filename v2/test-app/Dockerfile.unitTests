@@ -1,4 +1,4 @@
-FROM golang AS build
+FROM golang
 
 WORKDIR /app
 
@@ -7,10 +7,4 @@ RUN install /tmp/dibs /usr/local/bin
 
 ADD . .
 
-RUN dibs -build
-
-FROM debian
-
-COPY --from=build /app/.bin/test-app /usr/local/bin
-
-CMD /usr/local/bin/test-app
+CMD dibs -unitTests
