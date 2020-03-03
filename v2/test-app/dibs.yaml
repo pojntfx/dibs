@@ -2,13 +2,13 @@ paths:
   watch: . # The path to watch
   include: (.*).go # Regex of paths to include
   assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
-  assetOut: .bin/test-app # Path to the file to which the asset should be copied
+  assetOut: .bin/binaries/test-app # Path to the file to which the asset should be copied
 commands:
   generateSources: go generate ./... # Command to generate sources
-  build: go build -o .bin/test-app main.go # Command to build binary
+  build: go build -o .bin/binaries/test-app main.go # Command to build binary
   unitTests: go test ./... # Command to run unit test
-  integrationTests: .bin/test-app -help # Command to run integration test
-  start: .bin/test-app -keep-running # Command to start the app
+  integrationTests: .bin/binaries/test-app -help # Command to run integration test
+  start: .bin/binaries/test-app -keep-running # Command to start the app
 docker:
   build: # The main Docker config
     file: Dockerfile
@@ -22,3 +22,6 @@ docker:
     file: Dockerfile.integrationTests
     context: .
     tag: pojntfx/test-app-integration-tests
+helm:
+  src: charts/test-app # The source directory of the Helm chart
+  dist: .bin/chart # The directory into which the built chart should go

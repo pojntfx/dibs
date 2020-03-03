@@ -1,0 +1,13 @@
+apiVersion: v1
+name: test-app
+version: 0.0.1
+description: A simple test app.
+type: application
+home: https://pojntfx.github.io/dibs/
+sources:
+  - git@github.com:pojntfx/dibs.git
+maintainers:
+  - name: Felicitas Pojtinger
+    email: felicitas@pojtinger.com
+    url: https://felicitas.pojtinger.com
+appVersion: 0.0.1

@@ -11,6 +11,6 @@ RUN dibs -build
 
 FROM debian
 
-COPY --from=build /app/.bin/test-app /usr/local/bin
+COPY --from=build /app/.bin/binaries/test-app /usr/local/bin
 
 CMD /usr/local/bin/test-app

@@ -30,6 +30,10 @@ type Config struct {
 		UnitTests        dockerConfig `yaml:"unitTests"`
 		IntegrationTests dockerConfig `yaml:"integrationTests"`
 	}
+	Helm struct {
+		Src  string `yaml:"src"`
+		Dist string `yaml:"dist"`
+	}
 }
 
 type dockerConfig struct {
@@ -78,6 +82,7 @@ func main() {
 		integrationTests bool
 		pushImage        bool
 		docker           bool
+		buildChart       bool
 	)
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -94,6 +99,7 @@ func main() {
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
 	flag.BoolVar(&pushImage, "pushImage", false, "Push to Docker image of the project")
 	flag.BoolVar(&docker, "docker", false, "Run in Docker")
+	flag.BoolVar(&buildChart, "buildChart", false, "Build the Helm chart of the project")
 	flag.Parse()
 
 	if context == "" {
@@ -230,6 +236,20 @@ func main() {
 		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
 		if err := d.Push(config.Docker.Build.Tag); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if buildChart {
+		if err := os.MkdirAll(filepath.Join(context, config.Helm.Dist), 0777); err != nil {
+			log.Fatal(err)
+		}
+
+		h := utils.NewHelmManager(context, stdoutChan, stderrChan)
+
+		go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+		if err := h.Build(config.Helm.Src, config.Helm.Dist); err != nil {
 			log.Fatal(err)
 		}
 	}
