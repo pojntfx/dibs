@@ -30,20 +30,16 @@ func (f *CommandFlow) recreateCommands() error {
 		newCommands = append(newCommands, manageableCommand)
 	}
 
-	var err error
-	go func() {
-		for _, command := range f.commands {
-			if err != nil {
-				break
-			}
+	for i, command := range newCommands {
+		if err := command.Start(); err != nil {
+			return err
+		}
 
-			err = command.Start()
-
+		// We don't have to wait for the last one to ensure serial execution
+		if i != len(newCommands)-1 {
 			_ = command.Wait()
 		}
-	}()
-
-	return err
+	}
 
 	f.commands = newCommands
 
@@ -53,21 +49,18 @@ func (f *CommandFlow) recreateCommands() error {
 // Start starts the command flow
 func (f *CommandFlow) Start() error {
 	// TODO: Add test that ensures serial execution of commands
+	for i, command := range f.commands {
+		if err := command.Start(); err != nil {
+			return err
+		}
 
-	var err error
-	go func() {
-		for _, command := range f.commands {
-			if err != nil {
-				break
-			}
-
-			err = command.Start()
-
+		// We don't have to wait for the last one to ensure serial execution
+		if i != len(f.commands)-1 {
 			_ = command.Wait()
 		}
-	}()
+	}
 
-	return err
+	return nil
 }
 
 // Wait waits for the command flow to complete

@@ -66,7 +66,7 @@ func (r *ManageableCommand) Start() error {
 
 // Wait waits for the command to complete
 func (r *ManageableCommand) Wait() error {
-	if err := r.instance.Wait(); err != nil && err.Error() != "signal: killed" {
+	if err := r.instance.Wait(); err != nil && err.Error() != "signal: killed" && err.Error() != "exec: Wait was already called" {
 		return err
 	}
 
