@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 )
 
@@ -35,8 +36,8 @@ type dockerConfig struct {
 	Tag     string `yaml:"tag"`
 }
 
-func runCommandWithLog(execLine string, stdoutChan, stderrChan chan string) {
-	command := utils.NewManageableCommand(execLine, stdoutChan, stderrChan)
+func runCommandWithLog(execLine, pwd string, stdoutChan, stderrChan chan string) {
+	command := utils.NewManageableCommand(execLine, pwd, stdoutChan, stderrChan)
 
 	if err := command.Start(); err != nil {
 		log.Fatal(err)
@@ -91,6 +92,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	rawPwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	pwd := filepath.Join(rawPwd, configFilePath, "..")
+
 	config := Config{}
 	if err := yaml.Unmarshal(configFile, &config); err != nil {
 		log.Fatal(err)
@@ -105,7 +112,7 @@ func main() {
 			config.Commands.UnitTests,
 			config.Commands.IntegrationTests,
 			config.Commands.Start,
-		}, stdoutChan, stderrChan)
+		}, pwd, stdoutChan, stderrChan)
 
 		if err := commandFlow.Start(); err != nil {
 			log.Fatal(err)
@@ -139,30 +146,30 @@ func main() {
 	}
 
 	if generateSources {
-		runCommandWithLog(config.Commands.GenerateSources, stdoutChan, stderrChan)
+		runCommandWithLog(config.Commands.GenerateSources, pwd, stdoutChan, stderrChan)
 	}
 
 	if build {
-		runCommandWithLog(config.Commands.Build, stdoutChan, stderrChan)
+		runCommandWithLog(config.Commands.Build, pwd, stdoutChan, stderrChan)
 	}
 
 	if buildImage {
-		d := utils.NewDockerManager(stdoutChan, stderrChan)
+		d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
 
 		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-		if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.Build.File), filepath.Join(configFilePath, "..", config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
+		if err := d.Build(filepath.Join(pwd, config.Docker.Build.File), filepath.Join(pwd, config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	if unitTests {
 		if docker {
-			d := utils.NewDockerManager(stdoutChan, stderrChan)
+			d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
 
 			go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-			if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.UnitTests.File), filepath.Join(configFilePath, "..", config.Docker.UnitTests.Context), config.Docker.UnitTests.Tag); err != nil {
+			if err := d.Build(filepath.Join(pwd, config.Docker.UnitTests.File), filepath.Join(pwd, config.Docker.UnitTests.Context), config.Docker.UnitTests.Tag); err != nil {
 				log.Fatal(err)
 			}
 
@@ -170,17 +177,17 @@ func main() {
 				log.Fatal(err)
 			}
 		} else {
-			runCommandWithLog(config.Commands.UnitTests, stdoutChan, stderrChan)
+			runCommandWithLog(config.Commands.UnitTests, pwd, stdoutChan, stderrChan)
 		}
 	}
 
 	if integrationTests {
 		if docker {
-			d := utils.NewDockerManager(stdoutChan, stderrChan)
+			d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
 
 			go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-			if err := d.Build(filepath.Join(configFilePath, "..", config.Docker.IntegrationTests.File), filepath.Join(configFilePath, "..", config.Docker.IntegrationTests.Context), config.Docker.IntegrationTests.Tag); err != nil {
+			if err := d.Build(filepath.Join(pwd, config.Docker.IntegrationTests.File), filepath.Join(pwd, config.Docker.IntegrationTests.Context), config.Docker.IntegrationTests.Tag); err != nil {
 				log.Fatal(err)
 			}
 
@@ -188,12 +195,12 @@ func main() {
 				log.Fatal(err)
 			}
 		} else {
-			runCommandWithLog(config.Commands.IntegrationTests, stdoutChan, stderrChan)
+			runCommandWithLog(config.Commands.IntegrationTests, pwd, stdoutChan, stderrChan)
 		}
 	}
 
 	if pushImage {
-		d := utils.NewDockerManager(stdoutChan, stderrChan)
+		d := utils.NewDockerManager(pwd, stdoutChan, stderrChan)
 
 		go handleStdoutAndStderr(stdoutChan, stderrChan)
 
