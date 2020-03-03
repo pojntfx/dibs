@@ -15,6 +15,6 @@ RUN dibs -build
 # Run container
 FROM alpine
 
-COPY --from=build /app/.bin/binaries/test-app /usr/local/bin
+COPY --from=build /app/.bin/binaries/test-app* /usr/local/bin
 
 CMD /usr/local/bin/test-app
