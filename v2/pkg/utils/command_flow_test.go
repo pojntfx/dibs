@@ -17,7 +17,7 @@ var (
 func TestCreateCommandFlow(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	f := NewCommandFlow(testCommandsCreate, stdoutChan, stderrChan)
+	f := NewCommandFlow(testCommandsCreate, testDir, stdoutChan, stderrChan)
 
 	if f == nil {
 		t.Error("New command flow is nil")
@@ -55,7 +55,7 @@ func TestStartCommandFlow(t *testing.T) {
 		}
 	}()
 
-	f := NewCommandFlow(testCommandsStart, stdoutChan, stderrChan)
+	f := NewCommandFlow(testCommandsStart, testDir, stdoutChan, stderrChan)
 
 	if err := f.Start(); err != nil {
 		t.Error(err)
@@ -73,7 +73,7 @@ func TestStartCommandFlow(t *testing.T) {
 func TestStopCommandFlow(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	f := NewCommandFlow(testCommandsStop, stdoutChan, stderrChan)
+	f := NewCommandFlow(testCommandsStop, testDir, stdoutChan, stderrChan)
 
 	if err := f.Start(); err != nil {
 		t.Error(err)
@@ -97,7 +97,7 @@ func TestStopCommandFlow(t *testing.T) {
 func TestRestartCommandFlow(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	f := NewCommandFlow(testCommandsRestart, stdoutChan, stderrChan)
+	f := NewCommandFlow(testCommandsRestart, testDir, stdoutChan, stderrChan)
 
 	if err := f.Start(); err != nil {
 		t.Error(err)

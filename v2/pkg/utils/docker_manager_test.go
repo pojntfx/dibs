@@ -1,13 +1,22 @@
 package utils
 
 import (
+	"log"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
 var (
-	testContext    = filepath.Join("..", "..", "test-app")
+	testContext = func() string {
+		pwd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return filepath.Join(pwd, "..", "..", "test-app")
+	}()
 	testDockerfile = filepath.Join(testContext, "Dockerfile")
 	testTag        = filepath.Join("pojntfx/test-app")
 	testExecLine   = "ls"
@@ -16,10 +25,14 @@ var (
 func TestCreateDockerManager(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	d := NewDockerManager(stdoutChan, stderrChan)
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
 	if d == nil {
 		t.Error("New Docker manager is nil")
+	}
+
+	if d.dir != testContext {
+		t.Error("dir not set correctly")
 	}
 
 	if d.stdoutChan != stdoutChan {
@@ -34,7 +47,7 @@ func TestCreateDockerManager(t *testing.T) {
 func TestBuildDockerManager(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	d := NewDockerManager(stdoutChan, stderrChan)
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
 	hits := 0
 	go func() {
@@ -64,7 +77,7 @@ func TestBuildDockerManager(t *testing.T) {
 func TestPushDockerManager(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	d := NewDockerManager(stdoutChan, stderrChan)
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
 	hits := 0
 	go func() {
@@ -98,7 +111,7 @@ func TestPushDockerManager(t *testing.T) {
 func TestRunDockerManager(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	d := NewDockerManager(stdoutChan, stderrChan)
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
 	hits := 0
 	go func() {
@@ -107,7 +120,7 @@ func TestRunDockerManager(t *testing.T) {
 			case stdout := <-stdoutChan:
 				t.Log("test stdout", stdout)
 
-				if strings.Contains(stdout, "main.go") {
+				if strings.Contains(stdout, "usr") {
 					hits++
 				}
 			case stderr := <-stderrChan:

@@ -7,13 +7,13 @@ type CommandFlow struct {
 }
 
 // NewCommandFlow creates a new CommandFlow
-func NewCommandFlow(commands []string, stdoutChan, stderrChan chan string) *CommandFlow {
+func NewCommandFlow(commands []string, dir string, stdoutChan, stderrChan chan string) *CommandFlow {
 	commandFlow := &CommandFlow{
 		isRestart: false,
 	}
 
 	for _, command := range commands {
-		manageableCommand := NewManageableCommand(command, stdoutChan, stderrChan)
+		manageableCommand := NewManageableCommand(command, dir, stdoutChan, stderrChan)
 
 		commandFlow.commands = append(commandFlow.commands, manageableCommand)
 	}
@@ -25,7 +25,7 @@ func (f *CommandFlow) recreateCommands() error {
 	var newCommands []*ManageableCommand
 
 	for _, command := range f.commands {
-		manageableCommand := NewManageableCommand(command.GetExecLine(), command.GetStdoutChan(), command.GetStderrChan())
+		manageableCommand := NewManageableCommand(command.GetExecLine(), command.GetDir(), command.GetStdoutChan(), command.GetStderrChan())
 
 		newCommands = append(newCommands, manageableCommand)
 	}

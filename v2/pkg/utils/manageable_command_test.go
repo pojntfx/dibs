@@ -13,12 +13,13 @@ const (
 	testCommandIsStoppedRunningProcess = testCommandStop
 	testCommandIsStoppedStoppedProcess = testCommandStop
 	testCommandGetters                 = testCommandCreate
+	testDir                            = "."
 )
 
 func TestCreateManageableCommand(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandCreate, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandCreate, testDir, stdoutChan, stderrChan)
 
 	if c == nil {
 		t.Error("New manageable command is nil")
@@ -26,6 +27,10 @@ func TestCreateManageableCommand(t *testing.T) {
 
 	if c.execLine != testCommandCreate {
 		t.Error("execLine not set correctly")
+	}
+
+	if c.dir != testDir {
+		t.Error("dir not set correctly")
 	}
 
 	if c.stdoutChan != stdoutChan {
@@ -56,7 +61,7 @@ func TestStartManageableCommand(t *testing.T) {
 		}
 	}()
 
-	c := NewManageableCommand(testCommandStart, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandStart, testDir, stdoutChan, stderrChan)
 
 	if err := c.Start(); err != nil {
 		t.Error(err)
@@ -74,7 +79,7 @@ func TestStartManageableCommand(t *testing.T) {
 func TestStopManageableCommand(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandStop, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandStop, testDir, stdoutChan, stderrChan)
 
 	if err := c.Start(); err != nil {
 		t.Error(err)
@@ -96,7 +101,7 @@ func TestStopManageableCommand(t *testing.T) {
 func TestIsStoppedRunningProcess(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandIsStoppedRunningProcess, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandIsStoppedRunningProcess, testDir, stdoutChan, stderrChan)
 
 	defer func() {
 		if err := c.Stop(); err != nil {
@@ -115,7 +120,7 @@ func TestIsStoppedRunningProcess(t *testing.T) {
 func TestIsStoppedStoppedProcess(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandIsStoppedStoppedProcess, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandIsStoppedStoppedProcess, testDir, stdoutChan, stderrChan)
 
 	if err := c.Start(); err != nil {
 		t.Error(err)
@@ -137,17 +142,27 @@ func TestIsStoppedStoppedProcess(t *testing.T) {
 func TestGetExecLine(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandGetters, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandGetters, testDir, stdoutChan, stderrChan)
 
 	if c.GetExecLine() != testCommandGetters {
 		t.Error("GetExecLine did not return the set execLine")
 	}
 }
 
+func TestGetDir(t *testing.T) {
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	c := NewManageableCommand(testCommandGetters, testDir, stdoutChan, stderrChan)
+
+	if c.GetDir() != testDir {
+		t.Error("GetDir did not return the set dir")
+	}
+}
+
 func TestGetStdoutChan(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandGetters, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandGetters, testDir, stdoutChan, stderrChan)
 
 	if c.GetStdoutChan() == nil {
 		t.Error("GetStdoutChan has not been set")
@@ -157,7 +172,7 @@ func TestGetStdoutChan(t *testing.T) {
 func TestGetStderrChan(t *testing.T) {
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	c := NewManageableCommand(testCommandGetters, stdoutChan, stderrChan)
+	c := NewManageableCommand(testCommandGetters, testDir, stdoutChan, stderrChan)
 
 	if c.GetStderrChan() == nil {
 		t.Error("GetStderrChan has not been set")

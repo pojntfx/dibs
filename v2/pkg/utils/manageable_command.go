@@ -12,13 +12,15 @@ import (
 type ManageableCommand struct {
 	execLine               string
 	stdoutChan, stderrChan chan string
+	dir                    string
 	instance               *exec.Cmd
 }
 
 // NewManageableCommand creates a new ManageableCommand
-func NewManageableCommand(execLine string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
+func NewManageableCommand(execLine, dir string, stdoutChan chan string, stderrChan chan string) *ManageableCommand {
 	return &ManageableCommand{
 		execLine:   execLine,
+		dir:        dir,
 		stdoutChan: stdoutChan,
 		stderrChan: stderrChan,
 	}
@@ -46,6 +48,8 @@ func getCommandWrappedInSh(execLine string) *exec.Cmd {
 // Start starts the command
 func (r *ManageableCommand) Start() error {
 	r.instance = getCommandWrappedInSh(r.execLine)
+	// TODO: Add test that checks if command gets executed in the set dir
+	r.instance.Dir = r.dir
 
 	stdout, err := r.instance.StdoutPipe()
 	if err != nil {
@@ -117,6 +121,11 @@ func (r *ManageableCommand) IsStopped() bool {
 // GetExecLine returns the command's execLine
 func (r *ManageableCommand) GetExecLine() string {
 	return r.execLine
+}
+
+// Dir returns the command's dir
+func (r *ManageableCommand) GetDir() string {
+	return r.dir
 }
 
 // GetStdoutChan returns the command's stdout channel
