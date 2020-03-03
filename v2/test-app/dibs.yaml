@@ -24,6 +24,10 @@ docker:
     file: Dockerfile.integrationTests
     context: .
     tag: pojntfx/test-app-integration-tests
+  chartTests: # Docker configuration for chart tests
+    file: Dockerfile.chartTests
+    context: .
+    tag: pojntfx/test-app-chart-tests
 helm:
   src: charts/test-app # The source directory of the Helm chart
   dist: .bin/chart # The directory into which the built chart should go

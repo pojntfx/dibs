@@ -31,6 +31,7 @@ type Config struct {
 		Build            dockerConfig `yaml:"build"`
 		UnitTests        dockerConfig `yaml:"unitTests"`
 		IntegrationTests dockerConfig `yaml:"integrationTests"`
+		ChartTests       dockerConfig `yaml:"chartTests"`
 	}
 	Helm struct {
 		Src  string `yaml:"src"`
@@ -57,6 +58,20 @@ func runCommandWithLog(execLine, dir string, stdoutChan, stderrChan chan string)
 		if err.Error() == "exit status 2" { // -help
 			return
 		}
+		log.Fatal(err)
+	}
+}
+
+func buildAndRunDockerContainer(command, context string, config dockerConfig, privileged bool, stdoutChan, stderrChan chan string) {
+	d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+	go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+	if err := d.Build(filepath.Join(context, config.File), filepath.Join(context, config.Context), config.Tag); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := d.Run(config.Tag, command, privileged); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -203,17 +218,7 @@ func main() {
 
 	if unitTests {
 		if docker {
-			d := utils.NewDockerManager(context, stdoutChan, stderrChan)
-
-			go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-			if err := d.Build(filepath.Join(context, config.Docker.UnitTests.File), filepath.Join(context, config.Docker.UnitTests.Context), config.Docker.UnitTests.Tag); err != nil {
-				log.Fatal(err)
-			}
-
-			if err := d.Run(config.Docker.UnitTests.Tag, ""); err != nil {
-				log.Fatal(err)
-			}
+			buildAndRunDockerContainer("", context, config.Docker.UnitTests, false, stdoutChan, stderrChan)
 		} else {
 			runCommandWithLog(config.Commands.UnitTests, context, stdoutChan, stderrChan)
 		}
@@ -221,17 +226,7 @@ func main() {
 
 	if integrationTests {
 		if docker {
-			d := utils.NewDockerManager(context, stdoutChan, stderrChan)
-
-			go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-			if err := d.Build(filepath.Join(context, config.Docker.IntegrationTests.File), filepath.Join(context, config.Docker.IntegrationTests.Context), config.Docker.IntegrationTests.Tag); err != nil {
-				log.Fatal(err)
-			}
-
-			if err := d.Run(config.Docker.IntegrationTests.Tag, ""); err != nil {
-				log.Fatal(err)
-			}
+			buildAndRunDockerContainer("", context, config.Docker.IntegrationTests, false, stdoutChan, stderrChan)
 		} else {
 			runCommandWithLog(config.Commands.IntegrationTests, context, stdoutChan, stderrChan)
 		}
@@ -242,7 +237,11 @@ func main() {
 	}
 
 	if chartTests {
-		runCommandWithLog(config.Commands.ChartTests, context, stdoutChan, stderrChan)
+		if docker {
+			buildAndRunDockerContainer("", context, config.Docker.ChartTests, true, stdoutChan, stderrChan)
+		} else {
+			runCommandWithLog(config.Commands.ChartTests, context, stdoutChan, stderrChan)
+		}
 	}
 
 	if pushImage {

@@ -135,7 +135,7 @@ func TestRunDockerManager(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := d.Run(testTag, testExecLine); err != nil {
+	if err := d.Run(testTag, testExecLine, false); err != nil {
 		t.Error(err)
 	}
 
