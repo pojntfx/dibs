@@ -74,7 +74,7 @@ func TestBuildHelmManager(t *testing.T) {
 
 // TestPushHelmManager requires the environment variables below to be set; it is disabled by default.
 func TestPushHelmManager(t *testing.T) {
-	if os.Getenv("DIBS_PUSH_TEST_ENABLED") == "1" {
+	if os.Getenv("DIBS_HELM_PUSH_TEST_ENABLED") == "1" {
 		stdoutChan, stderrChan := make(chan string), make(chan string)
 
 		h := NewHelmManager(testContext, stdoutChan, stderrChan)
@@ -93,7 +93,7 @@ func TestPushHelmManager(t *testing.T) {
 				case stdout := <-stdoutChan:
 					t.Log("test stdout", stdout)
 				case stderr := <-stderrChan:
-					t.Error("error while building Helm chart", stderr)
+					t.Error("error while building or pushing Helm chart", stderr)
 				}
 			}
 		}()
