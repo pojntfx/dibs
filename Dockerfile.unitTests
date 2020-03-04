@@ -8,6 +8,11 @@ WORKDIR /app
 RUN curl -Lo /tmp/dibs https://nx904.your-storageshare.de/s/ZWxkmmQW37fHt9J/download
 RUN install /tmp/dibs /usr/local/bin
 
+RUN curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >/tmp/helm
+RUN install /tmp/helm /usr/local/bin
+
+RUN helm init --client-only
+
 ADD . .
 
-CMD dibs -unitTests
+CMD DIBS_DISABLE_DOCKER_DEPENDEND_TESTS=1 dibs -unitTests
