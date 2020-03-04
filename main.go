@@ -116,12 +116,14 @@ func main() {
 		docker           bool
 		target           string
 		platform         string
+		skipTests        bool
 	)
 
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
 	flag.StringVar(&context, "context", "", "The config file to use")
 	flag.BoolVar(&docker, "docker", false, "Run in Docker")
 	flag.BoolVar(&dev, "dev", false, "Start the development flow for the project")
+	flag.BoolVar(&skipTests, "skipTests", false, "Skip the tests for the project")
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
 	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image of the project")
@@ -276,6 +278,13 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 							platformConfig.Commands.IntegrationTests,
 							platformConfig.Commands.Start,
 						}, context, stdoutChan, stderrChan)
+						if skipTests {
+							commandFlow = utils.NewCommandFlow([]string{
+								platformConfig.Commands.GenerateSources,
+								platformConfig.Commands.Build,
+								platformConfig.Commands.Start,
+							}, context, stdoutChan, stderrChan)
+						}
 
 						if err := commandFlow.Start(); err != nil {
 							log.Fatal(err)
