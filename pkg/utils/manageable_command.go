@@ -91,12 +91,15 @@ func (r *ManageableCommand) Stop() error {
 	}
 
 	// Ignore Zombie processes, which can't be killed
-	err = syscall.Kill(processGroupID, syscall.SIGKILL)
-	if err != nil && err.Error() == noSuchProcessError {
-		return nil
-	}
-	if err != nil {
-		return err
+	// pid + 1 because we execute everything through `sh` so we have to kill it as well
+	for _, pid := range []int{r.instance.Process.Pid, processGroupID, r.instance.Process.Pid + 1, processGroupID + 1} {
+		err = syscall.Kill(pid, syscall.SIGKILL)
+		if err != nil && err.Error() == noSuchProcessError {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
