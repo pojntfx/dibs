@@ -33,78 +33,78 @@
     - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
-  - unitTest
-  - integrationTest
-  - buildAndPushImage
-  - buildAndPushManifestAndBinaries
-  - buildAndPushChart
+  - test-app:unitTest
+  - test-app:integrationTest
+  - test-app:buildAndPushImage
+  - test-app:test-app:buildAndPushManifestAndBinaries
+  - test-app:buildAndPushChart
 
 # Unit tests
-unitTestAMD64:
+test-app:unitTestAMD64:
   <<: *dibsJob
-  stage: unitTest
+  stage: test-app:unitTest
   script:
     - dibs -configFile test-app/dibs.yaml -unitTests -target linux -platform linux/amd64 -docker
-unitTestARM64:
+test-app:unitTestARM64:
   <<: *dibsJob
-  stage: unitTest
+  stage: test-app:unitTest
   script:
     - dibs -configFile test-app/dibs.yaml -unitTests -target linux -platform linux/arm64 -docker
 
 # Integration tests
-integrationTestAMD64:
+test-app:integrationTestAMD64:
   <<: *dibsJob
-  stage: integrationTest
+  stage: test-app:integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -integrationTests -target linux -platform linux/amd64 -docker
-integrationTestARM64:
+test-app:integrationTestARM64:
   <<: *dibsJob
-  stage: integrationTest
+  stage: test-app:integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -integrationTests -target linux -platform linux/arm64 -docker
 
 # Image tests
-imageTestsAMD64:
+test-app:imageTestsAMD64:
   <<: *dibsJob
-  stage: integrationTest
+  stage: test-app:integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
     - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/amd64
-imageTestsARM64:
+test-app:imageTestsARM64:
   <<: *dibsJob
-  stage: integrationTest
+  stage: test-app:integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
     - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/arm64
 
 # Chart tests
-chartTestsAMD64:
+test-app:chartTestsAMD64:
   <<: *dibsJob
-  stage: integrationTest
+  stage: test-app:integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
     - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
     - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/amd64 -docker
-chartTestsARM64:
+test-app:chartTestsARM64:
   <<: *dibsJob
-  stage: integrationTest
+  stage: test-app:integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
     - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
     - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/arm64 -docker
 
 # Build and push image
-buildAndPushImageAMD64:
+test-app:buildAndPushImageAMD64:
   <<: *dibsJob
-  stage: buildAndPushImage
+  stage: test-app:buildAndPushImage
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
     - dibs -configFile test-app/dibs.yaml -pushImage -target linux -platform linux/amd64
   only:
     - tags
-buildAndPushImageARM64:
+test-app:buildAndPushImageARM64:
   <<: *dibsJob
-  stage: buildAndPushImage
+  stage: test-app:buildAndPushImage
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
     - dibs -configFile test-app/dibs.yaml -pushImage -target linux -platform linux/arm64
@@ -112,9 +112,9 @@ buildAndPushImageARM64:
     - tags
 
 # Build and push manifest
-buildAndPushManifest:
+test-app:buildAndPushManifest:
   <<: *dibsJob
-  stage: buildAndPushManifestAndBinaries
+  stage: test-app:test-app:buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
     - dibs -configFile test-app/dibs.yaml -pushManifest -target linux
@@ -122,9 +122,9 @@ buildAndPushManifest:
     - tags
 
 # Build and push binaries
-buildAndPushBinariesAMD64:
+test-app:buildAndPushBinariesAMD64:
   <<: *dibsJob
-  stage: buildAndPushManifestAndBinaries
+  stage: test-app:test-app:buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -build -target linux -platform linux/amd64 -docker
     - dibs -configFile test-app/dibs.yaml -pushBinary -target linux -platform linux/amd64
@@ -135,9 +135,9 @@ buildAndPushBinariesAMD64:
     expire_in: 1 month
   only:
     - tags
-buildAndPushBinariesARM64:
+test-app:buildAndPushBinariesARM64:
   <<: *dibsJob
-  stage: buildAndPushManifestAndBinaries
+  stage: test-app:test-app:buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -build -target linux -platform linux/arm64 -docker
     - dibs -configFile test-app/dibs.yaml -pushBinary -target linux -platform linux/arm64
@@ -150,9 +150,9 @@ buildAndPushBinariesARM64:
     - tags
 
 # Build and push chart
-buildAndPushChart:
+test-app:buildAndPushChart:
   <<: *dibsJob
-  stage: buildAndPushChart
+  stage: test-app:buildAndPushChart
   script:
     - dibs -configFile test-app/dibs.yaml -buildChart -target linux
     - dibs -configFile test-app/dibs.yaml -pushChart -target linux
