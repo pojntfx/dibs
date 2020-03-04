@@ -12,33 +12,36 @@ import (
 
 // Config is a dibs configuration
 type Config struct {
-	Platforms []struct {
-		Identifier string `yaml:"identifier"`
-		Paths      struct {
-			Watch        string `yaml:"watch"`
-			Include      string `yaml:"include"`
-			AssetInImage string `yaml:"assetInImage"`
-			AssetOut     string `yaml:"assetOut"`
-			GitRepoRoot  string `yaml:"gitRepoRoot"`
-		}
-		Commands struct {
-			GenerateSources  string `yaml:"generateSources"`
-			Build            string `yaml:"build"`
-			UnitTests        string `yaml:"unitTests"`
-			IntegrationTests string `yaml:"integrationTests"`
-			ImageTests       string `yaml:"imageTests"`
-			ChartTests       string `yaml:"chartTests"`
-			Start            string `yaml:"start"`
-		}
-		Docker struct {
-			Build            dockerConfig `yaml:"build"`
-			UnitTests        dockerConfig `yaml:"unitTests"`
-			IntegrationTests dockerConfig `yaml:"integrationTests"`
-			ChartTests       dockerConfig `yaml:"chartTests"`
-		}
+	Targets []struct {
+		Name string `yaml:"name"`
 		Helm struct {
 			Src  string `yaml:"src"`
 			Dist string `yaml:"dist"`
+		}
+		Platforms []struct {
+			Identifier string `yaml:"identifier"`
+			Paths      struct {
+				Watch        string `yaml:"watch"`
+				Include      string `yaml:"include"`
+				AssetInImage string `yaml:"assetInImage"`
+				AssetOut     string `yaml:"assetOut"`
+				GitRepoRoot  string `yaml:"gitRepoRoot"`
+			}
+			Commands struct {
+				GenerateSources  string `yaml:"generateSources"`
+				Build            string `yaml:"build"`
+				UnitTests        string `yaml:"unitTests"`
+				IntegrationTests string `yaml:"integrationTests"`
+				ImageTests       string `yaml:"imageTests"`
+				ChartTests       string `yaml:"chartTests"`
+				Start            string `yaml:"start"`
+			}
+			Docker struct {
+				Build            dockerConfig `yaml:"build"`
+				UnitTests        dockerConfig `yaml:"unitTests"`
+				IntegrationTests dockerConfig `yaml:"integrationTests"`
+				ChartTests       dockerConfig `yaml:"chartTests"`
+			}
 		}
 	}
 }
@@ -108,6 +111,7 @@ func main() {
 		buildChart       bool
 		pushChart        bool
 		pushBinary       bool
+		target           string
 		platform         string
 	)
 
@@ -139,11 +143,16 @@ This command requires the following env variables to be set:
 - DIBS_GITHUB_USER_NAME
 - DIBS_GITHUB_TOKEN
 - DIBS_GITHUB_REPOSITORY`)
+	flag.StringVar(&target, "target", "linux", `The name of the target to use.
+This may also be set with the TARGET env variable; a value of "*" runs all targets.`)
 	flag.StringVar(&platform, "platform", "linux/amd64", `The identifier of the platform to use.
 This may also be set with the TARGETPLATFORM env variable; a value of "*" runs for all platforms.`)
 	flag.Parse()
 
 	// Normalize the environment and pass on env variables
+	if targetFromEnv := os.Getenv("TARGET"); targetFromEnv != "" {
+		target = targetFromEnv
+	}
 	if platformFromEnv := os.Getenv("TARGETPLATFORM"); platformFromEnv != "" {
 		platform = platformFromEnv
 	}
@@ -178,128 +187,14 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 
 	stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	for _, config := range configs.Platforms {
-		if config.Identifier == platform || platform == "*" {
-			if err := os.Setenv("TARGETPLATFORM", config.Identifier); err != nil {
+	for _, targetConfig := range configs.Targets {
+		if targetConfig.Name == target || target == "*" {
+			if err := os.Setenv("TARGET", target); err != nil {
 				log.Fatal(err)
 			}
 
-			if dev {
-				commandFlow := utils.NewCommandFlow([]string{
-					config.Commands.GenerateSources,
-					config.Commands.Build,
-					config.Commands.UnitTests,
-					config.Commands.IntegrationTests,
-					config.Commands.Start,
-				}, context, stdoutChan, stderrChan)
-
-				if err := commandFlow.Start(); err != nil {
-					log.Fatal(err)
-				}
-
-				go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-				eventChan := make(chan string)
-
-				pathWatcher := utils.NewPathWatcher(filepath.Join(context, config.Paths.Watch), filepath.Join(context, config.Paths.Include), eventChan)
-
-				go func() {
-					for {
-						select {
-						case <-eventChan:
-							if err := commandFlow.Restart(); err != nil {
-								log.Fatal(err)
-							}
-						}
-					}
-				}()
-
-				defer func() {
-					if err := commandFlow.Stop(); err != nil {
-						log.Fatal(err)
-					}
-				}()
-				if err := pathWatcher.Start(); err != nil {
-					log.Fatal(err)
-				}
-			}
-
-			if generateSources {
-				runCommandWithLog(config.Commands.GenerateSources, context, stdoutChan, stderrChan)
-			}
-
-			if build {
-				if docker {
-					d := utils.NewDockerManager(context, stdoutChan, stderrChan)
-
-					go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-					if err := d.Build(filepath.Join(context, config.Docker.Build.File), filepath.Join(context, config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
-						log.Fatal(err)
-					}
-
-					if err := os.MkdirAll(filepath.Join(context, config.Paths.AssetOut, ".."), 0777); err != nil {
-						log.Fatal(err)
-					}
-
-					if err := d.CopyFromImage(config.Docker.Build.Tag, config.Paths.AssetInImage, filepath.Join(context, config.Paths.AssetOut)); err != nil {
-						log.Fatal(err)
-					}
-				} else {
-					runCommandWithLog(config.Commands.Build, context, stdoutChan, stderrChan)
-				}
-			}
-
-			if buildImage {
-				d := utils.NewDockerManager(context, stdoutChan, stderrChan)
-
-				go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-				if err := d.Build(filepath.Join(context, config.Docker.Build.File), filepath.Join(context, config.Docker.Build.Context), config.Docker.Build.Tag); err != nil {
-					log.Fatal(err)
-				}
-			}
-
-			if unitTests {
-				if docker {
-					buildAndRunDockerContainer("", context, config.Docker.UnitTests, false, stdoutChan, stderrChan)
-				} else {
-					runCommandWithLog(config.Commands.UnitTests, context, stdoutChan, stderrChan)
-				}
-			}
-
-			if integrationTests {
-				if docker {
-					buildAndRunDockerContainer("", context, config.Docker.IntegrationTests, false, stdoutChan, stderrChan)
-				} else {
-					runCommandWithLog(config.Commands.IntegrationTests, context, stdoutChan, stderrChan)
-				}
-			}
-
-			if imageTests {
-				runCommandWithLog(config.Commands.ImageTests, context, stdoutChan, stderrChan)
-			}
-
-			if chartTests {
-				if docker {
-					buildAndRunDockerContainer("", context, config.Docker.ChartTests, true, stdoutChan, stderrChan)
-				} else {
-					runCommandWithLog(config.Commands.ChartTests, context, stdoutChan, stderrChan)
-				}
-			}
-
-			if pushImage {
-				d := utils.NewDockerManager(context, stdoutChan, stderrChan)
-
-				go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-				if err := d.Push(config.Docker.Build.Tag); err != nil {
-					log.Fatal(err)
-				}
-			}
-
 			if buildChart {
-				if err := os.MkdirAll(filepath.Join(context, config.Helm.Dist), 0777); err != nil {
+				if err := os.MkdirAll(filepath.Join(context, targetConfig.Helm.Dist), 0777); err != nil {
 					log.Fatal(err)
 				}
 
@@ -307,7 +202,7 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 
 				go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-				if err := h.Build(filepath.Join(context, config.Helm.Src), filepath.Join(config.Helm.Dist)); err != nil {
+				if err := h.Build(filepath.Join(context, targetConfig.Helm.Src), filepath.Join(targetConfig.Helm.Dist)); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -326,26 +221,148 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 					os.Getenv("DIBS_GITHUB_REPOSITORY_NAME"),
 					os.Getenv("DIBS_GITHUB_REPOSITORY_URL"),
 					os.Getenv("DIBS_GITHUB_PAGES_URL"),
-					filepath.Join(context, config.Helm.Dist),
+					filepath.Join(context, targetConfig.Helm.Dist),
 					filepath.Join(os.TempDir(), "dibs-push-chart-repo"),
 				); err != nil {
 					log.Fatal(err)
 				}
 			}
 
-			if pushBinary {
-				h := utils.NewBinaryManager(context, stdoutChan, stderrChan)
+			for _, platformConfig := range targetConfig.Platforms {
+				if platformConfig.Identifier == platform || platform == "*" {
+					if err := os.Setenv("TARGETPLATFORM", platformConfig.Identifier); err != nil {
+						log.Fatal(err)
+					}
 
-				go handleStdoutAndStderr(stdoutChan, stderrChan)
+					if dev {
+						commandFlow := utils.NewCommandFlow([]string{
+							platformConfig.Commands.GenerateSources,
+							platformConfig.Commands.Build,
+							platformConfig.Commands.UnitTests,
+							platformConfig.Commands.IntegrationTests,
+							platformConfig.Commands.Start,
+						}, context, stdoutChan, stderrChan)
 
-				if err := h.Push(
-					os.Getenv("DIBS_GITHUB_USER_NAME"),
-					os.Getenv("DIBS_GITHUB_TOKEN"),
-					os.Getenv("DIBS_GITHUB_REPOSITORY"),
-					filepath.Join(context, config.Paths.GitRepoRoot),
-					filepath.Join(context, config.Paths.AssetOut),
-				); err != nil {
-					log.Fatal(err)
+						if err := commandFlow.Start(); err != nil {
+							log.Fatal(err)
+						}
+
+						go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+						eventChan := make(chan string)
+
+						pathWatcher := utils.NewPathWatcher(filepath.Join(context, platformConfig.Paths.Watch), filepath.Join(context, platformConfig.Paths.Include), eventChan)
+
+						go func() {
+							for {
+								select {
+								case <-eventChan:
+									if err := commandFlow.Restart(); err != nil {
+										log.Fatal(err)
+									}
+								}
+							}
+						}()
+
+						defer func() {
+							if err := commandFlow.Stop(); err != nil {
+								log.Fatal(err)
+							}
+						}()
+						if err := pathWatcher.Start(); err != nil {
+							log.Fatal(err)
+						}
+					}
+
+					if generateSources {
+						runCommandWithLog(platformConfig.Commands.GenerateSources, context, stdoutChan, stderrChan)
+					}
+
+					if build {
+						if docker {
+							d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+							go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+							if err := d.Build(filepath.Join(context, platformConfig.Docker.Build.File), filepath.Join(context, platformConfig.Docker.Build.Context), platformConfig.Docker.Build.Tag); err != nil {
+								log.Fatal(err)
+							}
+
+							if err := os.MkdirAll(filepath.Join(context, platformConfig.Paths.AssetOut, ".."), 0777); err != nil {
+								log.Fatal(err)
+							}
+
+							if err := d.CopyFromImage(platformConfig.Docker.Build.Tag, platformConfig.Paths.AssetInImage, filepath.Join(context, platformConfig.Paths.AssetOut)); err != nil {
+								log.Fatal(err)
+							}
+						} else {
+							runCommandWithLog(platformConfig.Commands.Build, context, stdoutChan, stderrChan)
+						}
+					}
+
+					if buildImage {
+						d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+						go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+						if err := d.Build(filepath.Join(context, platformConfig.Docker.Build.File), filepath.Join(context, platformConfig.Docker.Build.Context), platformConfig.Docker.Build.Tag); err != nil {
+							log.Fatal(err)
+						}
+					}
+
+					if unitTests {
+						if docker {
+							buildAndRunDockerContainer("", context, platformConfig.Docker.UnitTests, false, stdoutChan, stderrChan)
+						} else {
+							runCommandWithLog(platformConfig.Commands.UnitTests, context, stdoutChan, stderrChan)
+						}
+					}
+
+					if integrationTests {
+						if docker {
+							buildAndRunDockerContainer("", context, platformConfig.Docker.IntegrationTests, false, stdoutChan, stderrChan)
+						} else {
+							runCommandWithLog(platformConfig.Commands.IntegrationTests, context, stdoutChan, stderrChan)
+						}
+					}
+
+					if imageTests {
+						runCommandWithLog(platformConfig.Commands.ImageTests, context, stdoutChan, stderrChan)
+					}
+
+					if chartTests {
+						if docker {
+							buildAndRunDockerContainer("", context, platformConfig.Docker.ChartTests, true, stdoutChan, stderrChan)
+						} else {
+							runCommandWithLog(platformConfig.Commands.ChartTests, context, stdoutChan, stderrChan)
+						}
+					}
+
+					if pushImage {
+						d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+						go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+						if err := d.Push(platformConfig.Docker.Build.Tag); err != nil {
+							log.Fatal(err)
+						}
+					}
+
+					if pushBinary {
+						h := utils.NewBinaryManager(context, stdoutChan, stderrChan)
+
+						go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+						if err := h.Push(
+							os.Getenv("DIBS_GITHUB_USER_NAME"),
+							os.Getenv("DIBS_GITHUB_TOKEN"),
+							os.Getenv("DIBS_GITHUB_REPOSITORY"),
+							filepath.Join(context, platformConfig.Paths.GitRepoRoot),
+							filepath.Join(context, platformConfig.Paths.AssetOut),
+						); err != nil {
+							log.Fatal(err)
+						}
+					}
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:experimental
 # Build container
 FROM --platform=$TARGETPLATFORM alpine AS build
+ARG TARGET
 ARG TARGETPLATFORM
 
 WORKDIR /app
@@ -21,6 +22,7 @@ RUN dibs -buildChart
 
 # Run container
 FROM --platform=$TARGETPLATFORM docker:stable
+ARG TARGET
 ARG TARGETPLATFORM
 
 WORKDIR /app
