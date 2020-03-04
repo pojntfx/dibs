@@ -11,7 +11,7 @@ targets:
           include: (.*).go # Regex of paths to include
           assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
           assetOut: .bin/binaries/test-app-linux-amd64 # Path to the file to which the asset should be copied
-          gitRepoRoot: ../.. # Root of the Git repo
+          gitRepoRoot: ../ # Root of the Git repo
         commands:
           generateSources: go generate ./... # Command to generate sources
           build: GOOS=linux GOARCH=amd64 go build -o .bin/binaries/test-app-linux-amd64 main.go # Command to build binary
@@ -43,7 +43,7 @@ targets:
           include: (.*).go # Regex of paths to include
           assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
           assetOut: .bin/binaries/test-app-linux-arm64 # Path to the file to which the asset should be copied
-          gitRepoRoot: ../.. # Root of the Git repo
+          gitRepoRoot: ../ # Root of the Git repo
         commands:
           generateSources: go generate ./... # Command to generate sources
           build: GOOS=linux GOARCH=arm64 go build -o .bin/binaries/test-app-linux-arm64 main.go # Command to build binary
@@ -75,7 +75,7 @@ targets:
         paths:
           watch: . # The path to watch
           include: (.*).go # Regex of paths to include
-          gitRepoRoot: ../.. # Root of the Git repo
+          gitRepoRoot: ../ # Root of the Git repo
         commands:
           generateSources: go generate ./... # Command to generate sources
           build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/test-app-darwin-amd64 main.go # Command to build binary
