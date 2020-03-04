@@ -20,19 +20,24 @@ func NewDockerManager(dir string, stdoutChan, stderrChan chan string) *DockerMan
 	}
 }
 
+func getTarget() string {
+	return os.Getenv("TARGET")
+}
+
 func getTargetPlatform() string {
 	return os.Getenv("TARGETPLATFORM")
 }
 
 func getDockerRunPrefix() string {
+	target := getTarget()
 	targetplatform := getTargetPlatform()
 
-	return "docker run -e TARGETPLATFORM=" + targetplatform + " --platform " + targetplatform
+	return "docker run -e TARGET=" + target + " -e TARGETPLATFORM=" + targetplatform + " --platform " + targetplatform
 }
 
 // Build builds and tags a Docker image
 func (d *DockerManager) Build(file, context, tag string) error {
-	command := NewManageableCommand("docker buildx build --progress plain --pull --load --platform "+getTargetPlatform()+" -f "+file+" -t "+tag+" "+context, d.dir, d.stdoutChan, d.stderrChan)
+	command := NewManageableCommand("docker buildx build --progress plain --pull --load --build-arg TARGET="+getTarget()+" --platform "+getTargetPlatform()+" -f "+file+" -t "+tag+" "+context, d.dir, d.stdoutChan, d.stderrChan)
 
 	if err := command.Start(); err != nil {
 		return err

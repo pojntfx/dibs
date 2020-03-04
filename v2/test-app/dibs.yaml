@@ -1,82 +1,83 @@
-platforms:
-  - identifier: linux/amd64
-    paths:
-      watch: . # The path to watch
-      include: (.*).go # Regex of paths to include
-      assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
-      assetOut: .bin/binaries/test-app-linux-amd64 # Path to the file to which the asset should be copied
-      gitRepoRoot: ../.. # Root of the Git repo
-    commands:
-      generateSources: go generate ./... # Command to generate sources
-      build: GOOS=linux GOARCH=amd64 go build -o .bin/binaries/test-app-linux-amd64 main.go # Command to build binary
-      unitTests: go test ./... # Command to run unit test
-      integrationTests: .bin/binaries/test-app-linux-amd64 -help # Command to run integration test
-      imageTests: docker run --platform linux/amd64 -e TARGETPLATFORM=linux/amd64 pojntfx/test-app-linux-amd64 /usr/local/bin/test-app -help # Command to run to test the Docker image
-      chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
-      start: .bin/binaries/test-app-linux-amd64 -keep-running # Command to start the app
-    docker:
-      build: # The main Docker config
-        file: Dockerfile
-        context: .
-        tag: pojntfx/test-app:linux-amd64
-      unitTests: # Docker configuration for unit tests
-        file: Dockerfile.unitTests
-        context: .
-        tag: pojntfx/test-app-unit-tests:linux-amd64
-      integrationTests: # Docker configuration for integration tests
-        file: Dockerfile.integrationTests
-        context: .
-        tag: pojntfx/test-app-integration-tests:linux-amd64
-      chartTests: # Docker configuration for chart tests
-        file: Dockerfile.chartTests
-        context: .
-        tag: pojntfx/test-app-chart-tests:linux-amd64
+targets:
+  - name: linux
     helm:
       src: charts/test-app # The source directory of the Helm chart
       dist: .bin/chart # The directory into which the built chart should go
-  - identifier: linux/arm64
-    paths:
-      watch: . # The path to watch
-      include: (.*).go # Regex of paths to include
-      assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
-      assetOut: .bin/binaries/test-app-linux-arm64 # Path to the file to which the asset should be copied
-      gitRepoRoot: ../.. # Root of the Git repo
-    commands:
-      generateSources: go generate ./... # Command to generate sources
-      build: GOOS=linux GOARCH=arm64 go build -o .bin/binaries/test-app-linux-arm64 main.go # Command to build binary
-      unitTests: go test ./... # Command to run unit test
-      integrationTests: .bin/binaries/test-app-linux-arm64 -help # Command to run integration test
-      imageTests: docker run --platform linux/arm64 -e TARGETPLATFORM=linux/arm64 pojntfx/test-app-linux-arm64 /usr/local/bin/test-app -help # Command to run to test the Docker image
-      chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
-      start: .bin/binaries/test-app-linux-arm64 -keep-running # Command to start the app
-    docker:
-      build: # The main Docker config
-        file: Dockerfile
-        context: .
-        tag: pojntfx/test-app:linux-arm64
-      unitTests: # Docker configuration for unit tests
-        file: Dockerfile.unitTests
-        context: .
-        tag: pojntfx/test-app-unit-tests:linux-arm64
-      integrationTests: # Docker configuration for integration tests
-        file: Dockerfile.integrationTests
-        context: .
-        tag: pojntfx/test-app-integration-tests:linux-arm64
-      chartTests: # Docker configuration for chart tests
-        file: Dockerfile.chartTests
-        context: .
-        tag: pojntfx/test-app-chart-tests:linux-arm64
-    helm:
-      src: charts/test-app # The source directory of the Helm chart
-      dist: .bin/chart # The directory into which the built chart should go
-  - identifier: darwin/amd64
-    paths:
-      watch: . # The path to watch
-      include: (.*).go # Regex of paths to include
-      gitRepoRoot: ../.. # Root of the Git repo
-    commands:
-      generateSources: go generate ./... # Command to generate sources
-      build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/test-app-darwin-amd64 main.go # Command to build binary
-      unitTests: go test ./... # Command to run unit test
-      integrationTests: .bin/binaries/test-app-darwin-amd64 -help # Command to run integration test
-      start: .bin/binaries/test-app-darwin-amd64 -keep-running # Command to start the app
+    platforms:
+      - identifier: linux/amd64
+        paths:
+          watch: . # The path to watch
+          include: (.*).go # Regex of paths to include
+          assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
+          assetOut: .bin/binaries/test-app-linux-amd64 # Path to the file to which the asset should be copied
+          gitRepoRoot: ../.. # Root of the Git repo
+        commands:
+          generateSources: go generate ./... # Command to generate sources
+          build: GOOS=linux GOARCH=amd64 go build -o .bin/binaries/test-app-linux-amd64 main.go # Command to build binary
+          unitTests: go test ./... # Command to run unit test
+          integrationTests: .bin/binaries/test-app-linux-amd64 -help # Command to run integration test
+          imageTests: docker run --platform linux/amd64 -e TARGET=linux -e TARGETPLATFORM=linux/amd64 pojntfx/test-app:linux-amd64 /usr/local/bin/test-app -help # Command to run to test the Docker image
+          chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
+          start: .bin/binaries/test-app-linux-amd64 -keep-running # Command to start the app
+        docker:
+          build: # The main Docker config
+            file: Dockerfile
+            context: .
+            tag: pojntfx/test-app:linux-amd64
+          unitTests: # Docker configuration for unit tests
+            file: Dockerfile.unitTests
+            context: .
+            tag: pojntfx/test-app-unit-tests:linux-amd64
+          integrationTests: # Docker configuration for integration tests
+            file: Dockerfile.integrationTests
+            context: .
+            tag: pojntfx/test-app-integration-tests:linux-amd64
+          chartTests: # Docker configuration for chart tests
+            file: Dockerfile.chartTests
+            context: .
+            tag: pojntfx/test-app-chart-tests:linux-amd64
+      - identifier: linux/arm64
+        paths:
+          watch: . # The path to watch
+          include: (.*).go # Regex of paths to include
+          assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
+          assetOut: .bin/binaries/test-app-linux-arm64 # Path to the file to which the asset should be copied
+          gitRepoRoot: ../.. # Root of the Git repo
+        commands:
+          generateSources: go generate ./... # Command to generate sources
+          build: GOOS=linux GOARCH=arm64 go build -o .bin/binaries/test-app-linux-arm64 main.go # Command to build binary
+          unitTests: go test ./... # Command to run unit test
+          integrationTests: .bin/binaries/test-app-linux-arm64 -help # Command to run integration test
+          imageTests: docker run --platform linux/arm64 -e TARGET=linux -e TARGETPLATFORM=linux/arm64 pojntfx/test-app:linux-arm64 /usr/local/bin/test-app -help # Command to run to test the Docker image
+          chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
+          start: .bin/binaries/test-app-linux-arm64 -keep-running # Command to start the app
+        docker:
+          build: # The main Docker config
+            file: Dockerfile
+            context: .
+            tag: pojntfx/test-app:linux-arm64
+          unitTests: # Docker configuration for unit tests
+            file: Dockerfile.unitTests
+            context: .
+            tag: pojntfx/test-app-unit-tests:linux-arm64
+          integrationTests: # Docker configuration for integration tests
+            file: Dockerfile.integrationTests
+            context: .
+            tag: pojntfx/test-app-integration-tests:linux-arm64
+          chartTests: # Docker configuration for chart tests
+            file: Dockerfile.chartTests
+            context: .
+            tag: pojntfx/test-app-chart-tests:linux-arm64
+  - name: darwin
+    platforms:
+      - identifier: darwin/amd64
+        paths:
+          watch: . # The path to watch
+          include: (.*).go # Regex of paths to include
+          gitRepoRoot: ../.. # Root of the Git repo
+        commands:
+          generateSources: go generate ./... # Command to generate sources
+          build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/test-app-darwin-amd64 main.go # Command to build binary
+          unitTests: go test ./... # Command to run unit test
+          integrationTests: .bin/binaries/test-app-darwin-amd64 -help # Command to run integration test
+          start: .bin/binaries/test-app-darwin-amd64 -keep-running # Command to start the app

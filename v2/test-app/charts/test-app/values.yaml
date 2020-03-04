@@ -1,3 +1,4 @@
 image: pojntfx/test-app
 dev: false
-platform: '*'
+platform: linux/amd64
+target: linux

@@ -27,6 +27,7 @@ kind: ConfigMap
 metadata:
   name: test-app{{ if .Values.dev }}-dev{{ end }}
 data:
+  TARGET: {{ .Values.target }}
   TARGETPLATFORM: {{ .Values.platform }}
   {{ end }}
 
