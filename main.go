@@ -43,7 +43,7 @@ type Config struct {
 				UnitTests        dockerConfig `yaml:"unitTests"`
 				IntegrationTests dockerConfig `yaml:"integrationTests"`
 				ChartTests       dockerConfig `yaml:"chartTests"`
-				Publish          dockerConfig `yaml:"chartTests"`
+				Publish          dockerConfig `yaml:"publish"`
 			}
 		}
 	}
