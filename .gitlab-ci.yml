@@ -36,36 +36,64 @@ stages:
   - unitTest
   - integrationTest
   - buildAndPushImage
-  - buildAndPushManifestAndAssets
+  - buildAndPushManifestAndBinaries
   - buildAndPushChart
 
-unitTestLangAMD64:
+# Unit tests
+unitTestAMD64:
   <<: *dibsJob
   stage: unitTest
   script:
     - dibs -configFile test-app/dibs.yaml -unitTests -target linux -platform linux/amd64 -docker
+unitTestARM64:
+  <<: *dibsJob
+  stage: unitTest
+  script:
+    - dibs -configFile test-app/dibs.yaml -unitTests -target linux -platform linux/arm64 -docker
 
+# Integration tests
 integrationTestAMD64:
   <<: *dibsJob
   stage: integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -integrationTests -target linux -platform linux/amd64 -docker
+integrationTestARM64:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs -configFile test-app/dibs.yaml -integrationTests -target linux -platform linux/arm64 -docker
 
-integrationTestImageAMD64:
+# Image tests
+imageTestsAMD64:
   <<: *dibsJob
   stage: integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
-    - dibs -configFile test-app/dibs.yaml -testImage -target linux -platform linux/amd64
+    - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/amd64
+imageTestsARM64:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
+    - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/arm64
 
-integrationTestChartAMD64:
+# Chart tests
+chartTestsAMD64:
   <<: *dibsJob
   stage: integrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
     - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
     - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/amd64 -docker
+chartTestsARM64:
+  <<: *dibsJob
+  stage: integrationTest
+  script:
+    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
+    - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
+    - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/arm64 -docker
 
+# Build and push image
 buildAndPushImageAMD64:
   <<: *dibsJob
   stage: buildAndPushImage
@@ -74,30 +102,54 @@ buildAndPushImageAMD64:
     - dibs -configFile test-app/dibs.yaml -pushImage -target linux -platform linux/amd64
   only:
     - tags
+buildAndPushImageARM64:
+  <<: *dibsJob
+  stage: buildAndPushImage
+  script:
+    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
+    - dibs -configFile test-app/dibs.yaml -pushImage -target linux -platform linux/arm64
+  only:
+    - tags
 
+# Build and push manifest
 buildAndPushManifest:
   <<: *dibsJob
-  stage: buildAndPushManifestAndAssets
+  stage: buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
     - dibs -configFile test-app/dibs.yaml -pushManifest -target linux
   only:
     - tags
 
-buildAndPushAssetsAMD64:
+# Build and push binaries
+buildAndPushBinariesAMD64:
   <<: *dibsJob
-  stage: buildAndPushManifestAndAssets
+  stage: buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -build -target linux -platform linux/amd64 -docker
     - dibs -configFile test-app/dibs.yaml -pushBinary -target linux -platform linux/amd64
   artifacts:
-    name: binaries
+    name: binaries-amd64
+    paths:
+      - test-app/.bin/binaries
+    expire_in: 1 month
+  only:
+    - tags
+buildAndPushBinariesARM64:
+  <<: *dibsJob
+  stage: buildAndPushManifestAndBinaries
+  script:
+    - dibs -configFile test-app/dibs.yaml -build -target linux -platform linux/arm64 -docker
+    - dibs -configFile test-app/dibs.yaml -pushBinary -target linux -platform linux/arm64
+  artifacts:
+    name: binaries-arm64
     paths:
       - test-app/.bin/binaries
     expire_in: 1 month
   only:
     - tags
 
+# Build and push chart
 buildAndPushChart:
   <<: *dibsJob
   stage: buildAndPushChart
