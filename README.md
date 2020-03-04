@@ -2,7 +2,7 @@
 
 System for distributed polyglot, multi-module, multi-architecture development and CI/CD.
 
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fpojntfx%2Fdibs%2Fbadge&style=flat)](https://actions-badge.atrox.dev/pojntfx/dibs/goto)
+[![pipeline status](https://gitlab.com/pojntfx/dibs/badges/master/pipeline.svg)](https://gitlab.com/pojntfx/dibs/commits/master)
 
 [![introduction video](https://img.youtube.com/vi/fUfW-z6fWZs/maxresdefault.jpg)](https://youtu.be/fUfW-z6fWZs)
 
