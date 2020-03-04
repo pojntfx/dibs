@@ -82,6 +82,7 @@ func (f *CommandFlow) Wait() error {
 	return nil
 }
 
+// TODO: Add test that ensures that it waits until all have stopped (this is necessary so that ports don't block)
 // Stop stops the flow
 func (f *CommandFlow) Stop() error {
 	for i := len(f.commands) - 1; i >= 0; i-- {
@@ -89,6 +90,10 @@ func (f *CommandFlow) Stop() error {
 
 		if !command.IsStopped() {
 			if err := command.Stop(); err != nil {
+				return err
+			}
+
+			if err := command.Wait(); err != nil {
 				return err
 			}
 		}
