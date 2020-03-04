@@ -235,3 +235,45 @@ func TestBuildManifestDockerManager(t *testing.T) {
 		t.Error("Docker output did not match expected output")
 	}
 }
+
+func TestPushManifestDockerManager(t *testing.T) {
+	if err := enableBuildx(); err != nil {
+		t.Error(err)
+	}
+
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
+
+	hits := 0
+	go func() {
+		for {
+			select {
+			case stdout := <-stdoutChan:
+				t.Log("test stdout", stdout)
+
+				if strings.Contains(stdout, "sha256:") { // Only the push command logs to stdout, so this works
+					hits++
+				}
+			case stderr := <-stderrChan:
+				t.Log("test stderr", stderr)
+			}
+		}
+	}()
+
+	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+		t.Error(err)
+	}
+
+	if err := d.BuildManifest(testManifestTag, []string{testTag}); err != nil {
+		t.Error(err)
+	}
+
+	if err := d.PushManifest(testManifestTag); err != nil {
+		t.Error(err)
+	}
+
+	if hits < 1 {
+		t.Error("Docker output did not match expected output")
+	}
+}

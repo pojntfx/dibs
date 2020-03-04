@@ -109,10 +109,11 @@ func main() {
 		integrationTests bool
 		imageTests       bool
 		chartTests       bool
-		pushImage        bool
-		docker           bool
-		pushChart        bool
 		pushBinary       bool
+		pushImage        bool
+		pushManifest     bool
+		pushChart        bool
+		docker           bool
 		target           string
 		platform         string
 	)
@@ -131,6 +132,7 @@ It will add all images of the specified platforms; to add all, set -platform to 
 	flag.BoolVar(&imageTests, "imageTests", false, "Run the image tests of the project")
 	flag.BoolVar(&chartTests, "chartTests", false, "Run the chart tests of the project")
 	flag.BoolVar(&pushImage, "pushImage", false, "Push the Docker image of the project")
+	flag.BoolVar(&pushManifest, "pushManifest", false, "Push the Docker manifest of the project")
 	flag.BoolVar(&buildChart, "buildChart", false, "Build the Helm chart of the project")
 	flag.BoolVar(&pushChart, "pushChart", false, `Push the Helm chart of the project.
 This command requires the following env variables to be set:
@@ -197,6 +199,34 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 				log.Fatal(err)
 			}
 
+			if buildManifest {
+				var images []string
+
+				for _, platformConfig := range targetConfig.Platforms {
+					if platformConfig.Identifier == platform || platform == "*" {
+						images = append(images, platformConfig.Docker.Build.Tag)
+					}
+				}
+
+				d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+				go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+				if err := d.BuildManifest(targetConfig.DockerManifest, images); err != nil {
+					log.Fatal(err)
+				}
+			}
+
+			if pushManifest {
+				d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+				go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+				if err := d.PushManifest(targetConfig.DockerManifest); err != nil {
+					log.Fatal(err)
+				}
+			}
+
 			if buildChart {
 				if err := os.MkdirAll(filepath.Join(context, targetConfig.Helm.Dist), 0777); err != nil {
 					log.Fatal(err)
@@ -228,24 +258,6 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 					filepath.Join(context, targetConfig.Helm.Dist),
 					filepath.Join(os.TempDir(), "dibs-push-chart-repo"),
 				); err != nil {
-					log.Fatal(err)
-				}
-			}
-
-			if buildManifest {
-				var images []string
-
-				for _, platformConfig := range targetConfig.Platforms {
-					if platformConfig.Identifier == platform || platform == "*" {
-						images = append(images, platformConfig.Docker.Build.Tag)
-					}
-				}
-
-				d := utils.NewDockerManager(context, stdoutChan, stderrChan)
-
-				go handleStdoutAndStderr(stdoutChan, stderrChan)
-
-				if err := d.BuildManifest(targetConfig.DockerManifest, images); err != nil {
 					log.Fatal(err)
 				}
 			}

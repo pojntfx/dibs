@@ -119,3 +119,14 @@ func (d *DockerManager) BuildManifest(tag string, images []string) error {
 
 	return command.Wait()
 }
+
+// PushManifest pushes a Docker manifest
+func (d *DockerManager) PushManifest(tag string) error {
+	command := NewManageableCommand("docker manifest push --purge "+tag, d.dir, d.stdoutChan, d.stderrChan)
+
+	if err := command.Start(); err != nil {
+		return err
+	}
+
+	return command.Wait()
+}
