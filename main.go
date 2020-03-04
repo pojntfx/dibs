@@ -101,27 +101,28 @@ func handleStdoutAndStderr(stdoutChan, stderrChan chan string) {
 
 func main() {
 	var (
-		configFilePath   string
-		context          string
-		dev              bool
-		generateSources  bool
-		build            bool
-		buildImage       bool
-		buildManifest    bool
-		buildChart       bool
-		unitTests        bool
-		integrationTests bool
-		imageTests       bool
-		chartTests       bool
-		publish          bool
-		pushBinary       bool
-		pushImage        bool
-		pushManifest     bool
-		pushChart        bool
-		docker           bool
-		target           string
-		platform         string
-		skipTests        bool
+		configFilePath      string
+		context             string
+		dev                 bool
+		generateSources     bool
+		build               bool
+		buildImage          bool
+		buildManifest       bool
+		buildChart          bool
+		unitTests           bool
+		integrationTests    bool
+		imageTests          bool
+		chartTests          bool
+		publish             bool
+		pushBinary          bool
+		pushImage           bool
+		pushManifest        bool
+		pushChart           bool
+		docker              bool
+		target              string
+		platform            string
+		skipTests           bool
+		skipGenerateSources bool
 	)
 
 	flag.StringVar(&configFilePath, "configFile", "dibs.yaml", "The config file to use")
@@ -129,6 +130,7 @@ func main() {
 	flag.BoolVar(&docker, "docker", false, "Run in Docker")
 	flag.BoolVar(&dev, "dev", false, "Start the development flow for the project")
 	flag.BoolVar(&skipTests, "skipTests", false, "Skip the tests for the project")
+	flag.BoolVar(&skipGenerateSources, "skipGenerateSources", false, "Don't generate the sources for the project")
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
 	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image of the project")
@@ -279,20 +281,27 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 					if dev {
 						go handleStdoutAndStderr(stdoutChan, stderrChan)
 
-						commandFlow := utils.NewCommandFlow([]string{
+						allCommands := []string{
 							platformConfig.Commands.GenerateSources,
 							platformConfig.Commands.Build,
 							platformConfig.Commands.UnitTests,
 							platformConfig.Commands.IntegrationTests,
 							platformConfig.Commands.Start,
-						}, context, stdoutChan, stderrChan)
-						if skipTests {
-							commandFlow = utils.NewCommandFlow([]string{
-								platformConfig.Commands.GenerateSources,
-								platformConfig.Commands.Build,
-								platformConfig.Commands.Start,
-							}, context, stdoutChan, stderrChan)
 						}
+						var commandsToRun []string
+						for _, command := range allCommands {
+							if skipTests && command == platformConfig.Commands.UnitTests || command == platformConfig.Commands.IntegrationTests {
+								continue
+							}
+
+							if skipGenerateSources && command == platformConfig.Commands.GenerateSources {
+								continue
+							}
+
+							commandsToRun = append(commandsToRun, command)
+						}
+
+						commandFlow := utils.NewCommandFlow(commandsToRun, context, stdoutChan, stderrChan)
 
 						interrupt := make(chan os.Signal, 2)
 						signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
