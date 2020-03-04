@@ -18,7 +18,8 @@ var (
 		return filepath.Join(pwd, "..", "..", "test-app")
 	}()
 	testDockerfile   = filepath.Join(testContext, "Dockerfile")
-	testTag          = filepath.Join("pojntfx/test-app")
+	testTag          = "pojntfx/test-app:linux-amd64"
+	testManifestTag  = "pojntfx/test-app"
 	testExecLine     = "ls"
 	testAssetInImage = "/usr/local/bin/test-app" // Don't `filepath.Join` as this is hard-coded in `dibs.yaml` anyways
 	testAssetOut     = filepath.Join(os.TempDir(), "test-app")
@@ -194,5 +195,43 @@ func TestCopyFromImageDockerManager(t *testing.T) {
 
 	if _, err := os.Stat(testAssetOut); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestBuildManifestDockerManager(t *testing.T) {
+	if err := enableBuildx(); err != nil {
+		t.Error(err)
+	}
+
+	stdoutChan, stderrChan := make(chan string), make(chan string)
+
+	d := NewDockerManager(testContext, stdoutChan, stderrChan)
+
+	hits := 0
+	go func() {
+		for {
+			select {
+			case stdout := <-stdoutChan:
+				t.Log("test stdout", stdout)
+
+				if strings.Contains(stdout, "Created manifest list") {
+					hits++
+				}
+			case stderr := <-stderrChan:
+				t.Log("test stderr", stderr)
+			}
+		}
+	}()
+
+	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+		t.Error(err)
+	}
+
+	if err := d.BuildManifest(testManifestTag, []string{testTag}); err != nil {
+		t.Error(err)
+	}
+
+	if hits < 1 {
+		t.Error("Docker output did not match expected output")
 	}
 }

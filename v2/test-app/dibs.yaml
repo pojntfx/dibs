@@ -3,6 +3,7 @@ targets:
     helm:
       src: charts/test-app # The source directory of the Helm chart
       dist: .bin/chart # The directory into which the built chart should go
+    dockerManifest: pojntfx/test-app:latest # The manifest to add all the platforms' Docker images to
     platforms:
       - identifier: linux/amd64
         paths:
