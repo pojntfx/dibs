@@ -275,6 +275,8 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 					}
 
 					if dev {
+						go handleStdoutAndStderr(stdoutChan, stderrChan)
+
 						commandFlow := utils.NewCommandFlow([]string{
 							platformConfig.Commands.GenerateSources,
 							platformConfig.Commands.Build,
@@ -293,8 +295,6 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 						if err := commandFlow.Start(); err != nil {
 							log.Fatal(err)
 						}
-
-						go handleStdoutAndStderr(stdoutChan, stderrChan)
 
 						eventChan := make(chan string)
 
