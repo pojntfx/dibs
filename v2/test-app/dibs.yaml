@@ -69,3 +69,14 @@ platforms:
     helm:
       src: charts/test-app # The source directory of the Helm chart
       dist: .bin/chart # The directory into which the built chart should go
+  - identifier: darwin/amd64
+    paths:
+      watch: . # The path to watch
+      include: (.*).go # Regex of paths to include
+      gitRepoRoot: ../.. # Root of the Git repo
+    commands:
+      generateSources: go generate ./... # Command to generate sources
+      build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/test-app-darwin-amd64 main.go # Command to build binary
+      unitTests: go test ./... # Command to run unit test
+      integrationTests: .bin/binaries/test-app-darwin-amd64 -help # Command to run integration test
+      start: .bin/binaries/test-app-darwin-amd64 -keep-running # Command to start the app
