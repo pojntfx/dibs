@@ -20,14 +20,6 @@ Prebuilt binaries are available on the [releases page](https://github.com/pojntf
 
 A Go package [is available](https://pkg.go.dev/github.com/pojntfx/dibs?tab=doc).
 
-### Docker Image
-
-A Docker image is available on [Docker Hub](https://hub.docker.com/r/pojntfx/dibs).
-
-### Helm Chart
-
-A Helm chart is available in [@pojntfx's Helm chart repository](https://pojntfx.github.io/charts/).
-
 ## Usage
 
 `dibs` is configured by using a [config file](./test-app/dibs.yaml).

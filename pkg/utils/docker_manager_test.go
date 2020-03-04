@@ -96,41 +96,44 @@ func TestBuildDockerManager(t *testing.T) {
 	}
 }
 
+// TestPushDockerManager requires the environment variable below to be set; it is disabled by default.
 func TestPushDockerManager(t *testing.T) {
-	if err := enableBuildx(); err != nil {
-		t.Error(err)
-	}
-
-	stdoutChan, stderrChan := make(chan string), make(chan string)
-
-	d := NewDockerManager(testContext, stdoutChan, stderrChan)
-
-	hits := 0
-	go func() {
-		for {
-			select {
-			case stdout := <-stdoutChan:
-				t.Log("test stdout", stdout)
-
-				if strings.Contains(stdout, "The push refers to repository") || strings.Contains(stdout, "digest:") {
-					hits++
-				}
-			case stderr := <-stderrChan:
-				t.Log("test stderr", stderr)
-			}
+	if os.Getenv("DIBS_DOCKER_PUSH_TEST_ENABLED") == "1" {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
 		}
-	}()
 
-	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
-		t.Error(err)
-	}
+		stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	if err := d.Push(testTag); err != nil {
-		t.Error(err)
-	}
+		d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
-	if hits < 2 {
-		t.Error("Docker output did not match expected output")
+		hits := 0
+		go func() {
+			for {
+				select {
+				case stdout := <-stdoutChan:
+					t.Log("test stdout", stdout)
+
+					if strings.Contains(stdout, "The push refers to repository") || strings.Contains(stdout, "digest:") {
+						hits++
+					}
+				case stderr := <-stderrChan:
+					t.Log("test stderr", stderr)
+				}
+			}
+		}()
+
+		if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+			t.Error(err)
+		}
+
+		if err := d.Push(testTag); err != nil {
+			t.Error(err)
+		}
+
+		if hits < 2 {
+			t.Error("Docker output did not match expected output")
+		}
 	}
 }
 
@@ -236,44 +239,47 @@ func TestBuildManifestDockerManager(t *testing.T) {
 	}
 }
 
+// TestPushManifestDockerManager requires the environment variable below to be set; it is disabled by default.
 func TestPushManifestDockerManager(t *testing.T) {
-	if err := enableBuildx(); err != nil {
-		t.Error(err)
-	}
-
-	stdoutChan, stderrChan := make(chan string), make(chan string)
-
-	d := NewDockerManager(testContext, stdoutChan, stderrChan)
-
-	hits := 0
-	go func() {
-		for {
-			select {
-			case stdout := <-stdoutChan:
-				t.Log("test stdout", stdout)
-
-				if strings.Contains(stdout, "sha256:") { // Only the push command logs to stdout, so this works
-					hits++
-				}
-			case stderr := <-stderrChan:
-				t.Log("test stderr", stderr)
-			}
+	if os.Getenv("DIBS_DOCKER_MANIFEST_PUSH_TEST_ENABLED") == "1" {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
 		}
-	}()
 
-	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
-		t.Error(err)
-	}
+		stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	if err := d.BuildManifest(testManifestTag, []string{testTag}); err != nil {
-		t.Error(err)
-	}
+		d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
-	if err := d.PushManifest(testManifestTag); err != nil {
-		t.Error(err)
-	}
+		hits := 0
+		go func() {
+			for {
+				select {
+				case stdout := <-stdoutChan:
+					t.Log("test stdout", stdout)
 
-	if hits < 1 {
-		t.Error("Docker output did not match expected output")
+					if strings.Contains(stdout, "sha256:") { // Only the push command logs to stdout, so this works
+						hits++
+					}
+				case stderr := <-stderrChan:
+					t.Log("test stderr", stderr)
+				}
+			}
+		}()
+
+		if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+			t.Error(err)
+		}
+
+		if err := d.BuildManifest(testManifestTag, []string{testTag}); err != nil {
+			t.Error(err)
+		}
+
+		if err := d.PushManifest(testManifestTag); err != nil {
+			t.Error(err)
+		}
+
+		if hits < 1 {
+			t.Error("Docker output did not match expected output")
+		}
 	}
 }
