@@ -18,7 +18,8 @@ type Config struct {
 			Src  string `yaml:"src"`
 			Dist string `yaml:"dist"`
 		}
-		Platforms []struct {
+		DockerManifest string `yaml:"dockerManifest"`
+		Platforms      []struct {
 			Identifier string `yaml:"identifier"`
 			Paths      struct {
 				Watch        string `yaml:"watch"`
@@ -102,13 +103,14 @@ func main() {
 		generateSources  bool
 		build            bool
 		buildImage       bool
+		buildManifest    bool
+		buildChart       bool
 		unitTests        bool
 		integrationTests bool
 		imageTests       bool
 		chartTests       bool
 		pushImage        bool
 		docker           bool
-		buildChart       bool
 		pushChart        bool
 		pushBinary       bool
 		target           string
@@ -122,6 +124,8 @@ func main() {
 	flag.BoolVar(&generateSources, "generateSources", false, "Generate the sources for the project")
 	flag.BoolVar(&build, "build", false, "Build the project")
 	flag.BoolVar(&buildImage, "buildImage", false, "Build the Docker image of the project")
+	flag.BoolVar(&buildManifest, "buildManifest", false, `Build a Docker manifest.
+It will add all images of the specified platforms; to add all, set -platform to "*".`)
 	flag.BoolVar(&unitTests, "unitTests", false, "Run the unit tests of the project")
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
 	flag.BoolVar(&imageTests, "imageTests", false, "Run the image tests of the project")
@@ -224,6 +228,24 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 					filepath.Join(context, targetConfig.Helm.Dist),
 					filepath.Join(os.TempDir(), "dibs-push-chart-repo"),
 				); err != nil {
+					log.Fatal(err)
+				}
+			}
+
+			if buildManifest {
+				var images []string
+
+				for _, platformConfig := range targetConfig.Platforms {
+					if platformConfig.Identifier == platform || platform == "*" {
+						images = append(images, platformConfig.Docker.Build.Tag)
+					}
+				}
+
+				d := utils.NewDockerManager(context, stdoutChan, stderrChan)
+
+				go handleStdoutAndStderr(stdoutChan, stderrChan)
+
+				if err := d.BuildManifest(targetConfig.DockerManifest, images); err != nil {
 					log.Fatal(err)
 				}
 			}

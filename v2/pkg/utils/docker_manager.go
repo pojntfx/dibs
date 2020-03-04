@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"os"
+	"strings"
 )
 
 // DockerManager manages Docker
@@ -106,4 +107,15 @@ func (d *DockerManager) CopyFromImage(tag, assetInImage, assetOut string) error 
 	}
 
 	return copyCommand.Wait()
+}
+
+// BuildManifest builds a Docker manifest from multiple images
+func (d *DockerManager) BuildManifest(tag string, images []string) error {
+	command := NewManageableCommand("docker manifest create --amend "+tag+" "+strings.Join(images, " "), d.dir, d.stdoutChan, d.stderrChan)
+
+	if err := command.Start(); err != nil {
+		return err
+	}
+
+	return command.Wait()
 }
