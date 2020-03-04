@@ -25,6 +25,10 @@ var (
 	testAssetOut     = filepath.Join(os.TempDir(), "test-app")
 )
 
+func isDockerEnabled() bool {
+	return os.Getenv("DIBS_DISABLE_DOCKER_DEPENDEND_TESTS") != "1"
+}
+
 func enableBuildx() error {
 	envVariablesToSet := [][]string{
 		{"TARGETPLATFORM", "linux/amd64"},
@@ -63,36 +67,38 @@ func TestCreateDockerManager(t *testing.T) {
 }
 
 func TestBuildDockerManager(t *testing.T) {
-	if err := enableBuildx(); err != nil {
-		t.Error(err)
-	}
+	if isDockerEnabled() {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
+		}
 
-	stdoutChan, stderrChan := make(chan string), make(chan string)
+		stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	d := NewDockerManager(testContext, stdoutChan, stderrChan)
+		d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
-	hits := 0
-	go func() {
-		for {
-			select {
-			case stdout := <-stdoutChan:
-				t.Log("test stdout", stdout)
-			case stderr := <-stderrChan:
-				t.Log("test stderr", stderr)
+		hits := 0
+		go func() {
+			for {
+				select {
+				case stdout := <-stdoutChan:
+					t.Log("test stdout", stdout)
+				case stderr := <-stderrChan:
+					t.Log("test stderr", stderr)
 
-				if strings.Contains(stderr, "DONE") || strings.Contains(stderr, "naming to") {
-					hits++
+					if strings.Contains(stderr, "DONE") || strings.Contains(stderr, "naming to") {
+						hits++
+					}
 				}
 			}
+		}()
+
+		if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+			t.Error(err)
 		}
-	}()
 
-	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
-		t.Error(err)
-	}
-
-	if hits < 2 {
-		t.Error("Docker output did not match expected output")
+		if hits < 2 {
+			t.Error("Docker output did not match expected output")
+		}
 	}
 }
 
@@ -138,104 +144,110 @@ func TestPushDockerManager(t *testing.T) {
 }
 
 func TestRunDockerManager(t *testing.T) {
-	if err := enableBuildx(); err != nil {
-		t.Error(err)
-	}
-
-	stdoutChan, stderrChan := make(chan string), make(chan string)
-
-	d := NewDockerManager(testContext, stdoutChan, stderrChan)
-
-	hits := 0
-	go func() {
-		for {
-			select {
-			case stdout := <-stdoutChan:
-				t.Log("test stdout", stdout)
-
-				if strings.Contains(stdout, "usr") {
-					hits++
-				}
-			case stderr := <-stderrChan:
-				t.Log("test stderr", stderr)
-			}
+	if isDockerEnabled() {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
 		}
-	}()
 
-	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
-		t.Error(err)
-	}
+		stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	if err := d.Run(testTag, testExecLine, false); err != nil {
-		t.Error(err)
-	}
+		d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
-	if hits < 1 {
-		t.Error("Docker output did not match expected output")
+		hits := 0
+		go func() {
+			for {
+				select {
+				case stdout := <-stdoutChan:
+					t.Log("test stdout", stdout)
+
+					if strings.Contains(stdout, "usr") {
+						hits++
+					}
+				case stderr := <-stderrChan:
+					t.Log("test stderr", stderr)
+				}
+			}
+		}()
+
+		if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+			t.Error(err)
+		}
+
+		if err := d.Run(testTag, testExecLine, false); err != nil {
+			t.Error(err)
+		}
+
+		if hits < 1 {
+			t.Error("Docker output did not match expected output")
+		}
 	}
 }
 
 func TestCopyFromImageDockerManager(t *testing.T) {
-	if err := enableBuildx(); err != nil {
-		t.Error(err)
-	}
+	if isDockerEnabled() {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
+		}
 
-	stdoutChan, stderrChan := make(chan string), make(chan string)
+		stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	d := NewDockerManager(testContext, stdoutChan, stderrChan)
+		d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
-	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
-		t.Error(err)
-	}
+		if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+			t.Error(err)
+		}
 
-	if err := os.RemoveAll(testAssetOut); err != nil {
-		t.Error(err)
-	}
+		if err := os.RemoveAll(testAssetOut); err != nil {
+			t.Error(err)
+		}
 
-	if err := d.CopyFromImage(testTag, testAssetInImage, testAssetOut); err != nil {
-		t.Error(err)
-	}
+		if err := d.CopyFromImage(testTag, testAssetInImage, testAssetOut); err != nil {
+			t.Error(err)
+		}
 
-	if _, err := os.Stat(testAssetOut); err != nil {
-		t.Error(err)
+		if _, err := os.Stat(testAssetOut); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
 func TestBuildManifestDockerManager(t *testing.T) {
-	if err := enableBuildx(); err != nil {
-		t.Error(err)
-	}
-
-	stdoutChan, stderrChan := make(chan string), make(chan string)
-
-	d := NewDockerManager(testContext, stdoutChan, stderrChan)
-
-	hits := 0
-	go func() {
-		for {
-			select {
-			case stdout := <-stdoutChan:
-				t.Log("test stdout", stdout)
-
-				if strings.Contains(stdout, "Created manifest list") {
-					hits++
-				}
-			case stderr := <-stderrChan:
-				t.Log("test stderr", stderr)
-			}
+	if isDockerEnabled() {
+		if err := enableBuildx(); err != nil {
+			t.Error(err)
 		}
-	}()
 
-	if err := d.Build(testDockerfile, testContext, testTag); err != nil {
-		t.Error(err)
-	}
+		stdoutChan, stderrChan := make(chan string), make(chan string)
 
-	if err := d.BuildManifest(testManifestTag, []string{testTag}); err != nil {
-		t.Error(err)
-	}
+		d := NewDockerManager(testContext, stdoutChan, stderrChan)
 
-	if hits < 1 {
-		t.Error("Docker output did not match expected output")
+		hits := 0
+		go func() {
+			for {
+				select {
+				case stdout := <-stdoutChan:
+					t.Log("test stdout", stdout)
+
+					if strings.Contains(stdout, "Created manifest list") {
+						hits++
+					}
+				case stderr := <-stderrChan:
+					t.Log("test stderr", stderr)
+				}
+			}
+		}()
+
+		if err := d.Build(testDockerfile, testContext, testTag); err != nil {
+			t.Error(err)
+		}
+
+		if err := d.BuildManifest(testManifestTag, []string{testTag}); err != nil {
+			t.Error(err)
+		}
+
+		if hits < 1 {
+			t.Error("Docker output did not match expected output")
+		}
 	}
 }
 
