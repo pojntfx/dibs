@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 )
 
 // Config is a dibs configuration
@@ -291,6 +293,27 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 								platformConfig.Commands.Start,
 							}, context, stdoutChan, stderrChan)
 						}
+
+						interrupt := make(chan os.Signal, 2)
+						signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+						go func() {
+							<-interrupt
+
+							// Allow manually killing the process
+							go func() {
+								<-interrupt
+
+								os.Exit(1)
+							}()
+
+							log.Println("Gracefully stopping command flow (this might take a few seconds)")
+
+							if err := commandFlow.Stop(); err != nil {
+								log.Fatal(err)
+							}
+
+							os.Exit(0) // The path watcher is blocking
+						}()
 
 						if err := commandFlow.Start(); err != nil {
 							log.Fatal(err)
