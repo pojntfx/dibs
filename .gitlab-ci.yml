@@ -33,12 +33,69 @@
     - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
+  - dibs:unitTest
+  - dibs:integrationTest
+  - dibs:buildAndPushBinaries
   - test-app:unitTest
   - test-app:integrationTest
   - test-app:buildAndPushImage
-  - test-app:test-app:buildAndPushManifestAndBinaries
+  - test-app:buildAndPushManifestAndBinaries
   - test-app:buildAndPushChart
 
+## dibs
+# Unit tests
+dibs:unitTestAMD64:
+  <<: *dibsJob
+  stage: dibs:unitTest
+  script:
+    - dibs -unitTests -target linux -platform linux/amd64 -docker
+dibs:unitTestARM64:
+  <<: *dibsJob
+  stage: dibs:unitTest
+  script:
+    - dibs -unitTests -target linux -platform linux/arm64 -docker
+
+# Integration tests
+dibs:integrationTestAMD64:
+  <<: *dibsJob
+  stage: dibs:integrationTest
+  script:
+    - dibs -integrationTests -target linux -platform linux/amd64 -docker
+dibs:integrationTestARM64:
+  <<: *dibsJob
+  stage: dibs:integrationTest
+  script:
+    - dibs -integrationTests -target linux -platform linux/arm64 -docker
+
+# Build and push binaries
+dibs:buildAndPushBinariesAMD64:
+  <<: *dibsJob
+  stage: dibs:buildAndPushBinaries
+  script:
+    - dibs -build -target linux -platform linux/amd64 -docker
+    - dibs -pushBinary -target linux -platform linux/amd64
+  artifacts:
+    name: dibs-binaries-amd64
+    paths:
+      - .bin/binaries
+    expire_in: 1 month
+  only:
+    - tags
+dibs:buildAndPushBinariesARM64:
+  <<: *dibsJob
+  stage: dibs:buildAndPushBinaries
+  script:
+    - dibs -build -target linux -platform linux/arm64 -docker
+    - dibs -pushBinary -target linux -platform linux/arm64
+  artifacts:
+    name: dibs-binaries-arm64
+    paths:
+      - .bin/binaries
+    expire_in: 1 month
+  only:
+    - tags
+
+## test-app
 # Unit tests
 test-app:unitTestAMD64:
   <<: *dibsJob
@@ -114,7 +171,7 @@ test-app:buildAndPushImageARM64:
 # Build and push manifest
 test-app:buildAndPushManifest:
   <<: *dibsJob
-  stage: test-app:test-app:buildAndPushManifestAndBinaries
+  stage: test-app:buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
     - dibs -configFile test-app/dibs.yaml -pushManifest -target linux
@@ -124,12 +181,12 @@ test-app:buildAndPushManifest:
 # Build and push binaries
 test-app:buildAndPushBinariesAMD64:
   <<: *dibsJob
-  stage: test-app:test-app:buildAndPushManifestAndBinaries
+  stage: test-app:buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -build -target linux -platform linux/amd64 -docker
     - dibs -configFile test-app/dibs.yaml -pushBinary -target linux -platform linux/amd64
   artifacts:
-    name: binaries-amd64
+    name: test-app-binaries-amd64
     paths:
       - test-app/.bin/binaries
     expire_in: 1 month
@@ -137,12 +194,12 @@ test-app:buildAndPushBinariesAMD64:
     - tags
 test-app:buildAndPushBinariesARM64:
   <<: *dibsJob
-  stage: test-app:test-app:buildAndPushManifestAndBinaries
+  stage: test-app:buildAndPushManifestAndBinaries
   script:
     - dibs -configFile test-app/dibs.yaml -build -target linux -platform linux/arm64 -docker
     - dibs -configFile test-app/dibs.yaml -pushBinary -target linux -platform linux/arm64
   artifacts:
-    name: binaries-arm64
+    name: test-app-binaries-arm64
     paths:
       - test-app/.bin/binaries
     expire_in: 1 month
@@ -157,7 +214,7 @@ test-app:buildAndPushChart:
     - dibs -configFile test-app/dibs.yaml -buildChart -target linux
     - dibs -configFile test-app/dibs.yaml -pushChart -target linux
   artifacts:
-    name: chart
+    name: test-app-chart
     paths:
       - test-app/.bin/chart
     expire_in: 1 month
