@@ -40,3 +40,5 @@ profiles:
               image: pojntfx/test-app-dev
             setValues:
               dev: true
+            setValueTemplates:
+              platform: "{{ .TARGETPLATFORM }}"

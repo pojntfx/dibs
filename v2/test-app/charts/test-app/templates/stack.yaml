@@ -14,3 +14,19 @@ spec:
       containers:
         - name: test-app{{ if .Values.dev}}-dev{{ end }}
           image: {{ .Values.image }}
+          {{ if .Values.dev }}
+          envFrom:
+            - configMapRef:
+                name: test-app{{ if .Values.dev }}-dev{{ end }}
+          {{ end }}
+  {{ if .Values.dev }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-app{{ if .Values.dev }}-dev{{ end }}
+data:
+  TARGETPLATFORM: {{ .Values.platform }}
+  {{ end }}
+
