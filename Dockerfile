@@ -1,12 +1,10 @@
 # syntax=docker/dockerfile:experimental
 # Build container
-FROM --platform=$TARGETPLATFORM golang:alpine AS build
+FROM --platform=$TARGETPLATFORM golang AS build
 ARG TARGET
 ARG TARGETPLATFORM
 
 WORKDIR /app
-
-RUN apk add -u curl
 
 RUN curl -Lo /tmp/dibs https://nx904.your-storageshare.de/s/ZWxkmmQW37fHt9J/download
 RUN install /tmp/dibs /usr/local/bin
@@ -20,13 +18,6 @@ FROM --platform=$TARGETPLATFORM alpine
 ARG TARGET
 ARG TARGETPLATFORM
 
-WORKDIR /app
+COPY --from=build /app/.bin/binaries/dibs* /usr/local/bin/dibs
 
-RUN apk add -u curl
-
-RUN curl -Lo /tmp/dibs https://nx904.your-storageshare.de/s/ZWxkmmQW37fHt9J/download
-RUN install /tmp/dibs /usr/local/bin
-
-COPY --from=build /app /app
-
-CMD dibs -integrationTests
+CMD /usr/local/bin/dibs
