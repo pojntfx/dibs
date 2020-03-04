@@ -36,14 +36,15 @@
     - docker buildx create --name dibs
     - docker buildx use dibs
     - docker buildx inspect --bootstrap
+    # Install Helm
+    - curl -L https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz | tar -zvxf - linux-amd64/helm -O >/tmp/helm
+    - install /tmp/helm /usr/local/bin
     # Install ghr
     - curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz | tar -zvxf - ghr_v0.13.0_linux_amd64/ghr
-    - chmod +x ghr_v0.13.0_linux_amd64/ghr
-    - mv ghr_v0.13.0_linux_amd64/ghr /usr/local/bin/ghr
+    - install ghr_v0.13.0_linux_amd64/ghr /usr/local/bin
     # Install Chart Releaser
     - curl -L https://github.com/helm/chart-releaser/releases/download/v0.2.3/chart-releaser_0.2.3_linux_amd64.tar.gz | tar -zvxf - cr
-    - chmod +x cr
-    - mv cr /usr/local/bin/cr
+    - install cr /usr/local/bin
     # Install dibs
     - curl -Lo /tmp/dibs https://nx904.your-storageshare.de/s/ZWxkmmQW37fHt9J/download
     - install /tmp/dibs /usr/local/bin
