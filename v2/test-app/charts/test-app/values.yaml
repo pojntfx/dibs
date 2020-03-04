@@ -1,2 +1,3 @@
 image: pojntfx/test-app
 dev: false
+platform: '*'
