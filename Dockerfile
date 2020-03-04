@@ -11,6 +11,7 @@ RUN install /tmp/dibs /usr/local/bin
 
 ADD . .
 
+RUN dibs -generateSources
 RUN dibs -build
 
 # Run container

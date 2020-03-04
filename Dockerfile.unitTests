@@ -15,4 +15,5 @@ RUN helm init --client-only
 
 ADD . .
 
+RUN dibs -generateSources
 CMD DIBS_DISABLE_DOCKER_DEPENDEND_TESTS=1 dibs -unitTests
