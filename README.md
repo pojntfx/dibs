@@ -22,10 +22,12 @@ A Go package [is available](https://pkg.go.dev/github.com/pojntfx/dibs?tab=doc).
 
 ## Usage
 
-`dibs` is configured by using a [config file](./test-app/dibs.yaml).
+dibs is configured by using a [config file](./test-app/dibs.yaml).
+
+To use dibs with GitLab CI/CD, see the [example GitLab CI/CD configuration file](./.gitlab-ci.yml).
 
 ```bash
-% dibs --help
+% dibs -help
 Usage of dibs:
   -build
     	Build the project
@@ -76,6 +78,8 @@ Usage of dibs:
     	Push the Docker image of the project
   -pushManifest
     	Push the Docker manifest of the project
+  -skipTests
+    	Skip the tests for the project
   -target string
     	The name of the target to use.
     	This may also be set with the TARGET env variable; a value of "*" runs all targets. (default "linux")

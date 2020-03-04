@@ -1,3 +1,21 @@
+# dibs GitLab CI/CD configuration
+#
+# See https://gist.github.com/pojntfx/100dd092090672c512364f5a6acf821c if you want to run the job locally.
+#
+# Required env variables (examples):
+# DOCKER_REGISTRY="docker.io"
+# DOCKER_USERNAME="pojntfx"
+# DOCKER_PASSWORD="awr9sdfiwr" # Mask this
+# DIBS_GITHUB_USER_NAME="pojntfx"
+# DIBS_GITHUB_TOKEN="erasdf9wrdsf" # Mask this
+# DIBS_GITHUB_REPOSITORY="dibs" # Corresponds to `pojntfx/dibs`
+# DIBS_GIT_USER_NAME="pojntfx"
+# DIBS_GIT_USER_EMAIL="felix@pojtinger.com"
+# DIBS_GIT_COMMIT_MESSAGE="chore: Update Helm charts"
+# DIBS_GITHUB_REPOSITORY_NAME="charts" # Corresponds to `pojntfx/charts`
+# DIBS_GITHUB_REPOSITORY_URL="https://github.com/pojntfx/charts.git"
+# DIBS_GITHUB_PAGES_URL="https://pojntfx.github.io/charts/"
+
 .dibsJob: &dibsJob
   image: docker:stable
   services:
