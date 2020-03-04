@@ -1,0 +1,70 @@
+targets:
+  - name: linux
+    platforms:
+      - identifier: linux/amd64
+        paths:
+          watch: .
+          include: (.*).go
+          assetInImage: /usr/local/bin/dibs
+          assetOut: .bin/binaries/dibs-linux-amd64
+          gitRepoRoot: ../..
+        commands:
+          generateSources: go generate ./...
+          build: GOOS=linux GOARCH=amd64 go build -o .bin/binaries/dibs-linux-amd64 main.go
+          unitTests: go test ./...
+          integrationTests: .bin/binaries/dibs-linux-amd64 -help
+          imageTests: docker run --platform linux/amd64 -e TARGET=linux -e TARGETPLATFORM=linux/amd64 pojntfx/dibs:linux-amd64 /usr/local/bin/dibs -help
+          start: .bin/binaries/dibs-linux-amd64 -help
+        docker:
+          build:
+            file: Dockerfile
+            context: .
+            tag: pojntfx/dibs:linux-amd64 # Only to get the binaries from Docker
+          unitTests:
+            file: Dockerfile.unitTests
+            context: .
+            tag: pojntfx/dibs-unit-tests:linux-amd64
+          integrationTests:
+            file: Dockerfile.integrationTests
+            context: .
+            tag: pojntfx/dibs-integration-tests:linux-amd64
+      - identifier: linux/arm64
+        paths:
+          watch: .
+          include: (.*).go
+          assetInImage: /usr/local/bin/dibs
+          assetOut: .bin/binaries/dibs-linux-arm64
+          gitRepoRoot: ../..
+        commands:
+          generateSources: go generate ./...
+          build: GOOS=linux GOARCH=arm64 go build -o .bin/binaries/dibs-linux-arm64 main.go
+          unitTests: go test ./...
+          integrationTests: .bin/binaries/dibs-linux-arm64 -help
+          imageTests: docker run --platform linux/arm64 -e TARGET=linux -e TARGETPLATFORM=linux/arm64 pojntfx/dibs:linux-arm64 /usr/local/bin/dibs -help
+          start: .bin/binaries/dibs-linux-arm64 -help
+        docker:
+          build:
+            file: Dockerfile
+            context: .
+            tag: pojntfx/dibs:linux-arm64 # Only to get the binaries from Docker
+          unitTests:
+            file: Dockerfile.unitTests
+            context: .
+            tag: pojntfx/dibs-unit-tests:linux-arm64
+          integrationTests:
+            file: Dockerfile.integrationTests
+            context: .
+            tag: pojntfx/dibs-integration-tests:linux-arm64
+  - name: darwin
+    platforms:
+      - identifier: darwin/amd64
+        paths:
+          watch: .
+          include: (.*).go
+          gitRepoRoot: ../..
+        commands:
+          generateSources: go generate ./...
+          build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/dibs-darwin-amd64 main.go
+          unitTests: go test ./...
+          integrationTests: .bin/binaries/dibs-darwin-amd64 -help
+          start: .bin/binaries/dibs-darwin-amd64 -help
