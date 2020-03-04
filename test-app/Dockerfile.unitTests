@@ -12,4 +12,5 @@ RUN install /tmp/dibs /usr/local/bin
 
 ADD . .
 
+RUN dibs -generateSources
 CMD dibs -unitTests
