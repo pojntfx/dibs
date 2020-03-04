@@ -7,7 +7,7 @@ targets:
           include: (.*).go
           assetInImage: /usr/local/bin/dibs
           assetOut: .bin/binaries/dibs-linux-amd64
-          gitRepoRoot: ../..
+          gitRepoRoot: .
         commands:
           generateSources: go generate ./...
           build: GOOS=linux GOARCH=amd64 go build -o .bin/binaries/dibs-linux-amd64 main.go
@@ -34,7 +34,7 @@ targets:
           include: (.*).go
           assetInImage: /usr/local/bin/dibs
           assetOut: .bin/binaries/dibs-linux-arm64
-          gitRepoRoot: ../..
+          gitRepoRoot: .
         commands:
           generateSources: go generate ./...
           build: GOOS=linux GOARCH=arm64 go build -o .bin/binaries/dibs-linux-arm64 main.go
@@ -61,7 +61,7 @@ targets:
         paths:
           watch: .
           include: (.*).go
-          gitRepoRoot: ../..
+          gitRepoRoot: .
         commands:
           generateSources: go generate ./...
           build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/dibs-darwin-amd64 main.go
