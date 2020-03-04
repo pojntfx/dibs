@@ -35,6 +35,7 @@ type Config struct {
 				IntegrationTests string `yaml:"integrationTests"`
 				ImageTests       string `yaml:"imageTests"`
 				ChartTests       string `yaml:"chartTests"`
+				Publish          string `yaml:"publish"`
 				Start            string `yaml:"start"`
 			}
 			Docker struct {
@@ -42,6 +43,7 @@ type Config struct {
 				UnitTests        dockerConfig `yaml:"unitTests"`
 				IntegrationTests dockerConfig `yaml:"integrationTests"`
 				ChartTests       dockerConfig `yaml:"chartTests"`
+				Publish          dockerConfig `yaml:"chartTests"`
 			}
 		}
 	}
@@ -109,6 +111,7 @@ func main() {
 		integrationTests bool
 		imageTests       bool
 		chartTests       bool
+		publish          bool
 		pushBinary       bool
 		pushImage        bool
 		pushManifest     bool
@@ -133,6 +136,7 @@ It will add all images of the specified platforms; to add all, set -platform to 
 	flag.BoolVar(&integrationTests, "integrationTests", false, "Run the integration tests of the project")
 	flag.BoolVar(&imageTests, "imageTests", false, "Run the image tests of the project")
 	flag.BoolVar(&chartTests, "chartTests", false, "Run the chart tests of the project")
+	flag.BoolVar(&publish, "publish", false, "Publish the project")
 	flag.BoolVar(&pushImage, "pushImage", false, "Push the Docker image of the project")
 	flag.BoolVar(&pushManifest, "pushManifest", false, "Push the Docker manifest of the project")
 	flag.BoolVar(&buildChart, "buildChart", false, "Build the Helm chart of the project")
@@ -378,6 +382,14 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 							buildAndRunDockerContainer("", context, platformConfig.Docker.ChartTests, true, stdoutChan, stderrChan)
 						} else {
 							runCommandWithLog(platformConfig.Commands.ChartTests, context, stdoutChan, stderrChan)
+						}
+					}
+
+					if publish {
+						if docker {
+							buildAndRunDockerContainer("", context, platformConfig.Docker.Publish, false, stdoutChan, stderrChan)
+						} else {
+							runCommandWithLog(platformConfig.Commands.Publish, context, stdoutChan, stderrChan)
 						}
 					}
 

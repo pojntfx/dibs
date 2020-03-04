@@ -139,12 +139,13 @@ test-app:integrationTestARM64:
     - dibs -configFile test-app/dibs.yaml -integrationTests -target linux -platform linux/arm64 -docker
 
 # Image tests
-test-app:imageTestsAMD64:
-  <<: *dibsJob
-  stage: test-app:integrationTest
-  script:
-    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
-    - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/amd64
+# amd64 is disabled for now due to a GitLab bug where it does not exit after being run
+#test-app:imageTestsAMD64:
+#  <<: *dibsJob
+#  stage: test-app:integrationTest
+#  script:
+#    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
+#    - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/amd64
 test-app:imageTestsARM64:
   <<: *dibsJob
   stage: test-app:integrationTest

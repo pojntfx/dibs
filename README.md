@@ -57,6 +57,8 @@ Usage of dibs:
   -platform string
     	The identifier of the platform to use.
     	This may also be set with the TARGETPLATFORM env variable; a value of "*" runs for all platforms. (default "linux/amd64")
+  -publish
+    	Publish the project
   -pushBinary
     	Push the binary of the project.
     	This command requires the following env variables to be set:
