@@ -4,7 +4,7 @@ targets:
       - identifier: linux/amd64
         paths:
           watch: .
-          include: (.*).go
+          include: (.*)\.go
           assetInImage: /usr/local/bin/dibs
           assetOut: .bin/binaries/dibs-linux-amd64
           gitRepoRoot: .
@@ -31,7 +31,7 @@ targets:
       - identifier: linux/arm64
         paths:
           watch: .
-          include: (.*).go
+          include: (.*)\.go
           assetInImage: /usr/local/bin/dibs
           assetOut: .bin/binaries/dibs-linux-arm64
           gitRepoRoot: .
@@ -60,7 +60,7 @@ targets:
       - identifier: darwin/amd64
         paths:
           watch: .
-          include: (.*).go
+          include: (.*)\.go
           gitRepoRoot: .
         commands:
           generateSources: go generate ./...
