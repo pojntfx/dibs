@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"syscall"
 )
 
@@ -91,8 +92,13 @@ func (r *ManageableCommand) Stop() error {
 	}
 
 	// Ignore Zombie processes, which can't be killed
-	// pid + 1 because we execute everything through `sh` so we have to kill it as well
-	for _, pid := range []int{r.instance.Process.Pid, processGroupID, r.instance.Process.Pid + 1, processGroupID + 1} {
+	processesToKill := []int{r.instance.Process.Pid, processGroupID}
+	if runtime.GOOS == "linux" {
+		// pid + 1 because we execute everything through `sh` so we have to kill it as well
+		// this is not necessary on macOS
+		processesToKill = append(processesToKill, r.instance.Process.Pid+1, processGroupID+1)
+	}
+	for _, pid := range processesToKill {
 		err = syscall.Kill(pid, syscall.SIGKILL)
 		if err != nil && err.Error() == noSuchProcessError {
 			return nil
