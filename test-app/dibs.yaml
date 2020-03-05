@@ -19,7 +19,15 @@ targets:
           integrationTests: .bin/binaries/test-app-linux-amd64 -help # Command to run integration test
           imageTests: docker run --platform linux/amd64 -e TARGET=linux -e TARGETPLATFORM=linux/amd64 pojntfx/test-app:linux-amd64 /usr/local/bin/test-app -help # Command to run to test the Docker image
           chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
-          start: .bin/binaries/test-app-linux-amd64 -keep-running # Command to start the app
+          start: | # Command to start the app
+            if [ "$DEBUG" = "true" ]; then
+              pkill -9 dlv || true
+              pkill -9 test-app || true
+              .bin/binaries/test-app-linux-amd64 &
+              dlv attach $! --headless --listen=:31441 --api-version=2 --accept-multiclient || true
+            else
+              .bin/binaries/test-app-linux-amd64
+            fi
         docker:
           build: # The main Docker config
             file: Dockerfile
@@ -51,7 +59,15 @@ targets:
           integrationTests: .bin/binaries/test-app-linux-arm64 -help # Command to run integration test
           imageTests: docker run --platform linux/arm64 -e TARGET=linux -e TARGETPLATFORM=linux/arm64 pojntfx/test-app:linux-arm64 /usr/local/bin/test-app -help # Command to run to test the Docker image
           chartTests: helm install --name test-app .bin/chart/test-app-*.tgz && helm delete --purge test-app # Command to run to test the Helm chart
-          start: .bin/binaries/test-app-linux-arm64 -keep-running # Command to start the app
+          start: | # Command to start the app
+            if [ "$DEBUG" = "true" ]; then
+              pkill -9 dlv || true
+              pkill -9 test-app || true
+              .bin/binaries/test-app-linux-arm64 &
+              dlv attach $! --headless --listen=:31441 --api-version=2 --accept-multiclient || true
+            else
+              .bin/binaries/test-app-linux-arm64
+            fi
         docker:
           build: # The main Docker config
             file: Dockerfile
@@ -81,4 +97,12 @@ targets:
           build: GOOS=darwin GOARCH=amd64 go build -o .bin/binaries/test-app-darwin-amd64 main.go # Command to build binary
           unitTests: go test -v ./... # Command to run unit test
           integrationTests: .bin/binaries/test-app-darwin-amd64 -help # Command to run integration test
-          start: .bin/binaries/test-app-darwin-amd64 -keep-running # Command to start the app
+          start: | # Command to start the app
+            if [ "$DEBUG" = "true" ]; then
+              pkill -9 dlv || true
+              pkill -9 test-app || true
+              .bin/binaries/test-app-darwin-arm64 &
+              dlv attach $! --headless --listen=:31441 --api-version=2 --accept-multiclient || true
+            else
+              .bin/binaries/test-app-darwin-arm64
+            fi

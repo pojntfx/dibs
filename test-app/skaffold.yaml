@@ -43,3 +43,4 @@ profiles:
             setValueTemplates:
               target: "{{ .TARGET }}"
               platform: "{{ .TARGETPLATFORM }}"
+              debug: "{{ .DEBUG }}"
