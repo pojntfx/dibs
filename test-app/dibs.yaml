@@ -8,7 +8,7 @@ targets:
       - identifier: linux/amd64
         paths:
           watch: . # The path to watch
-          include: (.*).go # Regex of paths to include
+          include: (.*)\.go # Regex of paths to include
           assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
           assetOut: .bin/binaries/test-app-linux-amd64 # Path to the file to which the asset should be copied
           gitRepoRoot: ../ # Root of the Git repo
@@ -40,7 +40,7 @@ targets:
       - identifier: linux/arm64
         paths:
           watch: . # The path to watch
-          include: (.*).go # Regex of paths to include
+          include: (.*)\.go # Regex of paths to include
           assetInImage: /usr/local/bin/test-app # Path of the asset in the Docker image
           assetOut: .bin/binaries/test-app-linux-arm64 # Path to the file to which the asset should be copied
           gitRepoRoot: ../ # Root of the Git repo
@@ -74,7 +74,7 @@ targets:
       - identifier: darwin/amd64
         paths:
           watch: . # The path to watch
-          include: (.*).go # Regex of paths to include
+          include: (.*)\.go # Regex of paths to include
           gitRepoRoot: ../ # Root of the Git repo
         commands:
           generateSources: go generate ./... # Command to generate sources
