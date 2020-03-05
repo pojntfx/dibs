@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"syscall"
 )
 
@@ -159,9 +160,9 @@ This command requires the following env variables to be set:
 - DIBS_GITHUB_USER_NAME
 - DIBS_GITHUB_TOKEN
 - DIBS_GITHUB_REPOSITORY`)
-	flag.StringVar(&target, "target", "linux", `The name of the target to use.
+	flag.StringVar(&target, "target", runtime.GOOS, `The name of the target to use.
 This may also be set with the TARGET env variable; a value of "*" runs all targets.`)
-	flag.StringVar(&platform, "platform", "linux/amd64", `The identifier of the platform to use.
+	flag.StringVar(&platform, "platform", runtime.GOOS+"/"+runtime.GOARCH, `The identifier of the platform to use.
 This may also be set with the TARGETPLATFORM env variable; a value of "*" runs for all platforms.`)
 	flag.Parse()
 
