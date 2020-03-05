@@ -2,3 +2,6 @@ image: pojntfx/test-app
 dev: false
 platform: linux/amd64
 target: linux
+debug: true
+debugPort: 31441
+debugNodePort: 31441

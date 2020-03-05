@@ -5,10 +5,12 @@ ARG TARGETPLATFORM
 
 WORKDIR /app
 
-RUN apk add -u curl
+RUN apk add -u curl git
 
 RUN curl -Lo /tmp/dibs https://nx904.your-storageshare.de/s/ZWxkmmQW37fHt9J/download
 RUN install /tmp/dibs /usr/local/bin
+
+RUN go get github.com/go-delve/delve/cmd/dlv
 
 ADD . .
 

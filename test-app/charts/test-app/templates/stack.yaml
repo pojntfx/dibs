@@ -19,6 +19,10 @@ spec:
             - configMapRef:
                 name: test-app{{ if .Values.dev }}-dev{{ end }}
           {{ end }}
+          {{ if and .Values.dev .Values.debug }}
+          ports:
+            - containerPort: {{ .Values.debugPort }}
+          {{end}}
   {{ if .Values.dev }}
 
 ---
@@ -29,5 +33,23 @@ metadata:
 data:
   TARGET: {{ .Values.target }}
   TARGETPLATFORM: {{ .Values.platform }}
+  {{ if and .Values.dev .Values.debug }}
+  DEBUG: "true"
+  {{end}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-app{{ if .Values.dev }}-dev{{ end }}
+spec:
+  selector:
+    app: test-app{{ if .Values.dev}}-dev{{ end }}
+  type: NodePort
+  ports:
+    - name: debug
+      port: {{ .Values.debugNodePort }}
+      targetPort: {{ .Values.debugPort }}
+      nodePort: {{ .Values.debugNodePort }}
   {{ end }}
 
