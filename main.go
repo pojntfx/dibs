@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/pojntfx/dibs/pkg/utils"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,6 +9,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"syscall"
+
+	"github.com/pojntfx/dibs/pkg/utils"
+	"gopkg.in/yaml.v2"
 )
 
 // Config is a dibs configuration
@@ -161,13 +162,13 @@ This command requires the following env variables to be set:
 - DIBS_GITHUB_TOKEN
 - DIBS_GITHUB_REPOSITORY`)
 	flag.StringVar(&target, "target", runtime.GOOS, `The name of the target to use.
-This may also be set with the TARGET env variable; a value of "*" runs all targets.`)
+This may also be set with the DIBS_TARGET env variable; a value of "*" runs all targets.`)
 	flag.StringVar(&platform, "platform", runtime.GOOS+"/"+runtime.GOARCH, `The identifier of the platform to use.
 This may also be set with the TARGETPLATFORM env variable; a value of "*" runs for all platforms.`)
 	flag.Parse()
 
 	// Normalize the environment and pass on env variables
-	if targetFromEnv := os.Getenv("TARGET"); targetFromEnv != "" {
+	if targetFromEnv := os.Getenv("DIBS_TARGET"); targetFromEnv != "" {
 		target = targetFromEnv
 	}
 	if platformFromEnv := os.Getenv("TARGETPLATFORM"); platformFromEnv != "" {
@@ -206,7 +207,7 @@ This may also be set with the TARGETPLATFORM env variable; a value of "*" runs f
 
 	for _, targetConfig := range configs.Targets {
 		if targetConfig.Name == target || target == "*" {
-			if err := os.Setenv("TARGET", target); err != nil {
+			if err := os.Setenv("DIBS_TARGET", target); err != nil {
 				log.Fatal(err)
 			}
 

@@ -13,7 +13,7 @@ targets:
           build: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/binaries/dibs-linux-amd64 main.go
           unitTests: go test -v ./...
           integrationTests: .bin/binaries/dibs-linux-amd64 -help
-          imageTests: docker run --platform linux/amd64 -e TARGET=linux -e TARGETPLATFORM=linux/amd64 pojntfx/dibs:linux-amd64 /usr/local/bin/dibs -help
+          imageTests: docker run --platform linux/amd64 -e DIBS_TARGET=linux -e TARGETPLATFORM=linux/amd64 pojntfx/dibs:linux-amd64 /usr/local/bin/dibs -help
           start: .bin/binaries/dibs-linux-amd64 -help
         docker:
           build:
@@ -40,7 +40,7 @@ targets:
           build: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags netgo -ldflags '-extldflags "-static"' -o .bin/binaries/dibs-linux-arm64 main.go
           unitTests: go test -v ./...
           integrationTests: .bin/binaries/dibs-linux-arm64 -help
-          imageTests: docker run --platform linux/arm64 -e TARGET=linux -e TARGETPLATFORM=linux/arm64 pojntfx/dibs:linux-arm64 /usr/local/bin/dibs -help
+          imageTests: docker run --platform linux/arm64 -e DIBS_TARGET=linux -e TARGETPLATFORM=linux/arm64 pojntfx/dibs:linux-arm64 /usr/local/bin/dibs -help
           start: .bin/binaries/dibs-linux-arm64 -help
         docker:
           build:

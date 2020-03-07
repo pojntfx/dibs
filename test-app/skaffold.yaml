@@ -41,6 +41,6 @@ profiles:
             setValues:
               dev: true
             setValueTemplates:
-              target: "{{ .TARGET }}"
+              target: "{{ .DIBS_TARGET }}"
               platform: "{{ .TARGETPLATFORM }}"
               debug: "{{ .DEBUG }}"
