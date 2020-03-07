@@ -31,8 +31,8 @@ kind: ConfigMap
 metadata:
   name: test-app{{ if .Values.dev }}-dev{{ end }}
 data:
-  TARGET: {{ .Values.target }}
-  TARGETPLATFORM: {{ .Values.platform }}
+  TARGET: "{{ .Values.target }}"
+  TARGETPLATFORM: "{{ .Values.platform }}"
   {{ if and .Values.dev .Values.debug }}
   DEBUG: "true"
   {{end}}
