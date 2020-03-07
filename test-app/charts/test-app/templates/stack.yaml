@@ -34,7 +34,7 @@ data:
   DIBS_TARGET: "{{ .Values.target }}"
   TARGETPLATFORM: "{{ .Values.platform }}"
   {{ if and .Values.dev .Values.debug }}
-  DEBUG: "true"
+  DIBS_DEBUG: "true"
   {{end}}
 
 ---
