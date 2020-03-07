@@ -20,7 +20,7 @@ targets:
           imageTests: docker run --platform linux/amd64 -e DIBS_TARGET=linux -e TARGETPLATFORM=linux/amd64 pojntfx/test-app:linux-amd64 /usr/local/bin/test-app -help # Command to run to test the Docker image
           chartTests: helm install test-app .bin/chart/test-app-*.tgz && helm delete test-app # Command to run to test the Helm chart
           start: | # Command to start the app
-            if [ "$DEBUG" = "true" ]; then
+            if [ "$DIBS_DEBUG" = "true" ]; then
               pkill -9 dlv || true
               pkill -9 test-app || true
               .bin/binaries/test-app-linux-amd64 &
@@ -60,7 +60,7 @@ targets:
           imageTests: docker run --platform linux/arm64 -e DIBS_TARGET=linux -e TARGETPLATFORM=linux/arm64 pojntfx/test-app:linux-arm64 /usr/local/bin/test-app -help # Command to run to test the Docker image
           chartTests: helm install test-app .bin/chart/test-app-*.tgz && helm delete test-app # Command to run to test the Helm chart
           start: | # Command to start the app
-            if [ "$DEBUG" = "true" ]; then
+            if [ "$DIBS_DEBUG" = "true" ]; then
               pkill -9 dlv || true
               pkill -9 test-app || true
               .bin/binaries/test-app-linux-arm64 &
@@ -98,7 +98,7 @@ targets:
           unitTests: go test -v ./... # Command to run unit test
           integrationTests: .bin/binaries/test-app-darwin-amd64 -help # Command to run integration test
           start: | # Command to start the app
-            if [ "$DEBUG" = "true" ]; then
+            if [ "$DIBS_DEBUG" = "true" ]; then
               pkill -9 dlv || true
               pkill -9 test-app || true
               .bin/binaries/test-app-darwin-arm64 &
