@@ -84,7 +84,7 @@ Usage of dibs:
     	Skip the tests for the project
   -target string
     	The name of the target to use.
-    	This may also be set with the TARGET env variable; a value of "*" runs all targets. (default "linux")
+    	This may also be set with the DIBS_TARGET env variable; a value of "*" runs all targets. (default "linux")
   -unitTests
     	Run the unit tests of the project
 ```

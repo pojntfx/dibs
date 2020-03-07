@@ -2,6 +2,6 @@ image: pojntfx/test-app
 dev: false
 debugPort: 31441
 debugNodePort: 31441
-target: "{{ .TARGET }}"
+target: "{{ .DIBS_TARGET }}"
 platform: "{{ .TARGETPLATFORM }}"
 debug: "{{ .DEBUG }}"
