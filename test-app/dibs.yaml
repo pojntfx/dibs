@@ -101,8 +101,8 @@ targets:
             if [ "$DIBS_DEBUG" = "true" ]; then
               pkill -9 dlv || true
               pkill -9 test-app || true
-              .bin/binaries/test-app-darwin-arm64 &
+              .bin/binaries/test-app-darwin-amd64 &
               dlv attach $! --headless --listen=:31441 --api-version=2 --accept-multiclient || true
             else
-              .bin/binaries/test-app-darwin-arm64
+              .bin/binaries/test-app-darwin-amd64
             fi
