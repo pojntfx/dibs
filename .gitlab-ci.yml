@@ -219,11 +219,15 @@ test-app:chartTestsAMD64:
   stage: test-app:chartIntegrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/amd64 -docker
+  only:
+    - tags
 test-app:chartTestsARM64:
   <<: *dibsJob
   stage: test-app:chartIntegrationTest
   script:
     - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/arm64 -docker
+  only:
+    - tags
 
 # Build and push chart
 test-app:buildAndPushChart:
