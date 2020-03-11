@@ -52,13 +52,16 @@
     - docker login ${DOCKER_REGISTRY} --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 
 stages:
+  # dibs
   - dibs:unitTest
   - dibs:integrationTest
   - dibs:buildAndPushBinaries
+  # test-app
   - test-app:unitTest
   - test-app:integrationTest
   - test-app:buildAndPushImage
   - test-app:buildAndPushManifestAndBinaries
+  - test-app:chartIntegrationTest
   - test-app:buildAndPushChart
 
 ## dibs
@@ -154,22 +157,6 @@ test-app:imageTestsARM64:
     - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
     - dibs -configFile test-app/dibs.yaml -imageTests -target linux -platform linux/arm64
 
-# Chart tests
-test-app:chartTestsAMD64:
-  <<: *dibsJob
-  stage: test-app:integrationTest
-  script:
-    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/amd64
-    - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
-    - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/amd64 -docker
-test-app:chartTestsARM64:
-  <<: *dibsJob
-  stage: test-app:integrationTest
-  script:
-    - dibs -configFile test-app/dibs.yaml -buildImage -target linux -platform linux/arm64
-    - dibs -configFile test-app/dibs.yaml -buildManifest -target linux
-    - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/arm64 -docker
-
 # Build and push image
 test-app:buildAndPushImageAMD64:
   <<: *dibsJob
@@ -225,6 +212,18 @@ test-app:buildAndPushBinariesARM64:
     expire_in: 1 month
   only:
     - tags
+
+# Chart tests
+test-app:chartTestsAMD64:
+  <<: *dibsJob
+  stage: test-app:chartIntegrationTest
+  script:
+    - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/amd64 -docker
+test-app:chartTestsARM64:
+  <<: *dibsJob
+  stage: test-app:chartIntegrationTest
+  script:
+    - dibs -configFile test-app/dibs.yaml -chartTests -target linux -platform linux/arm64 -docker
 
 # Build and push chart
 test-app:buildAndPushChart:
